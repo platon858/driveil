@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>גמברינוס | מסעדת בשרים</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Heebo:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --dark:   #1a1208;
+      --brown:  #2e1f0d;
+      --gold:   #c9a84c;
+      --cream:  #f5f0e8;
+      --light:  #ede8de;
+      --text:   #2a1a08;
+      --font-h: 'Frank Ruhl Libre', serif;
+      --font-b: 'Heebo', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-b); background: var(--cream); color: var(--text); overflow-x: hidden; }
+
+    /* ── UTILITY ── */
+    .section-icon { display: block; text-align: center; font-size: 28px; margin-bottom: 10px; }
+    .section-title {
+      font-family: var(--font-h); font-size: clamp(28px, 4vw, 48px);
+      font-weight: 700; text-align: center; letter-spacing: .02em;
+      margin-bottom: 30px;
+    }
+    .gold { color: var(--gold); }
+    .divider {
+      width: 60px; height: 2px; background: var(--gold);
+      margin: 0 auto 30px; border: none;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: var(--dark); color: rgba(255,255,255,.6);
+      font-size: 12px; text-align: center; padding: 6px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .topbar a { color: var(--gold); text-decoration: none; }
+
+    /* ── NAVIGATION ── */
+    nav {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(20,12,4,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,168,76,.2);
+      padding: 0 40px;
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .nav-logo {
+      font-family: var(--font-h); font-size: 26px; font-weight: 900;
+      color: var(--gold); text-decoration: none; letter-spacing: .04em;
+    }
+    .nav-logo span { font-size: 12px; display: block; color: rgba(255,255,255,.5); font-weight: 300; text-align: center; letter-spacing: .1em; }
+    .nav-links { display: flex; gap: 0; list-style: none; }
+    .nav-links a {
+      display: block; padding: 0 14px;
+      font-size: 14px; color: rgba(255,255,255,.8); text-decoration: none;
+      font-family: var(--font-b); font-weight: 300;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-reserve {
+      background: var(--gold); color: var(--dark);
+      padding: 8px 20px; border-radius: 2px;
+      font-size: 13px; font-weight: 500; text-decoration: none;
+      font-family: var(--font-b);
+      transition: background .2s;
+    }
+    .nav-reserve:hover { background: #e0bc60; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; height: 92vh; min-height: 600px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: var(--dark);
+    }
+    /* Atmospheric restaurant scene using CSS/SVG */
+    .hero-bg::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 30% 50%, rgba(80,40,10,.4) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 70% 40%, rgba(60,30,5,.5) 0%, transparent 70%),
+        linear-gradient(180deg, rgba(0,0,0,.3) 0%, rgba(30,15,5,.8) 100%);
+    }
+    /* Candle glows */
+    .hero-bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 8% 12% at 20% 65%, rgba(255,160,30,.18) 0%, transparent 100%),
+        radial-gradient(ellipse 8% 12% at 50% 58%, rgba(255,160,30,.15) 0%, transparent 100%),
+        radial-gradient(ellipse 8% 12% at 80% 62%, rgba(255,160,30,.18) 0%, transparent 100%);
+    }
+    /* Table silhouettes */
+    .hero-tables {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      width: 100%; height: 55%;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(10,6,2,.2) 0%, rgba(10,6,2,.6) 100%);
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      text-align: center; color: #fff;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-b); font-size: 13px; font-weight: 300;
+      letter-spacing: .3em; color: var(--gold); text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-family: var(--font-h); font-size: clamp(56px, 8vw, 110px);
+      font-weight: 900; line-height: .95; letter-spacing: .02em;
+      text-shadow: 0 2px 40px rgba(0,0,0,.6);
+    }
+    .hero-sub {
+      font-family: var(--font-b); font-size: 18px; font-weight: 300;
+      color: rgba(255,255,255,.75); margin-top: 16px; letter-spacing: .05em;
+    }
+    .hero-ctas { display: flex; gap: 16px; justify-content: center; margin-top: 36px; flex-wrap: wrap; }
+    .btn-gold {
+      background: var(--gold); color: var(--dark);
+      padding: 14px 36px; font-size: 15px; font-weight: 500;
+      text-decoration: none; letter-spacing: .06em;
+      border: 2px solid var(--gold);
+      transition: all .2s; font-family: var(--font-b);
+    }
+    .btn-gold:hover { background: transparent; color: var(--gold); }
+    .btn-outline-gold {
+      background: transparent; color: var(--gold);
+      padding: 14px 36px; font-size: 15px; font-weight: 400;
+      text-decoration: none; letter-spacing: .06em;
+      border: 2px solid rgba(201,168,76,.5);
+      transition: all .2s; font-family: var(--font-b);
+    }
+    .btn-outline-gold:hover { border-color: var(--gold); color: #fff; }
+    .hero-scroll {
+      position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,.4); font-size: 22px; z-index: 2;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
+
+    /* ── PHOTO STRIP ── */
+    .photo-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 3px; background: var(--dark); }
+    .photo-strip-item {
+      aspect-ratio: 4/3; overflow: hidden; cursor: pointer;
+    }
+    .photo-strip-item svg { width: 100%; height: 100%; display: block; transition: transform .4s; }
+    .photo-strip-item:hover svg { transform: scale(1.06); }
+
+    /* ── ABOUT ── */
+    .about {
+      background: var(--cream);
+      padding: 80px 40px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 60px; max-width: 1200px; margin: 0 auto;
+      align-items: center;
+    }
+    .about-text { }
+    .about-text .section-title { text-align: right; }
+    .about-text p {
+      font-size: 16px; line-height: 1.9; color: #4a3520;
+      font-weight: 300; margin-bottom: 14px;
+    }
+    .about-text .btn-gold { display: inline-block; margin-top: 10px; }
+    .about-visual {
+      position: relative;
+    }
+    .about-visual-inner {
+      width: 100%; aspect-ratio: 3/4; overflow: hidden;
+      border: 8px solid var(--cream);
+      outline: 2px solid rgba(201,168,76,.3);
+    }
+
+    /* ── DIVIDER SECTION ── */
+    .dark-divider {
+      background: var(--dark); color: #fff;
+      padding: 60px 40px; text-align: center;
+    }
+    .dark-divider .section-title { color: #fff; }
+    .dark-divider p { color: rgba(255,255,255,.6); font-size: 16px; max-width: 700px; margin: 0 auto; line-height: 1.8; font-weight: 300; }
+
+    /* ── MENU SECTION ── */
+    .menu-section { background: var(--light); padding: 80px 40px; }
+    .menu-section .section-title { }
+    .menu-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 20px; max-width: 1100px; margin: 0 auto;
+    }
+    .menu-card {
+      background: #fff; overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+      cursor: pointer; transition: transform .25s, box-shadow .25s;
+    }
+    .menu-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.15); }
+    .menu-card-img { aspect-ratio: 4/3; overflow: hidden; }
+    .menu-card-img svg { width: 100%; height: 100%; display: block; }
+    .menu-card-body { padding: 20px; }
+    .menu-card-title { font-family: var(--font-h); font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .menu-card-desc { font-size: 13px; color: #6a5540; line-height: 1.7; font-weight: 300; }
+    .menu-card-link {
+      display: inline-block; margin-top: 12px; color: var(--gold);
+      font-size: 13px; text-decoration: none; font-weight: 500; letter-spacing: .04em;
+      border-bottom: 1px solid rgba(201,168,76,.3); padding-bottom: 2px;
+    }
+
+    /* ── AMBIANCE FULL BLEED ── */
+    .ambiance {
+      position: relative; min-height: 480px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; background: var(--brown);
+    }
+    .ambiance-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 50% 60% at 25% 50%, rgba(150,80,20,.3) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 75% 50%, rgba(100,50,10,.3) 0%, transparent 60%);
+    }
+    .ambiance svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .4; }
+    .ambiance-content { position: relative; z-index: 2; text-align: center; color: #fff; padding: 60px 20px; }
+    .ambiance-content h2 { font-family: var(--font-h); font-size: clamp(30px,4vw,52px); font-weight: 900; margin-bottom: 16px; }
+    .ambiance-content p { font-size: 16px; color: rgba(255,255,255,.7); max-width: 600px; margin: 0 auto 28px; line-height: 1.8; font-weight: 300; }
+
+    /* ── PRESS ── */
+    .press { background: var(--dark); padding: 80px 40px; }
+    .press .section-title { color: #fff; }
+    .press-grid {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 16px; max-width: 1100px; margin: 0 auto;
+    }
+    .press-card {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(201,168,76,.15);
+      padding: 24px; cursor: pointer;
+      transition: background .2s;
+    }
+    .press-card:hover { background: rgba(201,168,76,.08); }
+    .press-source {
+      font-size: 11px; color: var(--gold); letter-spacing: .12em;
+      text-transform: uppercase; margin-bottom: 12px; font-weight: 500;
+    }
+    .press-quote {
+      font-family: var(--font-h); font-size: 15px; color: rgba(255,255,255,.85);
+      line-height: 1.7; font-style: italic;
+    }
+    .press-date { font-size: 11px; color: rgba(255,255,255,.35); margin-top: 12px; }
+
+    /* ── MEMBERS CLUB ── */
+    .members {
+      background: var(--light);
+      padding: 80px 40px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 60px; max-width: 1200px; margin: 0 auto;
+      align-items: center;
+    }
+    .members-text .section-title { text-align: right; }
+    .members-text p { font-size: 16px; line-height: 1.9; color: #4a3520; font-weight: 300; }
+    .members-form {
+      background: #fff;
+      padding: 40px; box-shadow: 0 4px 30px rgba(0,0,0,.1);
+    }
+    .members-form h3 {
+      font-family: var(--font-h); font-size: 22px; font-weight: 700;
+      text-align: center; margin-bottom: 6px;
+    }
+    .members-form .form-sub { font-size: 13px; color: #8a7560; text-align: center; margin-bottom: 24px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { font-size: 12px; color: #6a5540; display: block; margin-bottom: 4px; font-weight: 500; }
+    .form-group input {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid #ddd; font-size: 14px;
+      font-family: var(--font-b); color: var(--text);
+      background: #fafafa; outline: none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus { border-color: var(--gold); background: #fff; }
+    .form-submit {
+      width: 100%; padding: 13px;
+      background: var(--dark); color: var(--gold);
+      border: none; font-size: 15px; font-family: var(--font-h);
+      font-weight: 700; letter-spacing: .08em; cursor: pointer;
+      margin-top: 6px; transition: background .2s;
+    }
+    .form-submit:hover { background: var(--brown); }
+
+    /* ── GALLERY ── */
+    .gallery-section { background: var(--dark); padding: 80px 40px; }
+    .gallery-section .section-title { color: #fff; }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      grid-template-rows: auto;
+      gap: 4px; max-width: 1200px; margin: 0 auto;
+    }
+    .gallery-item { overflow: hidden; cursor: pointer; position: relative; }
+    .gallery-item:nth-child(1) { grid-column: span 2; }
+    .gallery-item:nth-child(6) { grid-column: span 2; }
+    .gallery-item svg { width: 100%; height: 100%; display: block; transition: transform .4s; min-height: 160px; }
+    .gallery-item:hover svg { transform: scale(1.05); }
+    .gallery-item-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0); transition: background .3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .gallery-item:hover .gallery-item-overlay { background: rgba(0,0,0,.3); }
+    .gallery-item-overlay span { color: #fff; font-size: 28px; opacity: 0; transition: opacity .3s; }
+    .gallery-item:hover .gallery-item-overlay span { opacity: 1; }
+
+    /* ── RESERVATION ── */
+    .reservation {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--brown) 100%);
+      padding: 80px 40px; text-align: center; color: #fff;
+    }
+    .reservation h2 { font-family: var(--font-h); font-size: clamp(28px,4vw,52px); font-weight: 900; margin-bottom: 16px; }
+    .reservation p { font-size: 16px; color: rgba(255,255,255,.7); margin-bottom: 36px; font-weight: 300; }
+    .reservation-info {
+      display: flex; gap: 60px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .res-item { text-align: center; }
+    .res-item .icon { font-size: 24px; margin-bottom: 8px; }
+    .res-item h4 { font-family: var(--font-h); font-size: 16px; color: var(--gold); margin-bottom: 4px; }
+    .res-item p { font-size: 14px; color: rgba(255,255,255,.6); margin: 0; }
+
+    /* ── FOOTER ── */
+    footer { background: #0d0802; color: rgba(255,255,255,.55); font-size: 13px; }
+    .footer-top {
+      max-width: 1200px; margin: 0 auto; padding: 60px 40px 40px;
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px;
+    }
+    .footer-brand .logo { font-family: var(--font-h); font-size: 30px; font-weight: 900; color: var(--gold); }
+    .footer-brand .tagline { font-size: 12px; color: rgba(255,255,255,.35); letter-spacing: .12em; margin-top: 4px; margin-bottom: 16px; }
+    .footer-brand p { font-size: 13px; line-height: 1.8; color: rgba(255,255,255,.45); max-width: 280px; }
+    .footer-col h4 { font-family: var(--font-h); font-size: 15px; color: rgba(255,255,255,.8); margin-bottom: 14px; font-weight: 700; }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 8px; }
+    .footer-col a { color: rgba(255,255,255,.45); text-decoration: none; transition: color .2s; font-size: 13px; }
+    .footer-col a:hover { color: var(--gold); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding: 20px 40px; max-width: 1200px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bottom a { color: rgba(255,255,255,.35); text-decoration: none; font-size: 12px; }
+    .footer-bottom a:hover { color: var(--gold); }
+    .social-links { display: flex; gap: 14px; }
+    .social-links a { color: rgba(255,255,255,.4); font-size: 18px; text-decoration: none; transition: color .2s; }
+    .social-links a:hover { color: var(--gold); }
+
+    /* ── MEAT ICON (decorative bull SVG) ── */
+    .bull-icon { display: block; margin: 0 auto 16px; }
+
+    @media (max-width: 900px) {
+      .about, .members { grid-template-columns: 1fr; }
+      .menu-grid { grid-template-columns: 1fr 1fr; }
+      .press-grid { grid-template-columns: 1fr 1fr; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+      .gallery-grid { grid-template-columns: repeat(2,1fr); }
+      .gallery-item:nth-child(1), .gallery-item:nth-child(6) { grid-column: span 1; }
+    }
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .menu-grid { grid-template-columns: 1fr; }
+      .press-grid { grid-template-columns: 1fr; }
+      .photo-strip { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<div class="topbar">
+  <span>ראשון–שבת: 12:00–24:00</span>
+  <span>טל: <a href="tel:+972-3-0000000">03-000-0000</a> &nbsp;|&nbsp; <a href="#">הזמן מקום</a></span>
+  <span>תל אביב, רחוב הירקון 1</span>
+</div>
+
+<!-- ── NAVIGATION ── -->
+<nav>
+  <div class="nav-inner">
+    <div style="display:flex;align-items:center;gap:30px;">
+      <a class="nav-reserve" href="#reservation">הזמן מקום</a>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#about">אודות</a></li>
+      <li><a href="#menu">תפריט</a></li>
+      <li><a href="#press">כתבו עלינו</a></li>
+      <li><a href="#members">מועדון חברים</a></li>
+      <li><a href="#gallery">גלריה</a></li>
+      <li><a href="#reservation">יצירת קשר</a></li>
+    </ul>
+    <a class="nav-logo" href="#">
+      Gambrinus
+      <span>מסעדת בשרים</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-bg">
+    <!-- Restaurant interior scene -->
+    <svg viewBox="0 0 1440 860" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;">
+      <defs>
+        <radialGradient id="cg1" cx="20%" cy="65%" r="15%">
+          <stop offset="0%" stop-color="#ff9020" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="cg2" cx="50%" cy="60%" r="12%">
+          <stop offset="0%" stop-color="#ff9020" stop-opacity=".4"/>
+          <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="cg3" cx="80%" cy="63%" r="15%">
+          <stop offset="0%" stop-color="#ff9020" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="floorG" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#3a2010" stop-opacity=".8"/>
+          <stop offset="100%" stop-color="#1a0c04" stop-opacity="1"/>
+        </linearGradient>
+        <linearGradient id="wallG" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#2a1808"/>
+          <stop offset="100%" stop-color="#1a0e06"/>
+        </linearGradient>
+      </defs>
+      <!-- background wall -->
+      <rect width="1440" height="860" fill="url(#wallG)"/>
+      <!-- floor -->
+      <polygon points="0,600 1440,540 1440,860 0,860" fill="url(#floorG)"/>
+      <!-- ceiling beams -->
+      <rect x="0" y="0" width="1440" height="80" fill="rgba(10,5,0,.6)"/>
+      <rect x="80" y="0" width="40" height="160" fill="rgba(40,20,5,.8)" rx="2"/>
+      <rect x="380" y="0" width="40" height="180" fill="rgba(40,20,5,.8)" rx="2"/>
+      <rect x="680" y="0" width="40" height="170" fill="rgba(40,20,5,.8)" rx="2"/>
+      <rect x="980" y="0" width="40" height="180" fill="rgba(40,20,5,.8)" rx="2"/>
+      <rect x="1280" y="0" width="40" height="160" fill="rgba(40,20,5,.8)" rx="2"/>
+      <!-- hanging lights -->
+      <line x1="200" y1="0" x2="200" y2="200" stroke="rgba(60,30,10,.6)" stroke-width="2"/>
+      <circle cx="200" cy="205" r="14" fill="#2a1608"/>
+      <ellipse cx="200" cy="210" rx="10" ry="6" fill="#ffb840" opacity=".7"/>
+      <line x1="500" y1="0" x2="500" y2="190" stroke="rgba(60,30,10,.6)" stroke-width="2"/>
+      <circle cx="500" cy="195" r="14" fill="#2a1608"/>
+      <ellipse cx="500" cy="200" rx="10" ry="6" fill="#ffb840" opacity=".65"/>
+      <line x1="800" y1="0" x2="800" y2="200" stroke="rgba(60,30,10,.6)" stroke-width="2"/>
+      <circle cx="800" cy="205" r="14" fill="#2a1608"/>
+      <ellipse cx="800" cy="210" rx="10" ry="6" fill="#ffb840" opacity=".7"/>
+      <line x1="1100" y1="0" x2="1100" y2="185" stroke="rgba(60,30,10,.6)" stroke-width="2"/>
+      <circle cx="1100" cy="190" r="14" fill="#2a1608"/>
+      <ellipse cx="1100" cy="195" rx="10" ry="6" fill="#ffb840" opacity=".65"/>
+      <!-- tables with white tablecloths -->
+      <ellipse cx="280" cy="580" rx="100" ry="30" fill="rgba(245,240,230,.12)"/>
+      <rect x="185" y="550" width="190" height="8" rx="4" fill="rgba(245,240,230,.2)"/>
+      <ellipse cx="720" cy="570" rx="110" ry="32" fill="rgba(245,240,230,.1)"/>
+      <rect x="618" y="540" width="204" height="8" rx="4" fill="rgba(245,240,230,.18)"/>
+      <ellipse cx="1180" cy="578" rx="100" ry="30" fill="rgba(245,240,230,.12)"/>
+      <rect x="1085" y="548" width="190" height="8" rx="4" fill="rgba(245,240,230,.2)"/>
+      <!-- wine glasses silhouettes -->
+      <g opacity=".5">
+        <path d="M256,530 Q256,510 248,490 L270,490 Q262,510 262,530 Z" fill="rgba(220,240,255,.3)"/>
+        <circle cx="259" cy="484" r="12" fill="none" stroke="rgba(220,240,255,.3)" stroke-width="2"/>
+        <line x1="259" y1="530" x2="259" y2="545" stroke="rgba(220,240,255,.3)" stroke-width="1.5"/>
+        <path d="M295,530 Q295,510 287,490 L309,490 Q301,510 301,530 Z" fill="rgba(220,240,255,.3)"/>
+        <circle cx="298" cy="484" r="12" fill="none" stroke="rgba(220,240,255,.3)" stroke-width="2"/>
+        <line x1="298" y1="530" x2="298" y2="545" stroke="rgba(220,240,255,.3)" stroke-width="1.5"/>
+      </g>
+      <!-- candle glow overlays -->
+      <ellipse cx="280" cy="548" rx="60" ry="30" fill="url(#cg1)"/>
+      <ellipse cx="720" cy="538" rx="60" ry="30" fill="url(#cg2)"/>
+      <ellipse cx="1180" cy="546" rx="60" ry="30" fill="url(#cg3)"/>
+      <!-- candles on tables -->
+      <rect x="278" y="516" width="4" height="28" rx="2" fill="rgba(245,245,220,.6)"/>
+      <ellipse cx="280" cy="514" rx="4" ry="2" fill="#ffcc40" opacity=".9"/>
+      <rect x="718" y="508" width="4" height="28" rx="2" fill="rgba(245,245,220,.6)"/>
+      <ellipse cx="720" cy="506" rx="4" ry="2" fill="#ffcc40" opacity=".85"/>
+      <rect x="1178" y="516" width="4" height="28" rx="2" fill="rgba(245,245,220,.6)"/>
+      <ellipse cx="1180" cy="514" rx="4" ry="2" fill="#ffcc40" opacity=".9"/>
+      <!-- dark vignette overlay -->
+      <radialGradient id="vig" cx="50%" cy="50%" r="70%">
+        <stop offset="40%" stop-color="transparent"/>
+        <stop offset="100%" stop-color="rgba(5,2,0,.75)"/>
+      </radialGradient>
+      <rect width="1440" height="860" fill="url(#vig)"/>
+    </svg>
+  </div>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">מסעדת בשרים פרמיום · תל אביב</div>
+    <h1>Gambrinus</h1>
+    <p class="hero-sub">בשר. אש. אחבה.</p>
+    <div class="hero-ctas">
+      <a class="btn-gold" href="#reservation">הזמן שולחן</a>
+      <a class="btn-outline-gold" href="#menu">לתפריט</a>
+    </div>
+  </div>
+  <div class="hero-scroll">↓</div>
+</section>
+
+<!-- ── PHOTO STRIP ── -->
+<div class="photo-strip">
+  <!-- Steak photo 1 -->
+  <div class="photo-strip-item">
+    <svg viewBox="0 0 400 300"><defs><radialGradient id="ps1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#8b3a00"/><stop offset="100%" stop-color="#2a0d00"/></radialGradient></defs><rect width="400" height="300" fill="#1a0800"/><ellipse cx="200" cy="160" rx="130" ry="80" fill="url(#ps1)" opacity=".9"/><ellipse cx="200" cy="155" rx="110" ry="65" fill="#6b2800"/><path d="M100,160 Q150,120 200,140 Q250,120 300,160 Q270,200 200,210 Q130,200 100,160Z" fill="#5a2000" opacity=".8"/><ellipse cx="185" cy="148" rx="30" ry="18" fill="rgba(255,120,40,.15)"/><ellipse cx="215" cy="168" rx="25" ry="14" fill="rgba(255,120,40,.12)"/><text x="200" y="268" font-size="13" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="sans-serif">אנטריקוט</text></svg>
+  </div>
+  <!-- Grill -->
+  <div class="photo-strip-item">
+    <svg viewBox="0 0 400 300"><rect width="400" height="300" fill="#0d0500"/><rect x="60" y="100" width="280" height="14" rx="3" fill="#3a2010" opacity=".8"/><rect x="60" y="130" width="280" height="14" rx="3" fill="#3a2010" opacity=".8"/><rect x="60" y="160" width="280" height="14" rx="3" fill="#3a2010" opacity=".8"/><rect x="60" y="190" width="280" height="14" rx="3" fill="#3a2010" opacity=".8"/><rect x="100" y="80" width="16" height="150" rx="3" fill="#3a2010" opacity=".8"/><rect x="150" y="80" width="16" height="150" rx="3" fill="#3a2010" opacity=".8"/><rect x="200" y="80" width="16" height="150" rx="3" fill="#3a2010" opacity=".8"/><rect x="250" y="80" width="16" height="150" rx="3" fill="#3a2010" opacity=".8"/><rect x="300" y="80" width="16" height="150" rx="3" fill="#3a2010" opacity=".8"/><ellipse cx="200" cy="155" rx="220" ry="50" fill="rgba(255,80,0,.12)"/><text x="200" y="268" font-size="13" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="sans-serif">גריל פחמים</text></svg>
+  </div>
+  <!-- Wine -->
+  <div class="photo-strip-item">
+    <svg viewBox="0 0 400 300"><rect width="400" height="300" fill="#12080e"/><rect x="175" y="40" width="50" height="160" rx="6" fill="#6b0a2a"/><ellipse cx="200" cy="40" rx="25" ry="10" fill="#8b1a3a"/><rect x="165" y="200" width="70" height="8" rx="4" fill="#5a0820"/><rect x="180" y="208" width="40" height="50" rx="2" fill="#4a0618"/><line x1="150" y1="258" x2="250" y2="258" stroke="#3a0410" stroke-width="6"/><ellipse cx="200" cy="100" rx="20" ry="35" fill="rgba(180,20,60,.4)"/><text x="200" y="285" font-size="13" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="sans-serif">יין אדום</text></svg>
+  </div>
+  <!-- Dining table -->
+  <div class="photo-strip-item">
+    <svg viewBox="0 0 400 300"><rect width="400" height="300" fill="#140a04"/><ellipse cx="200" cy="180" rx="160" ry="50" fill="rgba(245,240,230,.08)"/><rect x="45" y="165" width="310" height="10" rx="5" fill="rgba(245,240,230,.15)"/><path d="M155,155 Q155,135 148,115 L168,115 Q162,135 162,155Z" fill="rgba(220,240,255,.2)"/><circle cx="158" cy="108" r="16" fill="none" stroke="rgba(220,240,255,.2)" stroke-width="2"/><path d="M235,155 Q235,135 228,115 L248,115 Q242,135 242,155Z" fill="rgba(220,240,255,.2)"/><circle cx="238" cy="108" r="16" fill="none" stroke="rgba(220,240,255,.2)" stroke-width="2"/><circle cx="200" cy="168" r="8" fill="rgba(245,245,220,.3)"/><text x="200" y="268" font-size="13" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="sans-serif">אווירה</text></svg>
+  </div>
+</div>
+
+<!-- ── ABOUT ── -->
+<div id="about" style="background:var(--cream);padding:10px 0;">
+  <div class="about">
+    <div class="about-text">
+      <!-- Bull icon -->
+      <svg class="bull-icon" width="50" height="40" viewBox="0 0 60 44" fill="none">
+        <path d="M4 8 Q2 4 6 4 L10 4 Q14 2 16 6 L18 8 Q22 4 30 4 Q38 4 42 8 L44 6 Q46 2 50 4 L54 4 Q58 4 56 8 L52 12 Q56 18 56 24 Q56 36 44 40 Q36 44 30 44 Q24 44 16 40 Q4 36 4 24 Q4 18 8 12 Z" fill="var(--gold)" opacity=".7"/>
+        <circle cx="20" cy="20" r="3" fill="var(--dark)"/>
+        <circle cx="40" cy="20" r="3" fill="var(--dark)"/>
+      </svg>
+      <h2 class="section-title">⚓ אודות</h2>
+      <hr class="divider" style="margin-right:0;"/>
+      <p>גמברינוס היא לא סתם מסעדה — זוהי חוויה. מתחילת שנות ה-90 אנחנו מגישים את הבשר הטוב ביותר שישראל יכולה להציע, עם קאט פרמיום מיובא ומקומי, מושלם על גריל פחמים פתוח.</p>
+      <p>שף הבית שלנו, עם ניסיון של 25 שנה, בוחר ידנית כל נתח — מאנטריקוט ישן יומיים על עצם, ועד פילה שמש עדין שנמס בפה. כל ביסה מספרת סיפור של אש, דם, ומסורת.</p>
+      <p>בחדר שלנו תמצאו 80 מושבים, פינות אינטימיות עם תאורת נרות, ואחת מאוספי היין המובחרות בתל אביב — מעל 400 תוויות מהארץ ומהעולם.</p>
+      <a class="btn-gold" href="#menu" style="display:inline-block;margin-top:10px;">לתפריט שלנו</a>
+    </div>
+    <div class="about-visual">
+      <div class="about-visual-inner">
+        <svg viewBox="0 0 400 533" style="width:100%;height:100%;" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="abg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3a1a08"/>
+              <stop offset="100%" stop-color="#1a0a04"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="533" fill="url(#abg)"/>
+          <!-- chef silhouette -->
+          <circle cx="200" cy="160" r="55" fill="#2a1208"/>
+          <path d="M145,240 Q145,220 200,215 Q255,220 255,240 L270,533 L130,533 Z" fill="#2a1208"/>
+          <rect x="165" y="100" width="70" height="20" rx="10" fill="#3a2018"/>
+          <rect x="175" y="80" width="50" height="30" rx="25" fill="#3a2018"/>
+          <ellipse cx="200" cy="240" rx="60" ry="20" fill="rgba(255,255,255,.05)"/>
+          <!-- plate and steak in foreground -->
+          <ellipse cx="200" cy="400" rx="100" ry="35" fill="rgba(245,240,230,.15)"/>
+          <ellipse cx="200" cy="390" rx="80" ry="28" fill="rgba(245,240,230,.1)"/>
+          <ellipse cx="200" cy="385" rx="55" ry="22" fill="#5a2000" opacity=".8"/>
+          <path d="M155,385 Q175,365 200,375 Q225,365 245,385 Q235,410 200,415 Q165,410 155,385Z" fill="#4a1800" opacity=".9"/>
+          <!-- grill marks -->
+          <line x1="170" y1="378" x2="190" y2="398" stroke="rgba(20,8,0,.7)" stroke-width="4" stroke-linecap="round"/>
+          <line x1="185" y1="372" x2="205" y2="392" stroke="rgba(20,8,0,.7)" stroke-width="4" stroke-linecap="round"/>
+          <line x1="200" y1="370" x2="220" y2="390" stroke="rgba(20,8,0,.7)" stroke-width="4" stroke-linecap="round"/>
+          <!-- steam -->
+          <path d="M190,360 Q185,345 190,330" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M200,355 Q195,338 200,322" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M210,358 Q205,342 210,326" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <!-- gold frame accent -->
+      <div style="position:absolute;bottom:-12px;right:-12px;width:60%;height:60%;border:2px solid rgba(201,168,76,.3);z-index:-1;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DARK DIVIDER ── -->
+<div class="dark-divider">
+  <svg width="40" height="40" viewBox="0 0 40 40" style="margin-bottom:16px;">
+    <path d="M5 8 L5 32 Q5 35 8 35 L12 35 L12 24 L28 24 L28 35 L32 35 Q35 35 35 32 L35 8 Q35 5 32 5 L8 5 Q5 5 5 8Z" fill="var(--gold)" opacity=".7"/>
+    <path d="M12 5 L12 18 L28 18 L28 5" fill="none" stroke="var(--gold)" stroke-width="1.5" opacity=".7"/>
+  </svg>
+  <h2 class="section-title">מה בתפריט?</h2>
+  <p>אנחנו מגישים רק קאטים פרמיום — אנגוס אמריקאי, וואגיו יפני, ופרמיום מקומי. כל נתח מוגש עם ליווי מדויק, יין מומלץ, ושף שמוכן לדבר איתך על הבשר.</p>
+</div>
+
+<!-- ── MENU SECTION ── -->
+<section id="menu" class="menu-section">
+  <div style="text-align:center;margin-bottom:40px;">
+    <div class="section-icon">🔱</div>
+    <h2 class="section-title">התפריט שלנו</h2>
+    <hr class="divider"/>
+  </div>
+  <div class="menu-grid">
+
+    <!-- Card 1: Entrecote -->
+    <div class="menu-card">
+      <div class="menu-card-img">
+        <svg viewBox="0 0 400 300"><defs><radialGradient id="mc1" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#7a3010"/><stop offset="100%" stop-color="#1a0800"/></radialGradient></defs><rect width="400" height="300" fill="#100600"/><ellipse cx="200" cy="165" rx="150" ry="90" fill="url(#mc1)"/><ellipse cx="200" cy="160" rx="120" ry="72" fill="#5a2000"/><path d="M90,165 Q140,125 200,145 Q260,125 310,165 Q280,210 200,220 Q120,210 90,165Z" fill="#4a1800"/><line x1="145" y1="155" x2="170" y2="185" stroke="rgba(10,4,0,.8)" stroke-width="5" stroke-linecap="round"/><line x1="170" y1="145" x2="195" y2="175" stroke="rgba(10,4,0,.8)" stroke-width="5" stroke-linecap="round"/><line x1="195" y1="140" x2="220" y2="170" stroke="rgba(10,4,0,.8)" stroke-width="5" stroke-linecap="round"/><ellipse cx="200" cy="220" rx="110" ry="20" fill="rgba(0,0,0,.3)"/></svg>
+      </div>
+      <div class="menu-card-body">
+        <div class="menu-card-title">אנטריקוט על העצם</div>
+        <div class="menu-card-desc">300 גרם אנגוס אמריקאי Dry-Aged 21 יום. מוגש עם ירקות שורש וממרח חרדל ישן.</div>
+        <a class="menu-card-link" href="#">₪185 ←</a>
+      </div>
+    </div>
+
+    <!-- Card 2: Fillet -->
+    <div class="menu-card">
+      <div class="menu-card-img">
+        <svg viewBox="0 0 400 300"><defs><radialGradient id="mc2" cx="45%" cy="55%" r="55%"><stop offset="0%" stop-color="#6a2808"/><stop offset="100%" stop-color="#180600"/></radialGradient></defs><rect width="400" height="300" fill="#0e0500"/><ellipse cx="200" cy="165" rx="100" ry="75" fill="url(#mc2)"/><ellipse cx="200" cy="158" rx="82" ry="60" fill="#501e06"/><ellipse cx="200" cy="155" rx="65" ry="50" fill="#441800"/><ellipse cx="195" cy="150" rx="40" ry="32" fill="rgba(255,80,20,.12)"/><ellipse cx="200" cy="220" rx="85" ry="18" fill="rgba(0,0,0,.3)"/><g opacity=".6"><circle cx="160" cy="240" r="6" fill="#8a6020"/><circle cx="175" cy="240" r="6" fill="#8a6020"/><circle cx="190" cy="240" r="6" fill="#8a6020"/></g></svg>
+      </div>
+      <div class="menu-card-body">
+        <div class="menu-card-title">פילה מיניון</div>
+        <div class="menu-card-desc">250 גרם פילה וואגיו A4. הרך והמושלם שבנתחים. עם רוטב פטריות כמהין ורוזמרין.</div>
+        <a class="menu-card-link" href="#">₪220 ←</a>
+      </div>
+    </div>
+
+    <!-- Card 3: Ribeye -->
+    <div class="menu-card">
+      <div class="menu-card-img">
+        <svg viewBox="0 0 400 300"><defs><radialGradient id="mc3" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#903820"/><stop offset="100%" stop-color="#200800"/></radialGradient></defs><rect width="400" height="300" fill="#120700"/><ellipse cx="200" cy="162" rx="155" ry="85" fill="url(#mc3)"/><path d="M70,162 Q130,110 200,130 Q270,110 330,162 Q300,220 200,235 Q100,220 70,162Z" fill="#6a2810" opacity=".9"/><path d="M100,162 Q150,130 200,145 Q250,130 300,162 Q278,198 200,208 Q122,198 100,162Z" fill="#561e08"/><g opacity=".5"><ellipse cx="170" cy="150" rx="15" ry="8" fill="rgba(245,240,230,.15)"/><ellipse cx="220" cy="165" rx="12" ry="7" fill="rgba(245,240,230,.12)"/></g></svg>
+      </div>
+      <div class="menu-card-body">
+        <div class="menu-card-title">ריב-איי פרמיום</div>
+        <div class="menu-card-desc">350 גרם פרמיום קאט עם שיוש גבוה. נסרק בגריל פחמים ומוגש עם חמאה עשבי תיבול.</div>
+        <a class="menu-card-link" href="#">₪195 ←</a>
+      </div>
+    </div>
+
+    <!-- Card 4: Lamb chops -->
+    <div class="menu-card">
+      <div class="menu-card-img">
+        <svg viewBox="0 0 400 300"><defs><linearGradient id="mc4" x1="20%" y1="20%" x2="80%" y2="80%"><stop offset="0%" stop-color="#5a2808"/><stop offset="100%" stop-color="#180800"/></linearGradient></defs><rect width="400" height="300" fill="#0e0500"/><rect x="110" y="100" width="50" height="120" rx="8" fill="url(#mc4)"/><rect x="175" y="95" width="50" height="125" rx="8" fill="url(#mc4)"/><rect x="240" y="100" width="50" height="120" rx="8" fill="url(#mc4)"/><line x1="135" y1="100" x2="135" y2="60" stroke="rgba(245,240,220,.5)" stroke-width="6" stroke-linecap="round"/><line x1="200" y1="95" x2="200" y2="55" stroke="rgba(245,240,220,.5)" stroke-width="6" stroke-linecap="round"/><line x1="265" y1="100" x2="265" y2="60" stroke="rgba(245,240,220,.5)" stroke-width="6" stroke-linecap="round"/><ellipse cx="200" cy="230" rx="130" ry="18" fill="rgba(0,0,0,.3)"/></svg>
+      </div>
+      <div class="menu-card-body">
+        <div class="menu-card-title">צלעות טלה</div>
+        <div class="menu-card-desc">4 צלעות טלה ים-תיכוני עם מרינדת שום, לימון וזעתר. מוגש עם קוסקוס פרמי.</div>
+        <a class="menu-card-link" href="#">₪168 ←</a>
+      </div>
+    </div>
+
+    <!-- Card 5: Burger -->
+    <div class="menu-card">
+      <div class="menu-card-img">
+        <svg viewBox="0 0 400 300"><rect width="400" height="300" fill="#0e0600"/><ellipse cx="200" cy="130" rx="120" ry="50" fill="#8b5020"/><ellipse cx="200" cy="120" rx="115" ry="35" fill="#a06030"/><rect x="82" y="150" width="236" height="30" rx="4" fill="#6a3010"/><rect x="82" y="180" width="236" height="20" rx="4" fill="#8b4018"/><ellipse cx="200" cy="215" rx="125" ry="45" fill="#7a4015"/><ellipse cx="200" cy="200" rx="120" ry="30" fill="#6a3010"/><ellipse cx="200" cy="115" rx="85" ry="18" fill="rgba(255,255,255,.07)"/><ellipse cx="200" cy="260" rx="110" ry="15" fill="rgba(0,0,0,.3)"/></svg>
+      </div>
+      <div class="menu-card-body">
+        <div class="menu-card-title">המבורגר גמברינוס</div>
+        <div class="menu-card-desc">250 גרם טחון בית, בריוש תוצרת בית, גבינת שרמולה, כרוב כבוש וצ'ילי מעושן.</div>
+        <a class="menu-card-link" href="#">₪98 ←</a>
+      </div>
+    </div>
+
+    <!-- Card 6: Tasting menu -->
+    <div class="menu-card">
+      <div class="menu-card-img">
+        <svg viewBox="0 0 400 300"><rect width="400" height="300" fill="#100700"/><ellipse cx="200" cy="180" rx="160" ry="55" fill="rgba(245,240,230,.08)"/><rect x="45" y="165" width="310" height="10" rx="5" fill="rgba(245,240,230,.12)"/><ellipse cx="130" cy="155" rx="45" ry="35" fill="#4a1a08"/><ellipse cx="200" cy="150" rx="45" ry="35" fill="#5a2810"/><ellipse cx="270" cy="155" rx="45" ry="35" fill="#3a1206"/><path d="M105,145 Q130,125 155,145 Q145,165 130,170 Q115,165 105,145Z" fill="#3a0e04"/><path d="M175,140 Q200,120 225,140 Q215,160 200,165 Q185,160 175,140Z" fill="#4a1a08"/><path d="M245,145 Q270,125 295,145 Q285,165 270,170 Q255,165 245,145Z" fill="#2a0a02"/><text x="200" y="240" font-size="16" fill="rgba(201,168,76,.7)" text-anchor="middle" font-family="serif" font-style="italic">Tasting Menu</text></svg>
+      </div>
+      <div class="menu-card-body">
+        <div class="menu-card-title">תפריט טעימות</div>
+        <div class="menu-card-desc">7 מנות של הטוב ביותר שהמסעדה מציעה — כולל פרוסות Dry-Aged, טאטאקי, ועוד. לשניים בלבד.</div>
+        <a class="menu-card-link" href="#">₪480 לזוג ←</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;margin-top:40px;">
+    <a class="btn-gold" href="#" style="display:inline-block;">תפריט אנגלית | English Menu</a>
+  </div>
+</section>
+
+<!-- ── AMBIANCE ── -->
+<section class="ambiance">
+  <div class="ambiance-bg"></div>
+  <svg viewBox="0 0 1440 480" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="ambg" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#3a1a08" stop-opacity=".5"/>
+        <stop offset="100%" stop-color="#1a0800" stop-opacity=".7"/>
+      </linearGradient>
+    </defs>
+    <rect width="1440" height="480" fill="url(#ambg)"/>
+    <g opacity=".3">
+      <rect x="0" y="0" width="200" height="480" fill="#2a1208"/>
+      <rect x="1240" y="0" width="200" height="480" fill="#2a1208"/>
+      <rect x="200" y="380" width="1040" height="100" fill="#1a0c04"/>
+    </g>
+    <g opacity=".15">
+      <line x1="200" y1="0" x2="200" y2="240" stroke="#ffb040" stroke-width="2"/>
+      <ellipse cx="200" cy="248" rx="12" ry="7" fill="#ffb040"/>
+      <line x1="500" y1="0" x2="500" y2="230" stroke="#ffb040" stroke-width="2"/>
+      <ellipse cx="500" cy="238" rx="12" ry="7" fill="#ffb040"/>
+      <line x1="800" y1="0" x2="800" y2="240" stroke="#ffb040" stroke-width="2"/>
+      <ellipse cx="800" cy="248" rx="12" ry="7" fill="#ffb040"/>
+      <line x1="1100" y1="0" x2="1100" y2="235" stroke="#ffb040" stroke-width="2"/>
+      <ellipse cx="1100" cy="243" rx="12" ry="7" fill="#ffb040"/>
+      <line x1="1350" y1="0" x2="1350" y2="240" stroke="#ffb040" stroke-width="2"/>
+      <ellipse cx="1350" cy="248" rx="12" ry="7" fill="#ffb040"/>
+    </g>
+  </svg>
+  <div class="ambiance-content">
+    <h2>כתבו עלינו</h2>
+    <p>המסעדה הוכתרה בתואר "מסעדת הבשר הטובה בישראל" על ידי מדריך המסעדות 2024.</p>
+    <a class="btn-outline-gold" href="#press">לכל הכתבות</a>
+  </div>
+</section>
+
+<!-- ── PRESS ── -->
+<section id="press" class="press">
+  <div style="text-align:center;margin-bottom:40px;">
+    <div class="section-icon" style="color:var(--gold);">⚓</div>
+    <h2 class="section-title">כתבו עלינו</h2>
+    <hr class="divider"/>
+  </div>
+  <div class="press-grid">
+    <div class="press-card">
+      <div class="press-source">הארץ — מסעדות</div>
+      <div class="press-quote">"גמברינוס הוא מקדש הבשר. כל נתח מדויק, כל רוטב מוכוון, האש מדברת בשפה שרק שפים ותיקים מכירים."</div>
+      <div class="press-date">מרץ 2024</div>
+    </div>
+    <div class="press-card">
+      <div class="press-source">TimeOut תל אביב</div>
+      <div class="press-quote">"מסעדת 5 כוכבים מבלי שאמרנו זאת בקול. הצלחות שמגיעות לשולחן הן יצירת אמנות — גם ויזואלית וגם טעמית."</div>
+      <div class="press-date">ינואר 2024</div>
+    </div>
+    <div class="press-card">
+      <div class="press-source">וואלה! אוכל</div>
+      <div class="press-quote">"הריב-איי הכי טוב שאכלתי בישראל. נקודה. בלי הסתייגויות. תגיעו רעבים ותצאו שבעים ומאושרים."</div>
+      <div class="press-date">נובמבר 2023</div>
+    </div>
+    <div class="press-card">
+      <div class="press-source">מגזין נענע</div>
+      <div class="press-quote">"האינטריקוט על העצם שלהם שווה לבדו את הנסיעה. ממליצים לכל חובב בשר ברצינות."</div>
+      <div class="press-date">ספטמבר 2023</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MEMBERS CLUB ── -->
+<div id="members" style="background:var(--light);padding:10px 0;">
+  <div class="members">
+    <div class="members-text">
+      <svg width="50" height="50" viewBox="0 0 50 50" style="margin-bottom:16px;">
+        <path d="M25 5 L30 18 L45 18 L33 27 L38 40 L25 32 L12 40 L17 27 L5 18 L20 18 Z" fill="var(--gold)" opacity=".7"/>
+      </svg>
+      <h2 class="section-title">⚓ הרשמה למועדון החברים</h2>
+      <hr class="divider" style="margin-right:0;"/>
+      <p>הצטרפו למועדון VIP של גמברינוס וקבלו:</p>
+      <ul style="margin-top:16px;margin-right:20px;color:#4a3520;font-size:15px;line-height:2.2;font-weight:300;">
+        <li>🥩 עדיפות בהזמנות בעונת שיא</li>
+        <li>🍷 הנחת 10% על כל הרכישות</li>
+        <li>🎁 ארוחה חגיגית בגין יום הולדת</li>
+        <li>📰 עדכונים על תפריטים עונתיים חדשים</li>
+        <li>🎉 הזמנות לאירועי טעימות סגורים</li>
+      </ul>
+    </div>
+    <div>
+      <div class="members-form">
+        <h3>הצטרפו אלינו</h3>
+        <div class="form-sub">ההרשמה חינמית ומחייבת לא לשכוח לאכול טוב</div>
+        <div class="form-group">
+          <label>שם פרטי</label>
+          <input type="text" placeholder="ישראל"/>
+        </div>
+        <div class="form-group">
+          <label>שם משפחה</label>
+          <input type="text" placeholder="ישראלי"/>
+        </div>
+        <div class="form-group">
+          <label>אימייל</label>
+          <input type="email" placeholder="israel@example.com"/>
+        </div>
+        <div class="form-group">
+          <label>טלפון</label>
+          <input type="tel" placeholder="050-000-0000"/>
+        </div>
+        <button class="form-submit">הצטרפות למועדון ←</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── GALLERY ── -->
+<section id="gallery" class="gallery-section">
+  <div style="text-align:center;margin-bottom:40px;">
+    <div class="section-icon" style="color:var(--gold);">⚓</div>
+    <h2 class="section-title">גלריה</h2>
+    <hr class="divider"/>
+  </div>
+  <div class="gallery-grid">
+
+    <div class="gallery-item" style="grid-column:span 2;">
+      <svg viewBox="0 0 800 350" preserveAspectRatio="xMidYMid slice" style="min-height:220px;">
+        <defs><radialGradient id="gg1" cx="50%" cy="60%" r="60%"><stop offset="0%" stop-color="#7a3010"/><stop offset="100%" stop-color="#1a0800"/></radialGradient></defs>
+        <rect width="800" height="350" fill="#100800"/>
+        <ellipse cx="400" cy="220" rx="300" ry="120" fill="url(#gg1)" opacity=".8"/>
+        <path d="M150,220 Q280,150 400,180 Q520,150 650,220 Q580,310 400,330 Q220,310 150,220Z" fill="#5a2000" opacity=".7"/>
+        <line x1="280" y1="205" x2="320" y2="250" stroke="rgba(10,4,0,.7)" stroke-width="8" stroke-linecap="round"/>
+        <line x1="320" y1="192" x2="360" y2="237" stroke="rgba(10,4,0,.7)" stroke-width="8" stroke-linecap="round"/>
+        <line x1="360" y1="186" x2="400" y2="231" stroke="rgba(10,4,0,.7)" stroke-width="8" stroke-linecap="round"/>
+        <line x1="400" y1="183" x2="440" y2="228" stroke="rgba(10,4,0,.7)" stroke-width="8" stroke-linecap="round"/>
+        <text x="400" y="320" font-size="14" fill="rgba(201,168,76,.5)" text-anchor="middle" font-family="serif" font-style="italic">Dry-Aged Ribeye · 350g</text>
+      </svg>
+      <div class="gallery-item-overlay"><span>🔍</span></div>
+    </div>
+
+    <div class="gallery-item">
+      <svg viewBox="0 0 400 350" preserveAspectRatio="xMidYMid slice" style="min-height:220px;">
+        <rect width="400" height="350" fill="#0a0500"/>
+        <rect x="60" y="100" width="280" height="8" rx="3" fill="#3a2010" opacity=".7"/>
+        <rect x="60" y="125" width="280" height="8" rx="3" fill="#3a2010" opacity=".7"/>
+        <rect x="60" y="150" width="280" height="8" rx="3" fill="#3a2010" opacity=".7"/>
+        <rect x="60" y="175" width="280" height="8" rx="3" fill="#3a2010" opacity=".7"/>
+        <rect x="60" y="200" width="280" height="8" rx="3" fill="#3a2010" opacity=".7"/>
+        <ellipse cx="200" cy="155" rx="200" ry="50" fill="rgba(255,100,20,.1)"/>
+        <text x="200" y="300" font-size="12" fill="rgba(201,168,76,.5)" text-anchor="middle" font-family="serif">גריל פחמים פתוח</text>
+      </svg>
+      <div class="gallery-item-overlay"><span>🔍</span></div>
+    </div>
+
+    <div class="gallery-item">
+      <svg viewBox="0 0 400 350" preserveAspectRatio="xMidYMid slice" style="min-height:220px;">
+        <rect width="400" height="350" fill="#100808"/>
+        <rect x="160" y="40" width="80" height="200" rx="8" fill="#8b1a3a"/>
+        <ellipse cx="200" cy="40" rx="40" ry="14" fill="#b02248"/>
+        <rect x="150" y="240" width="100" height="12" rx="6" fill="#6a1228"/>
+        <rect x="170" y="252" width="60" height="70" rx="3" fill="#581020"/>
+        <line x1="140" y1="322" x2="260" y2="322" stroke="#481018" stroke-width="8" stroke-linecap="round"/>
+        <ellipse cx="200" cy="150" rx="30" ry="50" fill="rgba(220,20,60,.3)"/>
+        <text x="200" y="340" font-size="12" fill="rgba(201,168,76,.5)" text-anchor="middle" font-family="serif">אוסף יינות</text>
+      </svg>
+      <div class="gallery-item-overlay"><span>🔍</span></div>
+    </div>
+
+    <div class="gallery-item">
+      <svg viewBox="0 0 400 350" preserveAspectRatio="xMidYMid slice" style="min-height:220px;">
+        <rect width="400" height="350" fill="#0e0802"/>
+        <ellipse cx="200" cy="200" rx="160" ry="55" fill="rgba(245,240,230,.07)"/>
+        <rect x="45" y="188" width="310" height="8" rx="4" fill="rgba(245,240,230,.12)"/>
+        <path d="M145,175 Q145,155 138,136 L156,136 Q150,155 150,175Z" fill="rgba(220,240,255,.18)"/>
+        <circle cx="147" cy="129" r="15" fill="none" stroke="rgba(220,240,255,.18)" stroke-width="2"/>
+        <path d="M225,175 Q225,155 218,136 L236,136 Q230,155 230,175Z" fill="rgba(220,240,255,.18)"/>
+        <circle cx="227" cy="129" r="15" fill="none" stroke="rgba(220,240,255,.18)" stroke-width="2"/>
+        <rect x="188" y="195" width="24" height="4" rx="2" fill="rgba(245,245,210,.25)"/>
+        <rect x="192" y="188" width="4" height="20" rx="2" fill="rgba(245,245,210,.2)"/>
+        <ellipse cx="200" cy="200" rx="18" ry="6" fill="rgba(255,180,20,.2)"/>
+        <text x="200" y="310" font-size="12" fill="rgba(201,168,76,.5)" text-anchor="middle" font-family="serif">אווירת המסעדה</text>
+      </svg>
+      <div class="gallery-item-overlay"><span>🔍</span></div>
+    </div>
+
+    <div class="gallery-item">
+      <svg viewBox="0 0 400 350" preserveAspectRatio="xMidYMid slice" style="min-height:220px;">
+        <rect width="400" height="350" fill="#0c0600"/>
+        <ellipse cx="120" cy="180" rx="75" ry="58" fill="#4a1808" opacity=".9"/>
+        <ellipse cx="200" cy="175" rx="75" ry="58" fill="#5a2010" opacity=".9"/>
+        <ellipse cx="280" cy="180" rx="75" ry="58" fill="#3a1006" opacity=".9"/>
+        <ellipse cx="120" cy="172" rx="55" ry="42" fill="#3a1005"/>
+        <ellipse cx="200" cy="167" rx="55" ry="42" fill="#4a1808"/>
+        <ellipse cx="280" cy="172" rx="55" ry="42" fill="#2e0c04"/>
+        <line x1="98" y1="162" x2="112" y2="182" stroke="rgba(10,4,0,.6)" stroke-width="4" stroke-linecap="round"/>
+        <line x1="178" y1="157" x2="192" y2="177" stroke="rgba(10,4,0,.6)" stroke-width="4" stroke-linecap="round"/>
+        <text x="200" y="305" font-size="12" fill="rgba(201,168,76,.5)" text-anchor="middle" font-family="serif">קבב שלישייה</text>
+      </svg>
+      <div class="gallery-item-overlay"><span>🔍</span></div>
+    </div>
+
+    <div class="gallery-item" style="grid-column:span 2;">
+      <svg viewBox="0 0 800 350" preserveAspectRatio="xMidYMid slice" style="min-height:220px;">
+        <defs><linearGradient id="gg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2a1208"/><stop offset="100%" stop-color="#1a0c06"/></linearGradient></defs>
+        <rect width="800" height="350" fill="url(#gg2)"/>
+        <g opacity=".4">
+          <line x1="160" y1="0" x2="160" y2="200" stroke="#ffb040" stroke-width="2"/>
+          <ellipse cx="160" cy="208" rx="12" ry="7" fill="#ffb040"/>
+          <line x1="360" y1="0" x2="360" y2="195" stroke="#ffb040" stroke-width="2"/>
+          <ellipse cx="360" cy="203" rx="12" ry="7" fill="#ffb040"/>
+          <line x1="560" y1="0" x2="560" y2="200" stroke="#ffb040" stroke-width="2"/>
+          <ellipse cx="560" cy="208" rx="12" ry="7" fill="#ffb040"/>
+          <line x1="700" y1="0" x2="700" y2="195" stroke="#ffb040" stroke-width="2"/>
+          <ellipse cx="700" cy="203" rx="12" ry="7" fill="#ffb040"/>
+        </g>
+        <ellipse cx="200" cy="280" rx="130" ry="40" fill="rgba(245,240,230,.06)"/>
+        <rect x="75" y="265" width="250" height="8" rx="4" fill="rgba(245,240,230,.1)"/>
+        <ellipse cx="600" cy="275" rx="130" ry="40" fill="rgba(245,240,230,.06)"/>
+        <rect x="475" y="262" width="250" height="8" rx="4" fill="rgba(245,240,230,.1)"/>
+        <text x="400" y="330" font-size="14" fill="rgba(201,168,76,.4)" text-anchor="middle" font-family="serif" font-style="italic">האולם הראשי</text>
+      </svg>
+      <div class="gallery-item-overlay"><span>🔍</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── RESERVATION ── -->
+<section id="reservation" class="reservation">
+  <h2>הזמן שולחן</h2>
+  <p>אנחנו ממליצים להזמין מקום מראש, במיוחד בסופי שבוע</p>
+  <div class="reservation-info">
+    <div class="res-item">
+      <div class="icon">📍</div>
+      <h4>כתובת</h4>
+      <p>רחוב הירקון 1<br/>תל אביב</p>
+    </div>
+    <div class="res-item">
+      <div class="icon">🕐</div>
+      <h4>שעות פעילות</h4>
+      <p>ראשון–שישי: 12:00–24:00<br/>שבת: 13:00–24:00</p>
+    </div>
+    <div class="res-item">
+      <div class="icon">📞</div>
+      <h4>טלפון</h4>
+      <p><a href="tel:+97230000000" style="color:var(--gold);text-decoration:none;">03-000-0000</a></p>
+    </div>
+    <div class="res-item">
+      <div class="icon">✉️</div>
+      <h4>אימייל</h4>
+      <p><a href="mailto:info@gambrinus.co.il" style="color:var(--gold);text-decoration:none;">info@gambrinus.co.il</a></p>
+    </div>
+  </div>
+  <a class="btn-gold" href="tel:+97230000000" style="display:inline-block;font-size:16px;padding:16px 48px;">התקשרו עכשיו לשריון</a>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="logo">Gambrinus</div>
+      <div class="tagline">MEAT RESTAURANT · TEL AVIV</div>
+      <p>מסעדת הבשר הפרמיום של תל אביב. בשר. אש. אחבה. מאז 1993.</p>
+      <div class="social-links" style="margin-top:20px;">
+        <a href="#" title="Instagram">IG</a>
+        <a href="#" title="Facebook">FB</a>
+        <a href="#" title="TikTok">TK</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>ניווט</h4>
+      <ul>
+        <li><a href="#about">אודות</a></li>
+        <li><a href="#menu">תפריט</a></li>
+        <li><a href="#press">כתבו עלינו</a></li>
+        <li><a href="#members">מועדון חברים</a></li>
+        <li><a href="#gallery">גלריה</a></li>
+        <li><a href="#reservation">הזמן מקום</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>שעות פעילות</h4>
+      <ul>
+        <li><a href="#">ראשון–חמישי</a></li>
+        <li><a href="#" style="color:rgba(255,255,255,.25);">12:00–24:00</a></li>
+        <li><a href="#" style="margin-top:8px;display:block;">שישי</a></li>
+        <li><a href="#" style="color:rgba(255,255,255,.25);">12:00–01:00</a></li>
+        <li><a href="#" style="margin-top:8px;display:block;">שבת</a></li>
+        <li><a href="#" style="color:rgba(255,255,255,.25);">13:00–24:00</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>יצירת קשר</h4>
+      <ul>
+        <li><a href="#">רחוב הירקון 1, תל אביב</a></li>
+        <li><a href="tel:+97230000000">03-000-0000</a></li>
+        <li><a href="mailto:info@gambrinus.co.il">info@gambrinus.co.il</a></li>
+        <li style="margin-top:12px;"><a href="#reservation" style="color:var(--gold);">הזמן מקום ←</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom" style="max-width:1200px;margin:0 auto;">
+    <span>© 2025 Gambrinus · כל הזכויות שמורות</span>
+    <div style="display:flex;gap:20px;">
+      <a href="#">מדיניות פרטיות</a>
+      <a href="#">תנאי שימוש</a>
+      <a href="#">נגישות</a>
+    </div>
+    <a href="#" style="color:var(--gold);">www.gambrinus.co.il</a>
+  </div>
+</footer>
+
+</body>
+</html>

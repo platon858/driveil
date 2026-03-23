@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gambrinus — מסעדת בשר</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Frank Ruhl Libre', 'Cormorant Garamond', Georgia, serif; margin: 0; overflow-x: hidden; background: #0f0d0a; }
+
+    /* ── Palette ──────────────────────────────────────────────────
+       Charcoal  #0f0d0a / #1a1410
+       Deep red  #7B1113
+       Gold      #C8860A
+       Cream     #F5EFE6
+    ──────────────────────────────────────────────────────────── */
+
+    .sec-title { font-size:2rem; font-weight:700; text-align:center; color:#1a1410; margin-bottom:1.4rem; }
+    .sec-title-light { color:#F5EFE6; }
+    .gold { color:#C8860A; }
+
+    .nav-link { color:#d4c4a8; font-size:1rem; cursor:pointer; white-space:nowrap; text-decoration:none; transition:color 0.2s; }
+    .nav-link:hover { color:#fff; }
+
+    .btn-dark    { background:#1a1410; color:#fff; padding:7px 18px; border-radius:3px; font-size:0.82rem; cursor:pointer; border:none; font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif; transition:background 0.2s; }
+    .btn-dark:hover { background:#C8860A; }
+    .btn-outline { background:transparent; color:#d4c4a8; border:1.5px solid rgba(212,196,168,0.5); padding:6px 16px; border-radius:3px; font-size:0.82rem; cursor:pointer; font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif; transition:all 0.2s; }
+    .btn-outline:hover { background:#C8860A; color:#fff; border-color:#C8860A; }
+    .btn-reserve { background:#7B1113; color:#fff; border:none; padding:6px 16px; border-radius:3px; font-size:0.78rem; cursor:pointer; font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif; white-space:nowrap; transition:background 0.2s; letter-spacing:0.04em; }
+    .btn-reserve:hover { background:#C8860A; }
+
+    .lang-btn { background:transparent; color:#d4c4a8; border:1px solid rgba(255,255,255,0.15); padding:3px 8px; border-radius:2px; font-size:0.72rem; cursor:pointer; font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif; transition:all 0.2s; }
+    .lang-btn:hover  { color:#fff; border-color:rgba(255,255,255,0.4); }
+    .lang-btn.active { background:#7B1113; color:#fff; border-color:#7B1113; }
+
+    .menu-card { position:relative; overflow:hidden; border-radius:2px; cursor:pointer; }
+    .menu-card img { width:100%; height:180px; object-fit:cover; display:block; transition:transform 0.4s; }
+    .menu-card:hover img { transform:scale(1.06); }
+    .menu-card-label { position:absolute; bottom:0; width:100%; background:linear-gradient(transparent, rgba(0,0,0,0.75)); color:#fff; text-align:center; padding:20px 8px 10px; font-size:0.9rem; font-weight:700; letter-spacing:0.04em; }
+
+    .gallery-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; }
+    .gallery-grid img { width:100%; height:160px; object-fit:cover; display:block; cursor:pointer; transition:opacity 0.2s; filter:brightness(0.9); }
+    .gallery-grid img:hover { opacity:0.85; filter:brightness(1); }
+
+    .form-field { width:100%; border:none; border-bottom:1px solid #aaa; background:transparent; padding:5px 2px; font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif; font-size:0.82rem; color:#333; outline:none; display:block; margin-bottom:10px; }
+    .form-field::placeholder { color:#aaa; }
+
+    /* Gold divider line */
+    .gold-line { width:60px; height:2px; background:#C8860A; margin:0 auto 16px; }
+
+    /* LTR fixes */
+    html[dir="ltr"] .form-field  { text-align:left; }
+    html[dir="ltr"] #about-heading { text-align:left; }
+    html[dir="ltr"] #about-btns   { justify-content:flex-start; }
+
+    /* ── RUSSIAN: bigger text everywhere ────────────────────── */
+    html[lang="ru"] .nav-link                          { font-size:1.15rem; }
+    html[lang="ru"] .btn-reserve                       { font-size:0.92rem; padding:8px 20px; }
+    html[lang="ru"] .sec-title                         { font-size:2.3rem; }
+    html[lang="ru"] .menu-cat-title                    { font-size:1.9rem; }
+    html[lang="ru"] .menu-cat-sub                      { font-size:1rem; }
+    html[lang="ru"] .menu-tab                          { font-size:1.05rem; padding:11px 24px; }
+    html[lang="ru"] .menu-row-name                     { font-size:1.25rem; }
+    html[lang="ru"] .menu-row-desc                     { font-size:1.05rem; line-height:1.65; }
+    html[lang="ru"] .menu-row-price                    { font-size:1.35rem; }
+    html[lang="ru"] .menu-badge                        { font-size:0.82rem; }
+    html[lang="ru"] #about-text p                      { font-size:1.2rem; line-height:2; }
+    html[lang="ru"] #about-heading                     { font-size:2.4rem; }
+    html[lang="ru"] [data-i18n="about.label"],
+    html[lang="ru"] [data-i18n="hero.tagline"],
+    html[lang="ru"] [data-i18n="menu.label"],
+    html[lang="ru"] [data-i18n="press.label"],
+    html[lang="ru"] [data-i18n="gallery.label"],
+    html[lang="ru"] [data-i18n="members.label"]        { font-size:0.92rem; letter-spacing:0.2em; }
+    html[lang="ru"] [data-i18n="hero.sub"]             { font-size:1.2rem; }
+    html[lang="ru"] [data-i18n="float.desc"]           { font-size:1.2rem; }
+    html[lang="ru"] [data-i18n^="review."]             { font-size:1.1rem; line-height:1.8; }
+    html[lang="ru"] [data-i18n="members.b1"],
+    html[lang="ru"] [data-i18n="members.b2"],
+    html[lang="ru"] [data-i18n="members.b3"],
+    html[lang="ru"] [data-i18n="members.b4"]           { font-size:1rem; }
+    html[lang="ru"] .form-field                        { font-size:1rem; }
+    html[lang="ru"] #atm-quote                         { font-size:1.3rem; }
+    html[lang="ru"] footer a, html[lang="ru"] footer span { font-size:0.95rem; }
+    html[lang="ru"] [data-i18n="footer.hours"],
+    html[lang="ru"] [data-i18n="footer.call"]          { font-size:0.95rem; }
+
+    /* ── FULL MENU ──────────────────────────────────────────── */
+    .menu-tabs { display:flex; justify-content:center; flex-wrap:wrap; gap:6px; margin-bottom:36px; }
+    .menu-tab {
+      background:transparent; color:#a09070; border:1px solid rgba(200,134,10,0.3);
+      padding:9px 22px; border-radius:2px; font-size:0.92rem; letter-spacing:0.1em;
+      text-transform:uppercase; cursor:pointer; font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif;
+      transition:all 0.2s;
+    }
+    .menu-tab:hover  { color:#C8860A; border-color:#C8860A; }
+    .menu-tab.active { background:#C8860A; color:#0f0d0a; border-color:#C8860A; font-weight:700; }
+
+    .menu-cat { display:none; animation:fadeUp 0.35s ease; }
+    .menu-cat.visible { display:block; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+    .menu-cat-header {
+      display:flex; align-items:center; gap:14px; margin-bottom:24px; padding-bottom:12px;
+      border-bottom:1px solid rgba(200,134,10,0.25);
+    }
+    .menu-cat-icon { font-size:1.6rem; }
+    .menu-cat-title { font-family:'Cinzel Decorative','Cormorant Garamond',serif; font-size:1.6rem; color:#F5EFE6; }
+    .menu-cat-sub { font-size:0.88rem; color:#a09070; letter-spacing:0.15em; text-transform:uppercase; margin-top:3px; }
+
+    .menu-items { display:flex; flex-direction:column; gap:0; }
+    .menu-row {
+      display:flex; align-items:flex-start; justify-content:space-between;
+      padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.055);
+      gap:16px; transition:background 0.15s;
+    }
+    .menu-row:last-child { border-bottom:none; }
+    .menu-row:hover { background:rgba(200,134,10,0.04); margin:0 -12px; padding:16px 12px; border-radius:2px; }
+    .menu-row-left { flex:1; min-width:0; }
+    .menu-row-name { color:#F5EFE6; font-size:1.1rem; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .menu-row-desc { color:#8a7a60; font-size:0.92rem; line-height:1.6; }
+    .menu-row-price { color:#C8860A; font-size:1.2rem; font-weight:700; white-space:nowrap; padding-top:1px; letter-spacing:0.02em; }
+    .menu-badge { background:#7B1113; color:#fff; font-size:0.7rem; padding:3px 9px; border-radius:20px; letter-spacing:0.08em; text-transform:uppercase; font-weight:700; }
+    .menu-badge-new { background:#C8860A; color:#0f0d0a; }
+
+    /* two-column on wide screens */
+    @media(min-width:780px) {
+      .menu-items { display:grid; grid-template-columns:1fr 1fr; column-gap:36px; }
+    }
+
+    /* ── HAMBURGER NAV ──────────────────────────────────────── */
+    #hamburger {
+      display:none; flex-direction:column; justify-content:center; gap:5px;
+      width:36px; height:36px; cursor:pointer; background:none; border:none; padding:4px;
+    }
+    #hamburger span {
+      display:block; height:2px; background:#d4c4a8; border-radius:2px;
+      transition:all 0.25s;
+    }
+    #hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    #hamburger.open span:nth-child(2) { opacity:0; }
+    #hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+    #mobile-menu {
+      display:none; position:fixed; top:52px; left:0; right:0; z-index:99;
+      background:rgba(10,8,6,0.98); border-bottom:1px solid rgba(200,134,10,0.25);
+      flex-direction:column; padding:12px 20px 18px;
+      backdrop-filter:blur(12px);
+    }
+    #mobile-menu.open { display:flex; }
+    #mobile-menu a {
+      color:#d4c4a8; font-size:1rem; padding:12px 0;
+      border-bottom:1px solid rgba(255,255,255,0.07); text-decoration:none;
+      transition:color 0.2s;
+    }
+    #mobile-menu a:last-child { border-bottom:none; }
+    #mobile-menu a:hover { color:#C8860A; }
+
+    /* ── FLOATING HERO ──────────────────────────────────────── */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50%       { transform: translateY(-22px) rotate(2deg); }
+    }
+    @keyframes floatR {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50%       { transform: translateY(-18px) rotate(-2deg); }
+    }
+    .float-img {
+      position:absolute; object-fit:cover; border-radius:50%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      border: 3px solid rgba(200,134,10,0.55);
+    }
+    .float-img:nth-child(odd)  { animation: float  6s ease-in-out infinite; }
+    .float-img:nth-child(even) { animation: floatR 7s ease-in-out infinite; }
+    .float-img:nth-child(2) { animation-delay: 1s; }
+    .float-img:nth-child(3) { animation-delay: 2s; }
+    .float-img:nth-child(4) { animation-delay: 0.5s; }
+    .float-img:nth-child(5) { animation-delay: 1.5s; }
+
+    /* ── MOBILE BREAKPOINTS ─────────────────────────────────── */
+    @media(max-width:700px) {
+      /* Navbar */
+      #nav-links  { display:none !important; }
+      #hamburger  { display:flex !important; }
+      .btn-reserve { font-size:0.7rem; padding:5px 10px; }
+      .lang-btn { padding:2px 6px; font-size:0.68rem; }
+
+      /* Hero: shrink social icons, fix overlap */
+      #hero-social { bottom:12px !important; left:12px !important; gap:8px !important; }
+      #hero-social a { width:40px !important; height:40px !important; }
+      #hero-social svg { width:20px !important; height:20px !important; }
+
+      /* About: less padding, fewer balloons */
+      #about { padding:60px 16px !important; min-height:auto !important; }
+      .float-img { width:70px !important; height:70px !important; }
+      /* Hide interior balloons — keep only the 4 corners */
+      .float-img:nth-child(n+5) { display:none !important; }
+
+      /* Showcase: stack vertically */
+      #showcase { padding:40px 16px !important; }
+      #showcase > div { flex-direction:column !important; min-height:auto !important; }
+      #showcase > div > div { width:100% !important; }
+      #showcase-list { gap:20px !important; }
+      #showcase-svg { max-width:320px !important; }
+
+      /* Showcase numbers */
+      .sc-num { font-size:clamp(4rem,18vw,7rem) !important; }
+
+      /* Menu */
+      #menu { padding:40px 14px 50px !important; }
+      .menu-tab { padding:6px 12px; font-size:0.72rem; letter-spacing:0.06em; }
+      .menu-row { padding:12px 0 !important; }
+
+      /* Atmosphere divider */
+      #atm-quote { font-size:0.95rem !important; }
+
+      /* Press: single column */
+      #press { padding:36px 14px !important; }
+      #press-grid { grid-template-columns:1fr !important; }
+
+      /* Members: stack vertically */
+      #members { padding:40px 14px !important; }
+      #members-inner { flex-direction:column !important; gap:24px !important; }
+      #steak-col { display:none !important; }
+      #form-wrapper { max-width:100% !important; width:100% !important; }
+
+      /* Gallery: 2 cols on mobile */
+      #gallery { padding:36px 10px !important; }
+      .gallery-grid { grid-template-columns:repeat(2,1fr) !important; }
+      .gallery-grid img { height:110px !important; }
+
+      /* Footer */
+      #contact { padding:28px 14px !important; }
+      #footer-bottom { flex-direction:column !important; align-items:center !important; gap:12px !important; }
+
+      /* Reservation modal: scrollable on small screens */
+      #reserve-box { padding:24px 16px !important; max-height:90vh; overflow-y:auto; }
+      .rm-grid { grid-template-columns:1fr !important; }
+    }
+
+    /* Very small phones */
+    @media(max-width:400px) {
+      .float-img { width:56px !important; height:56px !important; }
+      #about { padding:50px 12px !important; }
+      .btn-reserve { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+  <nav style="position:fixed; top:0; width:100%; z-index:100; background:rgba(15,13,10,0.96); border-bottom:1px solid rgba(200,134,10,0.2); backdrop-filter:blur(8px);">
+    <div style="max-width:1100px; margin:0 auto; padding:0 28px; display:flex; align-items:center; justify-content:space-between; height:72px;">
+
+      <span style="color:#F5EFE6; font-family:'Cinzel Decorative','Cormorant Garamond',serif; font-size:1.6rem; letter-spacing:0.1em; flex-shrink:0;">
+        <span style="color:#C8860A;">Gambrinus</span>
+      </span>
+
+      <div id="nav-links" style="display:flex; align-items:center; gap:26px; flex-direction:row-reverse;">
+        <a href="#gallery" class="nav-link" data-i18n="nav.gallery" onclick="closeMobileMenu()">גלריה</a>
+        <a href="#members" class="nav-link" data-i18n="nav.members" onclick="closeMobileMenu()">מועדון</a>
+        <a href="#press"   class="nav-link" data-i18n="nav.press"   onclick="closeMobileMenu()">פרסומים</a>
+        <a href="#menu"    class="nav-link" data-i18n="nav.menus"   onclick="closeMobileMenu()">תפריט</a>
+        <a href="#about"   class="nav-link" data-i18n="nav.about"   onclick="closeMobileMenu()">אודות</a>
+        <a href="#contact" class="nav-link" data-i18n="nav.contact" onclick="closeMobileMenu()">צרו קשר</a>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="display:flex; gap:3px;">
+          <button class="lang-btn active" onclick="setLang('he')">עב</button>
+          <button class="lang-btn"        onclick="setLang('en')">EN</button>
+          <button class="lang-btn"        onclick="setLang('ru')">РУ</button>
+        </div>
+        <button class="btn-reserve" onclick="openReserve()" data-i18n="nav.reserve">הזמן מקום</button>
+        <!-- Hamburger (mobile only) -->
+        <button id="hamburger" onclick="toggleMobileMenu()" aria-label="menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile dropdown menu -->
+  <div id="mobile-menu">
+    <a href="#about"   data-i18n="nav.about"   onclick="closeMobileMenu()">אודות</a>
+    <a href="#menu"    data-i18n="nav.menus"   onclick="closeMobileMenu()">תפריט</a>
+    <a href="#press"   data-i18n="nav.press"   onclick="closeMobileMenu()">פרסומים</a>
+    <a href="#members" data-i18n="nav.members" onclick="closeMobileMenu()">מועדון</a>
+    <a href="#gallery" data-i18n="nav.gallery" onclick="closeMobileMenu()">גלריה</a>
+    <a href="#contact" data-i18n="nav.contact" onclick="closeMobileMenu()">צרו קשר</a>
+  </div>
+
+  <!-- ═══════════════════════ HERO ═══════════════════════ -->
+  <section style="position:relative; width:100%; height:100vh; min-height:500px; max-height:700px; overflow:hidden; background:#0f0d0a;">
+    <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=1400&q=80"
+      alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.55;"
+      onerror="this.style.display='none'" />
+    <!-- Dark vignette -->
+    <div style="position:absolute; inset:0; background:radial-gradient(ellipse at center, transparent 30%, rgba(5,3,1,0.7) 100%);"></div>
+    <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(5,3,1,0.1) 0%, rgba(5,3,1,0.85) 100%);"></div>
+
+    <!-- Centered title -->
+    <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 20px;">
+      <div style="color:#C8860A; font-size:0.8rem; letter-spacing:0.3em; text-transform:uppercase; margin-bottom:12px; font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif;" data-i18n="hero.tagline">מסעדת בשר פרימיום</div>
+      <h1 style="font-family:'Cinzel Decorative','Cormorant Garamond',serif; color:#fff; font-size:clamp(3rem,8vw,6rem); font-weight:900; margin:0; line-height:1; text-shadow:0 4px 24px rgba(0,0,0,0.8); letter-spacing:0.04em;">
+        Gambrinus
+      </h1>
+      <div style="width:80px; height:2px; background:#C8860A; margin:18px auto;"></div>
+      <p style="color:#d4c4a8; font-size:1rem; max-width:400px; line-height:1.6;" data-i18n="hero.sub">חוויה קולינרית בלתי נשכחת של בשר פרימיום</p>
+      <button onclick="openReserve()" style="margin-top:28px; background:#C8860A; color:#fff; border:none; padding:12px 32px; font-size:0.9rem; font-weight:700; cursor:pointer; border-radius:2px; font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif; letter-spacing:0.08em; transition:background 0.2s;" onmouseover="this.style.background='#7B1113'" onmouseout="this.style.background='#C8860A'" data-i18n="nav.reserve">הזמן מקום</button>
+    </div>
+
+    <!-- Social -->
+    <div id="hero-social" style="position:absolute; bottom:20px; left:20px; display:flex; gap:10px;">
+      <a href="https://www.facebook.com/GambrinosPub?rdid=Y85oj2w0Arb5wFvo&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F14Xh1ViE1R8%2F#" target="_blank" rel="noopener noreferrer" onclick="return confirm('Do you want to visit our Facebook page?')" style="width:52px;height:52px;background:rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M22 12c0-5.522-4.477-10-10-10S2 6.478 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.988H7.898V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+      </a>
+      <a href="https://www.instagram.com/gambrinusrestaurant?igsh=MTJxejJmM2MyNnJueg==" target="_blank" rel="noopener noreferrer" onclick="return confirm('Do you want to visit our Instagram page?')" style="width:52px;height:52px;background:rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="#fff" stroke="none"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ ABOUT ═══════════════════════ -->
+  <section id="about" style="position:relative; background:#0f0d0a; padding:100px 20px; overflow:hidden; min-height:520px; display:flex; align-items:center; justify-content:center;">
+
+    <!-- Floating balloon images around the text -->
+    <img class="float-img" src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&q=80"   alt="Ribeye"        style="width:150px;height:150px;top:6%;left:2%;animation-delay:0s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=300&q=80" alt="Steak"         style="width:110px;height:110px;top:4%;right:4%;animation-delay:1s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=300&q=80"   alt="Plate"         style="width:130px;height:130px;bottom:6%;left:4%;animation-delay:2s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1544025162-d76694265947?w=300&q=80"   alt="BBQ"           style="width:120px;height:120px;bottom:6%;right:3%;animation-delay:0.5s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=300&q=80" alt="Burger"        style="width:90px;height:90px;top:46%;left:0.5%;animation-delay:1.5s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1558030006-450675393462?w=300&q=80"   alt="Grill"         style="width:90px;height:90px;top:46%;right:0.5%;animation-delay:2.5s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&q=80" alt="Dish"          style="width:95px;height:95px;top:3%;left:24%;animation-delay:0.8s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&q=80" alt="Beef burger"   style="width:95px;height:95px;top:3%;right:24%;animation-delay:1.8s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=300&q=80" alt="Restaurant"    style="width:105px;height:105px;bottom:3%;left:22%;animation-delay:1.2s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=300&q=80" alt="Food"          style="width:100px;height:100px;bottom:3%;right:22%;animation-delay:2.2s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1611599537845-1c7aca0091c0?w=300&q=80" alt="Close steak"   style="width:80px;height:80px;top:26%;left:11%;animation-delay:3s;" />
+    <img class="float-img" src="https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=300&q=80" alt="Pasta"         style="width:80px;height:80px;top:26%;right:11%;animation-delay:3.3s;" />
+
+    <!-- Centered story text — no photos -->
+    <div style="position:relative; z-index:10; text-align:center; max-width:600px;">
+      <div style="color:#C8860A; font-size:0.75rem; letter-spacing:0.3em; text-transform:uppercase; margin-bottom:10px; font-family:'Frank Ruhl Libre',Georgia,serif;" data-i18n="about.label">אודות המסעדה</div>
+      <h2 id="about-heading" style="font-family:'Cinzel Decorative','Cormorant Garamond',serif; font-size:clamp(1.6rem,4vw,2.6rem); font-weight:900; color:#F5EFE6; margin:0 0 14px; line-height:1.2;" data-i18n="about.heading">Gambrinus — מסעדת בשר</h2>
+      <div class="gold-line"></div>
+      <div id="about-text" style="margin-top:20px;">
+        <p style="color:#d4c4a8; font-size:1.08rem; line-height:1.9; margin-bottom:14px;" data-i18n="about.p1">
+          Gambrinus היא מסעדת בשר פרימיום המציעה חוויה קולינארית יוצאת דופן. אנו מתמחים בנתחי בשר מובחרים, מוכנים בגריל פחם על אש פתוחה.
+        </p>
+        <p style="color:#d4c4a8; font-size:1.08rem; line-height:1.9; margin-bottom:14px;" data-i18n="about.p2">
+          הבשר שלנו מגיע מספקים הטובים ביותר, ומוגש בליווי תוספות מיוחדות ורטבים בהכנה עצמית. כל נתח מוכן בקפידה ובאהבה.
+        </p>
+        <p style="color:#d4c4a8; font-size:1.08rem; line-height:1.9; margin-bottom:0;" data-i18n="about.p3">
+          בין אם אתם מחפשים סטייק אנטרקוט מושלם, קבב ביתי או ארוחת שף מיוחדת — Gambrinus הוא המקום בשבילכם.
+        </p>
+      </div>
+      <div id="about-btns" style="display:flex; gap:10px; justify-content:center; margin-top:28px;">
+        <button class="btn-outline" data-i18n="about.readmore">קרא עוד</button>
+        <button class="btn-dark" onclick="openReserve()" data-i18n="nav.reserve">הזמן מקום</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ INTERACTIVE SHOWCASE ═══════════════════════ -->
+  <section id="showcase" style="background:#0f0d0a; padding:70px 24px; overflow:hidden; direction:ltr;">
+    <div style="max-width:1000px; margin:0 auto; display:flex; flex-direction:row; align-items:center; justify-content:space-between; gap:32px; min-height:480px; flex-wrap:wrap;">
+      <div style="width:48%; z-index:10;">
+        <div style="color:#C8860A; font-size:0.7rem; letter-spacing:0.3em; text-transform:uppercase; margin-bottom:24px;" id="showcase-label">Our Specialties</div>
+        <nav><ul id="showcase-list" style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:32px;"></ul></nav>
+      </div>
+      <div style="width:48%; display:flex; justify-content:center; align-items:center; position:relative;">
+        <div style="position:absolute; width:120%; height:120%; background:radial-gradient(circle, rgba(200,134,10,0.1) 0%, transparent 65%); border-radius:50%; pointer-events:none;"></div>
+        <svg id="showcase-svg" viewBox="0 0 500 500" style="width:100%; max-width:460px; height:auto; z-index:10; filter:drop-shadow(0 0 50px rgba(0,0,0,0.9));">
+          <defs>
+            <clipPath id="sc-clip-bars">
+              <rect class="sc-path" x="8"  y="204" width="484" height="32"  rx="4"/>
+              <rect class="sc-path" x="8"  y="344" width="484" height="14"  rx="3"/>
+              <rect class="sc-path" x="39" y="242" width="422" height="86"  rx="10"/>
+              <rect class="sc-path" x="8"  y="75"  width="484" height="122" rx="14"/>
+              <rect class="sc-path" x="40" y="370" width="420" height="58"  rx="8"/>
+            </clipPath>
+            <clipPath id="sc-clip-mosaic">
+              <rect class="sc-path" x="20"  y="20"  width="190" height="270" rx="6"/>
+              <rect class="sc-path" x="20"  y="310" width="190" height="170" rx="6"/>
+              <rect class="sc-path" x="230" y="20"  width="250" height="135" rx="6"/>
+              <rect class="sc-path" x="230" y="175" width="115" height="155" rx="6"/>
+              <rect class="sc-path" x="365" y="175" width="115" height="155" rx="6"/>
+              <rect class="sc-path" x="230" y="350" width="250" height="130" rx="6"/>
+            </clipPath>
+            <clipPath id="sc-clip-grid">
+              <rect class="sc-path" x="20"  y="20"  width="140" height="140" rx="3"/>
+              <rect class="sc-path" x="180" y="20"  width="140" height="140" rx="3"/>
+              <rect class="sc-path" x="340" y="20"  width="140" height="140" rx="3"/>
+              <rect class="sc-path" x="20"  y="180" width="140" height="140" rx="3"/>
+              <rect class="sc-path" x="180" y="180" width="140" height="140" rx="3"/>
+              <rect class="sc-path" x="340" y="180" width="140" height="140" rx="3"/>
+              <rect class="sc-path" x="20"  y="340" width="140" height="140" rx="3"/>
+              <rect class="sc-path" x="180" y="340" width="140" height="140" rx="3"/>
+              <rect class="sc-path" x="340" y="340" width="140" height="140" rx="3"/>
+            </clipPath>
+          </defs>
+          <g id="sc-main-group" clip-path="url(#sc-clip-bars)">
+            <image id="sc-image" href="" width="500" height="500" preserveAspectRatio="xMidYMid slice"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ MENU ═══════════════════════ -->
+  <section id="menu" style="padding:70px 20px 80px; background:#0f0d0a;">
+    <div style="max-width:960px; margin:0 auto;">
+      <div style="color:#C8860A; font-size:0.75rem; letter-spacing:0.3em; text-transform:uppercase; text-align:center; margin-bottom:8px;" data-i18n="menu.label">התפריט שלנו</div>
+      <h2 class="sec-title sec-title-light" style="font-family:'Cinzel Decorative','Cormorant Garamond',serif; font-size:2.2rem;" data-i18n="menu.heading">התפריט</h2>
+      <div class="gold-line"></div>
+
+      <!-- Category tabs -->
+      <div class="menu-tabs" id="menu-tabs" style="margin-top:32px;"></div>
+
+      <!-- Category panels (rendered by JS) -->
+      <div id="menu-panels"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ ATMOSPHERE DIVIDER ═══════════════════════ -->
+  <section style="width:100%; height:220px; position:relative; overflow:hidden; background:#0f0d0a;">
+    <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1400&q=80"
+      alt="" style="width:100%; height:100%; object-fit:cover; opacity:0.45;" onerror="this.style.display='none'" />
+    <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(5,3,1,0.5), rgba(5,3,1,0.7));"></div>
+    <!-- Centered quote -->
+    <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
+      <p id="atm-quote" style="color:#d4c4a8; font-size:1.1rem; font-style:italic; text-align:center; letter-spacing:0.06em; padding:0 20px;" data-i18n="atm.quote">"הבשר הטוב ביותר, מוכן בלב ובנשמה"</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ PRESS ═══════════════════════ -->
+  <section id="press" style="padding:50px 20px; background:#0f0d0a;">
+    <div style="max-width:1000px; margin:0 auto;">
+      <div style="color:#C8860A; font-size:0.75rem; letter-spacing:0.3em; text-transform:uppercase; text-align:center; margin-bottom:8px;" data-i18n="press.label">מה אומרים עלינו</div>
+      <h2 class="sec-title sec-title-light" data-i18n="press.heading">פרסומים וביקורות</h2>
+      <div class="gold-line"></div>
+
+      <!-- Reviews / press cards -->
+      <div id="press-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:28px;">
+        <div style="background:#1a1410; border-radius:4px; padding:22px; box-shadow:0 4px 20px rgba(0,0,0,0.4); border-top:3px solid #C8860A;">
+          <div style="color:#C8860A; font-size:1.2rem; margin-bottom:8px;">★★★★★</div>
+          <p style="color:#d4c4a8; font-size:1rem; line-height:1.75; font-style:italic;" data-i18n="review.1">"הסטייק הכי טעים שאכלתי בחיים שלי. שירות מעולה, אווירה נהדרת."</p>
+          <div style="margin-top:12px; font-size:0.75rem; color:#888; font-weight:700;">— מיכאל ל.</div>
+        </div>
+        <div style="background:#1a1410; border-radius:4px; padding:22px; box-shadow:0 4px 20px rgba(0,0,0,0.4); border-top:3px solid #C8860A;">
+          <div style="color:#C8860A; font-size:1.2rem; margin-bottom:8px;">★★★★★</div>
+          <p style="color:#d4c4a8; font-size:1rem; line-height:1.75; font-style:italic;" data-i18n="review.2">"מסעדת בשר ברמה אחרת. האנטרקוט היה מדהים, ממש נמס בפה."</p>
+          <div style="margin-top:12px; font-size:0.75rem; color:#888; font-weight:700;">— אנה ק.</div>
+        </div>
+        <div style="background:#1a1410; border-radius:4px; padding:22px; box-shadow:0 4px 20px rgba(0,0,0,0.4); border-top:3px solid #C8860A;">
+          <div style="color:#C8860A; font-size:1.2rem; margin-bottom:8px;">★★★★★</div>
+          <p style="color:#d4c4a8; font-size:1rem; line-height:1.75; font-style:italic;" data-i18n="review.3">"חוויה בלתי נשכחת. הגריל, הבשר, הרטבים — הכל מושלם."</p>
+          <div style="margin-top:12px; font-size:0.75rem; color:#888; font-weight:700;">— דניאל ר.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ MEMBERS CLUB ═══════════════════════ -->
+  <section id="members" style="padding:60px 20px; background:#0f0d0a; position:relative; overflow:hidden;">
+    <!-- Background flame texture -->
+    <div style="position:absolute; inset:0; background:radial-gradient(ellipse at 50% 100%, rgba(123,17,19,0.25) 0%, transparent 60%); pointer-events:none;"></div>
+
+    <div style="max-width:900px; margin:0 auto; position:relative; z-index:1;">
+      <div style="color:#C8860A; font-size:0.75rem; letter-spacing:0.3em; text-transform:uppercase; text-align:center; margin-bottom:8px;" data-i18n="members.label">הטבות בלעדיות</div>
+      <h2 class="sec-title sec-title-light" data-i18n="members.heading">מועדון החברים</h2>
+      <div class="gold-line"></div>
+
+      <div id="members-inner" style="display:flex; align-items:center; gap:24px; direction:ltr; margin-top:32px;">
+
+        <!-- Benefits left -->
+        <div style="flex:1; color:#d4c4a8;">
+          <div style="width:40px;height:2px;background:#C8860A;margin:0 auto 16px;"></div>
+          <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px;">
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:0.82rem; line-height:1.5;">
+              <span style="color:#C8860A; font-weight:700; margin-top:1px;">✓</span>
+              <span data-i18n="members.b1">10% הנחה על כל הזמנה</span>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:0.82rem; line-height:1.5;">
+              <span style="color:#C8860A; font-weight:700; margin-top:1px;">✓</span>
+              <span data-i18n="members.b2">מנת בשר חינם ביום הולדת</span>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:0.82rem; line-height:1.5;">
+              <span style="color:#C8860A; font-weight:700; margin-top:1px;">✓</span>
+              <span data-i18n="members.b3">גישה לאירועים מיוחדים</span>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:10px; font-size:0.82rem; line-height:1.5;">
+              <span style="color:#C8860A; font-weight:700; margin-top:1px;">✓</span>
+              <span data-i18n="members.b4">עדיפות בהזמנת מקומות</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Form CENTER -->
+        <div style="flex:1.4; max-width:300px;" id="form-wrapper">
+          <div style="background:#F5EFE6; border-radius:6px; padding:24px 20px; border:1px solid rgba(200,134,10,0.3); box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+            <h3 style="text-align:center; font-weight:700; font-size:0.95rem; margin:0 0 4px 0; color:#1a1410;" data-i18n="form.title">הצטרפות למועדון</h3>
+            <p style="text-align:center; font-size:0.75rem; color:#888; margin:0 0 16px 0;" data-i18n="form.subtitle">מלאו את הפרטים ונחזור אליכם</p>
+            <input type="text"  class="form-field" data-i18n-ph="form.firstname" placeholder="שם פרטי" />
+            <input type="text"  class="form-field" data-i18n-ph="form.lastname"  placeholder="שם משפחה" />
+            <input type="email" class="form-field" data-i18n-ph="form.email"     placeholder="אימייל" />
+            <input type="tel"   class="form-field" data-i18n-ph="form.phone"     placeholder="טלפון" />
+            <input type="text"  class="form-field" data-i18n-ph="form.dob"       placeholder="תאריך לידה" />
+            <button style="width:100%;background:#7B1113;color:#fff;border:none;padding:10px;border-radius:3px;font-size:0.85rem;font-weight:700;font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif;cursor:pointer;margin-top:4px;letter-spacing:0.05em;transition:background 0.2s;" onmouseover="this.style.background='#C8860A'" onmouseout="this.style.background='#7B1113'" data-i18n="form.submit">שלח</button>
+          </div>
+        </div>
+
+        <!-- Steak image RIGHT -->
+        <div id="steak-col" style="flex:1; display:flex; justify-content:center; align-items:center;">
+          <img id="steak-img"
+            src="https://images.unsplash.com/photo-1558030006-450675393462?w=300&q=80"
+            alt="steak"
+            style="height:260px; width:180px; object-fit:cover; border-radius:4px; box-shadow:0 8px 32px rgba(0,0,0,0.5); will-change:transform; transform:translateX(180px) translateY(60px) rotate(15deg); opacity:0; filter:brightness(0.9);"
+            onerror="this.outerHTML='<div id=&quot;steak-img&quot; style=&quot;height:260px;width:160px;display:flex;align-items:center;justify-content:center;font-size:6rem;will-change:transform;transform:translateX(180px) translateY(60px) rotate(15deg);opacity:0;&quot;>🥩</div>'" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ GALLERY ═══════════════════════ -->
+  <section id="gallery" style="padding:50px 20px; background:#0f0d0a;">
+    <div style="max-width:1000px; margin:0 auto;">
+      <div style="color:#C8860A; font-size:0.75rem; letter-spacing:0.3em; text-transform:uppercase; text-align:center; margin-bottom:8px;" data-i18n="gallery.label">רגעים מהמסעדה</div>
+      <h2 class="sec-title sec-title-light" data-i18n="gallery.heading">גלריה</h2>
+      <div class="gold-line"></div>
+      <div class="gallery-grid" style="margin-top:24px;">
+        <img src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"   onerror="this.style.background='#3d1a0a'" />
+        <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80"   onerror="this.style.background='#2a1208'" />
+        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80"   onerror="this.style.background='#1a0a05'" />
+        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80" onerror="this.style.background='#2d1509'" />
+        <img src="https://images.unsplash.com/photo-1558030006-450675393462?w=400&q=80"   onerror="this.style.background='#3a1a0a'" />
+        <img src="https://images.unsplash.com/photo-1611599537845-1c7aca0091c0?w=400&q=80" onerror="this.style.background='#1f0d04'" />
+        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80" onerror="this.style.background='#2e1508'" />
+        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80" onerror="this.style.background='#3c1d0a'" />
+        <img src="https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&q=80" onerror="this.style.background='#221005'" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer id="contact" style="background:#0f0d0a; color:#8a7a68; padding:40px 20px; border-top:1px solid rgba(200,134,10,0.15);">
+    <div style="max-width:1000px; margin:0 auto;">
+      <div style="text-align:center; margin-bottom:20px;">
+        <span style="font-family:'Cinzel Decorative','Cormorant Garamond',serif; color:#F5EFE6; font-size:1.4rem; letter-spacing:0.08em;">Gambrinus</span>
+        <div style="width:40px; height:1px; background:#C8860A; margin:10px auto;"></div>
+      </div>
+      <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-bottom:20px; font-size:0.8rem;">
+        <a href="#"        style="color:#8a7a68;text-decoration:none;" data-i18n="nav.home">עמוד הבית</a>
+        <a href="#about"   style="color:#8a7a68;text-decoration:none;" data-i18n="nav.about">אודות</a>
+        <a href="#menu"    style="color:#8a7a68;text-decoration:none;" data-i18n="nav.menus">תפריט</a>
+        <a href="#press"   style="color:#8a7a68;text-decoration:none;" data-i18n="nav.press">פרסומים</a>
+        <a href="#members" style="color:#8a7a68;text-decoration:none;" data-i18n="nav.members">מועדון</a>
+        <a href="#gallery" style="color:#8a7a68;text-decoration:none;" data-i18n="nav.gallery">גלריה</a>
+        <a href="#contact" style="color:#8a7a68;text-decoration:none;" data-i18n="nav.contact">צרו קשר</a>
+      </div>
+      <hr style="border-color:rgba(200,134,10,0.1); margin-bottom:16px;" />
+      <div style="text-align:center; font-size:0.8rem; color:#6a5a48; margin-bottom:10px;">
+        <span data-i18n="footer.hours">שעות פעילות: א – ש 12:00 – 23:00</span>
+        &nbsp;·&nbsp;
+        <span data-i18n="footer.call">חייגו</span>: <a href="tel:08-8524313" style="color:#C8860A; text-decoration:none;">08-8524313</a>
+      </div>
+      <div id="footer-bottom" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div style="font-size:0.7rem; color:#5a4a38;" data-i18n="footer.copyright">© 2024 Gambrinus. כל הזכויות שמורות.</div>
+        <div style="display:flex; gap:8px;">
+          <a href="https://www.facebook.com/GambrinosPub?rdid=Y85oj2w0Arb5wFvo&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F14Xh1ViE1R8%2F#" target="_blank" rel="noopener noreferrer" onclick="return confirm('Do you want to visit our Facebook page?')" style="width:32px;height:32px;background:rgba(200,134,10,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;text-decoration:none;" onmouseover="this.style.background='rgba(200,134,10,0.35)'" onmouseout="this.style.background='rgba(200,134,10,0.15)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#C8860A"><path d="M22 12c0-5.522-4.477-10-10-10S2 6.478 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.988H7.898V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/gambrinusrestaurant?igsh=MTJxejJmM2MyNnJueg==" target="_blank" rel="noopener noreferrer" onclick="return confirm('Do you want to visit our Instagram page?')" style="width:32px;height:32px;background:rgba(200,134,10,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;text-decoration:none;" onmouseover="this.style.background='rgba(200,134,10,0.35)'" onmouseout="this.style.background='rgba(200,134,10,0.15)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8860A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="#C8860A" stroke="none"/></svg>
+          </a>
+        </div>
+        <div style="font-size:0.68rem; color:#5a4a38;" data-i18n="footer.privacy">מדיניות פרטיות</div>
+      </div>
+      <p style="text-align:center; font-size:0.62rem; color:#4a3a28; margin-top:14px;" data-i18n="footer.warning">
+        אזהרה: צריכה מופרזת של אלכוהול מסכנת חיים ומזיקה לבריאות!
+      </p>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════ RESERVATION MODAL ═══════════════════════ -->
+  <div id="reserve-modal" style="display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center;">
+    <div style="background:#F5EFE6; border-radius:6px; padding:32px 28px; width:90%; max-width:420px; position:relative; box-shadow:0 24px 80px rgba(0,0,0,0.6); border-top:4px solid #C8860A;" id="reserve-box">
+      <button onclick="closeReserve()" style="position:absolute; top:14px; right:14px; background:none; border:none; font-size:1.4rem; cursor:pointer; color:#888; line-height:1;">×</button>
+      <div style="text-align:center; margin-bottom:20px;">
+        <div style="width:40px;height:2px;background:#C8860A;margin:0 auto 12px;"></div>
+        <h2 id="rm-title" style="margin:0; font-size:1.15rem; font-weight:700; color:#1a1410; font-family:'Cinzel Decorative','Cormorant Garamond',serif;">Reserve a Table</h2>
+        <p id="rm-sub" style="margin:4px 0 0; font-size:0.78rem; color:#888;">Gambrinus · 08-8524313</p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div class="rm-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label id="rm-name-lbl" style="font-size:0.72rem; color:#666; display:block; margin-bottom:3px;">Full Name</label>
+            <input id="rm-name" type="text" style="width:100%;border:1px solid #ddd;border-radius:4px;padding:8px 10px;font-size:0.85rem;outline:none;font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif;background:#fff;" placeholder="John Smith" />
+          </div>
+          <div>
+            <label id="rm-phone-lbl" style="font-size:0.72rem; color:#666; display:block; margin-bottom:3px;">Phone</label>
+            <input id="rm-phone" type="tel" style="width:100%;border:1px solid #ddd;border-radius:4px;padding:8px 10px;font-size:0.85rem;outline:none;font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif;background:#fff;" placeholder="050-000-0000" />
+          </div>
+        </div>
+        <div class="rm-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label id="rm-date-lbl" style="font-size:0.72rem; color:#666; display:block; margin-bottom:3px;">Date</label>
+            <input id="rm-date" type="date" style="width:100%;border:1px solid #ddd;border-radius:4px;padding:8px 10px;font-size:0.85rem;outline:none;font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif;background:#fff;" />
+          </div>
+          <div>
+            <label id="rm-time-lbl" style="font-size:0.72rem; color:#666; display:block; margin-bottom:3px;">Time</label>
+            <select id="rm-time" style="width:100%;border:1px solid #ddd;border-radius:4px;padding:8px 10px;font-size:0.85rem;outline:none;font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif;background:#fff;">
+              <option value="">--:--</option>
+              <option>12:00</option><option>12:30</option><option>13:00</option><option>13:30</option>
+              <option>14:00</option><option>14:30</option><option>15:00</option><option>15:30</option>
+              <option>16:00</option><option>16:30</option><option>17:00</option><option>17:30</option>
+              <option>18:00</option><option>18:30</option><option>19:00</option><option>19:30</option>
+              <option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option>
+              <option>22:00</option><option>22:30</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label id="rm-guests-lbl" style="font-size:0.72rem; color:#666; display:block; margin-bottom:3px;">Guests</label>
+          <div style="display:flex; gap:6px;">
+            <button class="guest-btn" onclick="setGuests(1)" style="flex:1;border:1px solid #ddd;border-radius:4px;padding:7px 4px;font-size:0.82rem;cursor:pointer;background:#fff;transition:all 0.15s;">1</button>
+            <button class="guest-btn" onclick="setGuests(2)" style="flex:1;border:1px solid #ddd;border-radius:4px;padding:7px 4px;font-size:0.82rem;cursor:pointer;background:#fff;transition:all 0.15s;">2</button>
+            <button class="guest-btn" onclick="setGuests(3)" style="flex:1;border:1px solid #ddd;border-radius:4px;padding:7px 4px;font-size:0.82rem;cursor:pointer;background:#fff;transition:all 0.15s;">3</button>
+            <button class="guest-btn" onclick="setGuests(4)" style="flex:1;border:1px solid #ddd;border-radius:4px;padding:7px 4px;font-size:0.82rem;cursor:pointer;background:#fff;transition:all 0.15s;">4</button>
+            <button class="guest-btn" onclick="setGuests(5)" style="flex:1;border:1px solid #ddd;border-radius:4px;padding:7px 4px;font-size:0.82rem;cursor:pointer;background:#fff;transition:all 0.15s;">5</button>
+            <button class="guest-btn" onclick="setGuests(6)" style="flex:1;border:1px solid #ddd;border-radius:4px;padding:7px 4px;font-size:0.82rem;cursor:pointer;background:#fff;transition:all 0.15s;">6+</button>
+          </div>
+          <input id="rm-guests" type="hidden" value="" />
+        </div>
+        <div>
+          <label id="rm-notes-lbl" style="font-size:0.72rem; color:#666; display:block; margin-bottom:3px;">Special Requests</label>
+          <textarea id="rm-notes" rows="2" style="width:100%;border:1px solid #ddd;border-radius:4px;padding:8px 10px;font-size:0.85rem;outline:none;resize:none;font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif;background:#fff;"></textarea>
+        </div>
+        <div id="rm-error" style="display:none; color:#c0392b; font-size:0.78rem; text-align:center;"></div>
+        <button id="rm-submit" onclick="submitReserve()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:4px;padding:12px;font-size:0.92rem;font-weight:700;cursor:pointer;font-family:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;">
+          <svg width="18" height="18" viewBox="0 0 32 32" fill="white"><path d="M16 0C7.163 0 0 7.163 0 16c0 2.822.737 5.476 2.027 7.782L0 32l8.418-2.005A15.934 15.934 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.07 22.186c-.34.953-1.987 1.823-2.74 1.94-.702.108-1.59.153-2.566-.161a23.4 23.4 0 01-2.322-.858c-4.085-1.763-6.748-5.9-6.953-6.172-.204-.272-1.666-2.215-1.666-4.225s1.055-2.998 1.43-3.408c.374-.41.817-.513 1.088-.513.272 0 .544.003.783.013.25.012.587-.095.919.7.34.815 1.156 2.81 1.258 3.013.102.204.17.442.034.714-.137.272-.204.442-.408.68-.204.239-.43.534-.613.717-.204.204-.416.424-.179.832.238.407 1.055 1.742 2.264 2.82 1.554 1.386 2.864 1.815 3.272 2.02.408.204.646.17.884-.102.238-.272 1.02-1.19 1.293-1.598.272-.408.544-.34.918-.204.374.136 2.378 1.122 2.786 1.326.408.204.68.306.782.476.103.17.103.985-.237 1.938z"/></svg>
+          <span id="rm-btn-text">Send via WhatsApp</span>
+        </button>
+        <p style="text-align:center; font-size:0.7rem; color:#aaa; margin:0;">
+          <span id="rm-or-call">Or call us:</span>
+          <a href="tel:08-8524313" style="color:#7B1113; font-weight:700;">08-8524313</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCRIPTS ═══════════════════════ -->
+  <script>
+  // ─── TRANSLATIONS ────────────────────────────────────────────────────────
+  const TRANSLATIONS = {
+    he: {
+      'nav.home':'עמוד הבית','nav.about':'אודות','nav.menus':'תפריט','nav.press':'פרסומים',
+      'nav.members':'מועדון','nav.gallery':'גלריה','nav.contact':'צרו קשר','nav.reserve':'הזמן מקום',
+      'hero.tagline':'מסעדת בשר פרימיום','hero.sub':'חוויה קולינרית בלתי נשכחת של בשר פרימיום',
+      'float.desc':'טעמים עמוקים, בשר מובחר, ואש פתוחה — ברוכים הבאים לחוויה אמיתית.',
+      'about.label':'אודות המסעדה','about.heading':'Gambrinus — מסעדת בשר',
+      'about.p1':'Gambrinus היא מסעדת בשר פרימיום המציעה חוויה קולינארית יוצאת דופן. אנו מתמחים בנתחי בשר מובחרים, מוכנים בגריל פחם על אש פתוחה.',
+      'about.p2':'הבשר שלנו מגיע מספקים הטובים ביותר, ומוגש בליווי תוספות מיוחדות ורטבים בהכנה עצמית. כל נתח מוכן בקפידה ובאהבה.',
+      'about.p3':'בין אם אתם מחפשים סטייק אנטרקוט מושלם, קבב ביתי או ארוחת שף מיוחדת — Gambrinus הוא המקום בשבילכם.',
+      'about.readmore':'קרא עוד',
+      'menu.label':'התפריט שלנו','menu.heading':'מה בתפריט?',
+      'menu.card1':'נתחים פרימיום','menu.card2':'גריל על האש','menu.card3':'מנות שף',
+      'atm.quote':'"הבשר הטוב ביותר, מוכן בלב ובנשמה"',
+      'press.label':'מה אומרים עלינו','press.heading':'פרסומים וביקורות',
+      'review.1':'"הסטייק הכי טעים שאכלתי בחיים שלי. שירות מעולה, אווירה נהדרת."',
+      'review.2':'"מסעדת בשר ברמה אחרת. האנטרקוט היה מדהים, ממש נמס בפה."',
+      'review.3':'"חוויה בלתי נשכחת. הגריל, הבשר, הרטבים — הכל מושלם."',
+      'members.label':'הטבות בלעדיות','members.heading':'מועדון החברים',
+      'members.b1':'10% הנחה על כל הזמנה','members.b2':'מנת בשר חינם ביום הולדת',
+      'members.b3':'גישה לאירועים מיוחדים','members.b4':'עדיפות בהזמנת מקומות',
+      'form.title':'הצטרפות למועדון','form.subtitle':'מלאו את הפרטים ונחזור אליכם',
+      'form.firstname':'שם פרטי','form.lastname':'שם משפחה','form.email':'אימייל',
+      'form.phone':'טלפון','form.dob':'תאריך לידה','form.submit':'שלח',
+      'gallery.label':'רגעים מהמסעדה','gallery.heading':'גלריה',
+      'footer.hours':'שעות פעילות: א – ש 12:00 – 23:00','footer.call':'חייגו',
+      'footer.copyright':'© 2024 Gambrinus. כל הזכויות שמורות.',
+      'footer.privacy':'מדיניות פרטיות',
+      'footer.warning':'אזהרה: צריכה מופרזת של אלכוהול מסכנת חיים ומזיקה לבריאות!',
+      'showcase.label':'המומחיות שלנו',
+      'showcase.0.l1':'בשר','showcase.0.l2':'פרימיום',
+      'showcase.1.l1':'גריל','showcase.1.l2':'אש',
+      'showcase.2.l1':'מנות','showcase.2.l2':'שף',
+    },
+    en: {
+      'nav.home':'Home','nav.about':'About','nav.menus':'Menu','nav.press':'Press',
+      'nav.members':'Members','nav.gallery':'Gallery','nav.contact':'Contact','nav.reserve':'Reserve',
+      'hero.tagline':'Premium Meat Restaurant','hero.sub':'An unforgettable culinary experience of premium cuts',
+      'float.desc':'Deep flavours, premium cuts, open fire — welcome to a real experience.',
+      'about.label':'About the Restaurant','about.heading':'Gambrinus — Meat Restaurant',
+      'about.p1':'Gambrinus is a premium meat restaurant offering an extraordinary culinary experience. We specialise in select cuts of meat, grilled over charcoal on an open flame.',
+      'about.p2':'Our meat comes from the finest suppliers and is served with house-made sides and sauces. Every cut is prepared with care and passion.',
+      'about.p3':'Whether you are looking for a perfect entrecôte steak, homemade kebab or a special chef\'s meal — Gambrinus is the place for you.',
+      'about.readmore':'Read More',
+      'menu.label':'Our Menu','menu.heading':'What\'s on the menu?',
+      'menu.card1':'Prime Cuts','menu.card2':'Open-Flame Grill','menu.card3':'Chef\'s Specials',
+      'atm.quote':'"The finest meat, prepared with heart and soul"',
+      'press.label':'What People Say','press.heading':'Press & Reviews',
+      'review.1':'"The best steak I\'ve ever had. Excellent service and great atmosphere."',
+      'review.2':'"A meat restaurant on another level. The entrecôte was amazing, melted in my mouth."',
+      'review.3':'"An unforgettable experience. The grill, the meat, the sauces — everything was perfect."',
+      'members.label':'Exclusive Benefits','members.heading':'Members Club',
+      'members.b1':'10% discount on every order','members.b2':'Free meat dish on your birthday',
+      'members.b3':'Access to special events','members.b4':'Priority table reservations',
+      'form.title':'Join the Club','form.subtitle':'Fill in your details and we\'ll be in touch',
+      'form.firstname':'First Name','form.lastname':'Last Name','form.email':'Email',
+      'form.phone':'Phone','form.dob':'Date of Birth','form.submit':'Send',
+      'gallery.label':'Moments from the Restaurant','gallery.heading':'Gallery',
+      'footer.hours':'Hours: Sun – Sat  12:00 – 23:00','footer.call':'Call us',
+      'footer.copyright':'© 2024 Gambrinus. All rights reserved.',
+      'footer.privacy':'Privacy Policy',
+      'footer.warning':'Warning: Excessive alcohol consumption is dangerous to your health!',
+      'showcase.label':'Our Specialties',
+      'showcase.0.l1':'Prime','showcase.0.l2':'Cuts',
+      'showcase.1.l1':'Open','showcase.1.l2':'Grill',
+      'showcase.2.l1':'Chef\'s','showcase.2.l2':'Special',
+    },
+    ru: {
+      'nav.home':'Главная','nav.about':'О нас','nav.menus':'Меню','nav.press':'Пресса',
+      'nav.members':'Клуб','nav.gallery':'Галерея','nav.contact':'Контакты','nav.reserve':'Забронировать',
+      'hero.tagline':'Премиум ресторан мяса','hero.sub':'Незабываемый кулинарный опыт с премиальными блюдами',
+      'float.desc':'Глубокие вкусы, отборное мясо, открытый огонь — добро пожаловать в настоящий опыт.',
+      'about.label':'О ресторане','about.heading':'Gambrinus — Ресторан мяса',
+      'about.p1':'Gambrinus — ресторан премиум-мяса, предлагающий исключительный кулинарный опыт. Мы специализируемся на отборных кусках мяса, приготовленных на угольном гриле на открытом огне.',
+      'about.p2':'Наше мясо поставляется от лучших поставщиков и подаётся с домашними гарнирами и соусами. Каждый кусок готовится с заботой и любовью.',
+      'about.p3':'Ищете ли вы идеальный стейк антрекот, домашний кебаб или особое блюдо от шефа — Gambrinus создан для вас.',
+      'about.readmore':'Читать далее',
+      'menu.label':'Наше меню','menu.heading':'Что в меню?',
+      'menu.card1':'Премиальные куски','menu.card2':'Гриль на огне','menu.card3':'Блюда шефа',
+      'atm.quote':'"Лучшее мясо, приготовленное с душой и любовью"',
+      'press.label':'Что говорят о нас','press.heading':'Пресса и отзывы',
+      'review.1':'"Лучший стейк в моей жизни. Отличный сервис, прекрасная атмосфера."',
+      'review.2':'"Ресторан мяса на другом уровне. Антрекот был невероятным, таял во рту."',
+      'review.3':'"Незабываемый опыт. Гриль, мясо, соусы — всё было идеально."',
+      'members.label':'Эксклюзивные преимущества','members.heading':'Клуб участников',
+      'members.b1':'Скидка 10% на каждый заказ','members.b2':'Бесплатное мясное блюдо в день рождения',
+      'members.b3':'Доступ к специальным мероприятиям','members.b4':'Приоритетное бронирование столиков',
+      'form.title':'Вступить в клуб','form.subtitle':'Заполните данные, и мы свяжемся с вами',
+      'form.firstname':'Имя','form.lastname':'Фамилия','form.email':'Email',
+      'form.phone':'Телефон','form.dob':'Дата рождения','form.submit':'Отправить',
+      'gallery.label':'Моменты из ресторана','gallery.heading':'Галерея',
+      'footer.hours':'Часы работы: вс – сб  12:00 – 23:00','footer.call':'Звоните',
+      'footer.copyright':'© 2024 Gambrinus. Все права защищены.',
+      'footer.privacy':'Политика конфиденциальности',
+      'footer.warning':'Предупреждение: чрезмерное употребление алкоголя опасно для вашего здоровья!',
+      'showcase.label':'Наши специалитеты',
+      'showcase.0.l1':'Премиум','showcase.0.l2':'Мясо',
+      'showcase.1.l1':'Гриль','showcase.1.l2':'Огонь',
+      'showcase.2.l1':'Блюда','showcase.2.l2':'Шефа',
+    }
+  };
+
+  // ─── MENU DATA ────────────────────────────────────────────────────────────
+  const MENU_DATA = [
+    {
+      id: 'starters',
+      icon: '🥗',
+      label: { he:'מנות פתיחה', en:'Starters', ru:'Закуски' },
+      sub:   { he:'להתחיל בסגנון', en:'Begin with style', ru:'Начнём красиво' },
+      items: [
+        { he:{ name:'חומוס בשר', desc:'חומוס ביתי עם בשר טחון מתובל, פיסטוקים ושמן זית' }, en:{ name:'Meat Hummus', desc:'House hummus with spiced ground beef, pine nuts & olive oil' }, ru:{ name:'Хумус с мясом', desc:'Домашний хумус с пряным говяжьим фаршем, кедровыми орехами' }, price:49 },
+        { he:{ name:'עצמות מוח', desc:'עצמות מוח אפויות, לחם שחור קלוי וסלסת עשבים' }, en:{ name:'Bone Marrow', desc:'Roasted bone marrow, toasted black bread & herb salsa' }, ru:{ name:'Костный мозг', desc:'Запечёный костный мозг, поджаренный хлеб и сальса из трав' }, price:64, badge:{ he:'סיגנטורה', en:'Signature', ru:'Фирменное' } },
+        { he:{ name:'נקניקיות גריל', desc:'נקניקיות בקר ביתיות על הגחלים, חרדל גרגרים' }, en:{ name:'Grilled Sausages', desc:'House beef sausages on charcoal, wholegrain mustard' }, ru:{ name:'Колбаски гриль', desc:'Домашние говяжьи колбаски на углях, зернистая горчица' }, price:52 },
+        { he:{ name:'קרפצ\'יו בקר', desc:'פרוסות בקר טרי דקות, צלפים, פרמזן ושמן לימון' }, en:{ name:'Beef Carpaccio', desc:'Paper-thin raw beef, capers, parmesan & lemon oil' }, ru:{ name:'Карпаччо из говядины', desc:'Тонко нарезанная сырая говядина, каперсы, пармезан, лимонное масло' }, price:68, badge:{ he:'חדש', en:'New', ru:'Новинка' }, badgeNew:true },
+        { he:{ name:'כבד פרגיות', desc:'כבד עוף מוקפץ, בצל קרמלי ותימין טרי' }, en:{ name:'Chicken Liver', desc:'Sautéed chicken livers, caramelised onion & fresh thyme' }, ru:{ name:'Куриная печень', desc:'Обжаренная куриная печень с карамелизированным луком и тимьяном' }, price:46 }
+      ]
+    },
+    {
+      id: 'prime',
+      icon: '🥩',
+      label: { he:'נתחים פרימיום', en:'Prime Cuts', ru:'Премиум куски' },
+      sub:   { he:'נתחי בשר מובחרים מיובאים', en:'Select imported beef cuts', ru:'Отборная импортная говядина' },
+      items: [
+        { he:{ name:'אנטרקוט 400 גרם', desc:'בקר אוסטרלי פרימיום, חמאת עשבים, שום קלוי' }, en:{ name:'Entrecôte 400g', desc:'Premium Australian beef, herb butter & roasted garlic' }, ru:{ name:'Антрекот 400г', desc:'Австралийская премиум-говядина, зелёное масло, запечённый чеснок' }, price:189, badge:{ he:'הבסטסלר', en:'Best Seller', ru:'Хит продаж' } },
+        { he:{ name:'ריב איי 350 גרם', desc:'ריב איי US פריים עם ריבוי שיוש, קרום מלח ים' }, en:{ name:'Ribeye 350g', desc:'US prime ribeye, heavy marbling, sea salt crust' }, ru:{ name:'Рибай 350г', desc:'Рибай US prime с мраморностью, корочка из морской соли' }, price:210 },
+        { he:{ name:'טי-בון 600 גרם', desc:'סינטה ופילה על עצם, מנה מושלמת לחולקים' }, en:{ name:'T-Bone 600g', desc:'Bone-in sirloin & tenderloin — perfect to share for two' }, ru:{ name:'Ти-бон 600г', desc:'Стриплойн и вырезка на кости — идеально для двоих' }, price:245, badge:{ he:'לשניים', en:'For Two', ru:'На двоих' } },
+        { he:{ name:'פילה מיניון 300 גרם', desc:'הנתח הרך ביותר, ציר יין אדום ורוטב ברנה' }, en:{ name:'Filet Mignon 300g', desc:'The most tender cut, red wine jus & béarnaise sauce' }, ru:{ name:'Филе миньон 300г', desc:'Самый нежный кусок, соус из красного вина, беарнез' }, price:220 },
+        { he:{ name:'פיקאניה 300 גרם', desc:'כובע סינטה ברזילאי, מלח גס, צ\'ימיצ\'ורי' }, en:{ name:'Picanha 300g', desc:'Brazilian top rump cap, coarse salt & chimichurri' }, ru:{ name:'Пиканья 300г', desc:'Бразильский топ-рамп, крупная соль и чимичурри' }, price:175 }
+      ]
+    },
+    {
+      id: 'grill',
+      icon: '🔥',
+      label: { he:'גריל על האש', en:'Open-Flame Grill', ru:'Гриль на огне' },
+      sub:   { he:'מוכן על גחלים לוהטים', en:'Cooked over burning charcoal', ru:'Готовим на раскалённых углях' },
+      items: [
+        { he:{ name:'קבב כבש x4', desc:'כבש טחון ביד, תבלינים מזרחיים, על גחלים' }, en:{ name:'Lamb Kebab ×4', desc:'Hand-minced lamb, eastern spices, charcoal-grilled' }, ru:{ name:'Кебаб из баранины ×4', desc:'Рубленая баранина, восточные специи, на углях' }, price:105 },
+        { he:{ name:'צלעות כבש 4 יח\'', desc:'מושרות לילה, רוזמרין ושום, צלויות על להבה' }, en:{ name:'Lamb Chops ×4', desc:'Overnight-marinated, rosemary & garlic, open-flame charred' }, ru:{ name:'Бараньи рёбрышки ×4', desc:'Маринованные ночь, розмарин и чеснок, приготовленные на огне' }, price:165, badge:{ he:'סיגנטורה', en:'Signature', ru:'Фирменное' } },
+        { he:{ name:'מנגל מיקס לזוג', desc:'כבש, בקר ועוף על מגש אחד, ליווי תוספת ורוטב' }, en:{ name:'Mixed Grill Platter', desc:'Lamb, beef & chicken on one platter — includes side & sauce' }, ru:{ name:'Ассорти гриль', desc:'Баранина, говядина и курица на одном блюде с гарниром и соусом' }, price:210, badge:{ he:'לשניים', en:'For Two', ru:'На двоих' } },
+        { he:{ name:'שיפוד אנטרקוט x4', desc:'4 שיפודי אנטרקוט, פפריקה מעושנת ובצל' }, en:{ name:'Entrecôte Skewers ×4', desc:'4 skewers, smoked paprika & onion' }, ru:{ name:'Шашлык из антрекота ×4', desc:'4 шампура, копчёная паприка и лук' }, price:138 },
+        { he:{ name:'חזה עוף שלם', desc:'חזה עוף שלם, פסטו, לימון, עשבי תיבול' }, en:{ name:'Whole Chicken Breast', desc:'Whole chicken breast, pesto, lemon & fresh herbs' }, ru:{ name:'Целая куриная грудка', desc:'Куриная грудка целиком, песто, лимон и свежие травы' }, price:88 }
+      ]
+    },
+    {
+      id: 'sides',
+      icon: '🫘',
+      label: { he:'תוספות', en:'Sides', ru:'Гарниры' },
+      sub:   { he:'להשלמת הארוחה', en:'Complete your meal', ru:'Дополните трапезу' },
+      items: [
+        { he:{ name:'ציפס ביתי', desc:'ציפס עם קליפה, מלח רוזמרין, מיונז שום' }, en:{ name:'House Fries', desc:'Skin-on fries, rosemary salt, garlic aioli' }, ru:{ name:'Домашняя картошка фри', desc:'Картофель с кожурой, соль с розмарином, чесночный айоли' }, price:32 },
+        { he:{ name:'פירה חמאה', desc:'פירה משי עם קרם פרש וחמאה ממש' }, en:{ name:'Butter Mashed Potato', desc:'Silky mash with crème fraîche & real butter' }, ru:{ name:'Картофельное пюре', desc:'Нежное пюре с крем-фрешем и настоящим сливочным маслом' }, price:28 },
+        { he:{ name:'ירקות צלויים', desc:'ירקות עונה צלויים, גלייז בלסמי' }, en:{ name:'Roasted Vegetables', desc:'Seasonal roasted vegetables, balsamic glaze' }, ru:{ name:'Жареные овощи', desc:'Сезонные жареные овощи, бальзамическая глазурь' }, price:34 },
+        { he:{ name:'תירס גריל', desc:'תירס מוחרך, חמאת צ\'ילי ולימון' }, en:{ name:'Grilled Corn', desc:'Charred corn, chilli butter & lime' }, ru:{ name:'Кукуруза гриль', desc:'Обугленная кукуруза, масло с чили и лайм' }, price:24 },
+        { he:{ name:'פטריות מוקפצות', desc:'פטריות מעורבות, שום, יין לבן ופטרוזיליה' }, en:{ name:'Sautéed Mushrooms', desc:'Mixed mushrooms, garlic, white wine & parsley' }, ru:{ name:'Жареные грибы', desc:'Смесь грибов, чеснок, белое вино и петрушка' }, price:36 }
+      ]
+    },
+    {
+      id: 'desserts',
+      icon: '🍮',
+      label: { he:'קינוחים', en:'Desserts', ru:'Десерты' },
+      sub:   { he:'לסיום המושלם', en:'The perfect ending', ru:'Сладкое завершение' },
+      items: [
+        { he:{ name:'עוגת שוקולד לבה', desc:'עוגת שוקולד חם עם מרכז נוזלי, גלידת וניל' }, en:{ name:'Chocolate Lava Cake', desc:'Warm dark chocolate cake, liquid centre & vanilla ice cream' }, ru:{ name:'Шоколадный лавовый торт', desc:'Тёплый шоколадный торт с жидкой начинкой и ванильным мороженым' }, price:52 },
+        { he:{ name:'קרם ברולה', desc:'קרם וניל צרפתי קלאסי, סוכר קרמלי פריך' }, en:{ name:'Crème Brûlée', desc:'Classic French vanilla custard, caramelised sugar crust' }, ru:{ name:'Крем-брюле', desc:'Классический французский ванильный крем с хрустящей карамельной корочкой' }, price:48 },
+        { he:{ name:'פבלובה פירות יער', desc:'מרנג, שמנת מוקצפת ופירות יער טריים' }, en:{ name:'Berry Pavlova', desc:'Meringue, whipped cream & fresh mixed berries' }, ru:{ name:'Павлова с ягодами', desc:'Меренга, взбитые сливки и свежие лесные ягоды' }, price:45 },
+        { he:{ name:'גלידת וניל ביתית', desc:'שלוש כדורים עם רוטב קרמל חם ופיסטוקים' }, en:{ name:'House Vanilla Ice Cream', desc:'Three scoops with warm caramel sauce & pistachios' }, ru:{ name:'Домашнее мороженое', desc:'Три шарика с тёплым карамельным соусом и фисташками' }, price:38 }
+      ]
+    }
+  ];
+
+  let activeMenuCat = 'starters';
+
+  function renderMenu(lang) {
+    const tabsEl   = document.getElementById('menu-tabs');
+    const panelsEl = document.getElementById('menu-panels');
+    if (!tabsEl || !panelsEl) return;
+
+    // Render tabs
+    tabsEl.innerHTML = MENU_DATA.map(cat => `
+      <button class="menu-tab${cat.id === activeMenuCat ? ' active' : ''}"
+        onclick="switchMenuCat('${cat.id}')" data-catid="${cat.id}">
+        ${cat.icon} ${cat.label[lang]}
+      </button>
+    `).join('');
+
+    // Render panels
+    panelsEl.innerHTML = MENU_DATA.map(cat => {
+      const isVisible = cat.id === activeMenuCat;
+      const items = cat.items.map(item => {
+        const d = item[lang] || item['he'];
+        const badgeHtml = item.badge
+          ? `<span class="menu-badge${item.badgeNew ? ' menu-badge-new' : ''}">${item.badge[lang] || item.badge['he']}</span>`
+          : '';
+        return `
+          <div class="menu-row">
+            <div class="menu-row-left">
+              <div class="menu-row-name">${d.name} ${badgeHtml}</div>
+              <div class="menu-row-desc">${d.desc}</div>
+            </div>
+            <div class="menu-row-price">₪${item.price}</div>
+          </div>`;
+      }).join('');
+
+      return `
+        <div class="menu-cat${isVisible ? ' visible' : ''}" data-catid="${cat.id}">
+          <div class="menu-cat-header">
+            <span class="menu-cat-icon">${cat.icon}</span>
+            <div>
+              <div class="menu-cat-title">${cat.label[lang]}</div>
+              <div class="menu-cat-sub">${cat.sub[lang]}</div>
+            </div>
+          </div>
+          <div class="menu-items">${items}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function switchMenuCat(catId) {
+    activeMenuCat = catId;
+    document.querySelectorAll('.menu-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.catid === catId);
+    });
+    document.querySelectorAll('.menu-cat').forEach(panel => {
+      panel.classList.toggle('visible', panel.dataset.catid === catId);
+    });
+  }
+
+  // ─── WHATSAPP ─────────────────────────────────────────────────────────────
+  const WA_PHONE = '97288524313'; // +972-8-8524313 — update to your WhatsApp number
+
+  // ─── HAMBURGER ───────────────────────────────────────────────────────────
+  function toggleMobileMenu() {
+    const hb = document.getElementById('hamburger');
+    const mm = document.getElementById('mobile-menu');
+    const open = mm.classList.toggle('open');
+    hb.classList.toggle('open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+  function closeMobileMenu() {
+    document.getElementById('hamburger').classList.remove('open');
+    document.getElementById('mobile-menu').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // ─── STATE ───────────────────────────────────────────────────────────────
+  let currentLang = 'he';
+
+  // ─── setLang ─────────────────────────────────────────────────────────────
+  function setLang(lang) {
+    currentLang = lang;
+    const html = document.documentElement;
+    const t = TRANSLATIONS[lang];
+    html.setAttribute('lang', lang);
+    html.setAttribute('dir', lang === 'he' ? 'rtl' : 'ltr');
+
+    document.getElementById('form-wrapper').style.direction = lang === 'he' ? 'rtl' : 'ltr';
+    document.getElementById('nav-links').style.flexDirection = lang === 'he' ? 'row-reverse' : 'row';
+    document.getElementById('about-heading').style.textAlign = lang === 'he' ? 'right' : 'left';
+    document.getElementById('about-btns').style.justifyContent = lang === 'he' ? 'flex-end' : 'flex-start';
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      if (t[k] !== undefined) el.textContent = t[k];
+    });
+    // Update mobile menu direction
+    const mm = document.getElementById('mobile-menu');
+    if (mm) mm.style.direction = lang === 'he' ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      const k = el.getAttribute('data-i18n-ph');
+      if (t[k] !== undefined) el.placeholder = t[k];
+    });
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim() === {he:'עב',en:'EN',ru:'РУ'}[lang]);
+    });
+
+    const sl = document.getElementById('showcase-label');
+    if (sl) sl.textContent = t['showcase.label'] || '';
+
+    updateModalLang(lang);
+    rebuildShowcase(lang);
+    renderMenu(lang);
+  }
+
+  // ─── RESERVE MODAL ────────────────────────────────────────────────────────
+  let selectedGuests = '';
+  function openReserve() {
+    const modal = document.getElementById('reserve-modal');
+    modal.style.display = 'flex';
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('rm-date').min = today;
+    document.getElementById('rm-date').value = today;
+    updateModalLang(currentLang);
+    document.body.style.overflow = 'hidden';
+  }
+  function closeReserve() {
+    document.getElementById('reserve-modal').style.display = 'none';
+    document.getElementById('rm-error').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.getElementById('reserve-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeReserve();
+  });
+  function setGuests(n) {
+    selectedGuests = n === 6 ? '6+' : String(n);
+    document.getElementById('rm-guests').value = selectedGuests;
+    document.querySelectorAll('.guest-btn').forEach((btn, i) => {
+      const a = i + 1 === n;
+      btn.style.background  = a ? '#7B1113' : '#fff';
+      btn.style.color       = a ? '#fff'    : '#333';
+      btn.style.borderColor = a ? '#7B1113' : '#ddd';
+    });
+  }
+  function submitReserve() {
+    const name   = document.getElementById('rm-name').value.trim();
+    const phone  = document.getElementById('rm-phone').value.trim();
+    const date   = document.getElementById('rm-date').value;
+    const time   = document.getElementById('rm-time').value;
+    const guests = document.getElementById('rm-guests').value;
+    const notes  = document.getElementById('rm-notes').value.trim();
+    const err    = document.getElementById('rm-error');
+    const labels = {
+      he:{ req:'נא למלא שם, טלפון, תאריך, שעה ומספר סועדים', guests:'סועדים', notes:'הערות', msg:'הזמנת שולחן ב-Gambrinus' },
+      en:{ req:'Please fill in name, phone, date, time and guests', guests:'Guests', notes:'Notes', msg:'Table reservation at Gambrinus' },
+      ru:{ req:'Пожалуйста, заполните имя, телефон, дату, время и кол-во гостей', guests:'Гостей', notes:'Примечания', msg:'Бронирование столика в Gambrinus' },
+    }[currentLang];
+    if (!name || !phone || !date || !time || !guests) { err.textContent = labels.req; err.style.display='block'; return; }
+    err.style.display = 'none';
+    const dateStr = new Date(date).toLocaleDateString('he-IL', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    let msg = `*${labels.msg}*\n👤 ${name}\n📞 ${phone}\n📅 ${dateStr}  🕐 ${time}\n👥 ${labels.guests}: ${guests}`;
+    if (notes) msg += `\n💬 ${labels.notes}: ${notes}`;
+    window.open('https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(msg), '_blank');
+    closeReserve();
+  }
+  const MODAL_LABELS = {
+    he:{ title:'הזמנת שולחן', sub:'Gambrinus · 08-8524313', name:'שם מלא', phone:'טלפון', date:'תאריך', time:'שעה', guests:'מספר סועדים', notes:'בקשות מיוחדות', notesPh:'אלרגיות, כיסא גבוה, יום הולדת…', btn:'שלח בוואטסאפ', orCall:'או חייגו:' },
+    en:{ title:'Reserve a Table', sub:'Gambrinus · 08-8524313', name:'Full Name', phone:'Phone', date:'Date', time:'Time', guests:'Guests', notes:'Special Requests', notesPh:'Allergies, high chair, birthday…', btn:'Send via WhatsApp', orCall:'Or call us:' },
+    ru:{ title:'Забронировать стол', sub:'Gambrinus · 08-8524313', name:'Полное имя', phone:'Телефон', date:'Дата', time:'Время', guests:'Гостей', notes:'Пожелания', notesPh:'Аллергии, детский стул, день рождения…', btn:'Отправить в WhatsApp', orCall:'Или позвоните:' },
+  };
+  function updateModalLang(lang) {
+    const L = MODAL_LABELS[lang] || MODAL_LABELS.en;
+    document.getElementById('rm-title').textContent     = L.title;
+    document.getElementById('rm-sub').textContent       = L.sub;
+    document.getElementById('rm-name-lbl').textContent  = L.name;
+    document.getElementById('rm-phone-lbl').textContent = L.phone;
+    document.getElementById('rm-date-lbl').textContent  = L.date;
+    document.getElementById('rm-time-lbl').textContent  = L.time;
+    document.getElementById('rm-guests-lbl').textContent= L.guests;
+    document.getElementById('rm-notes-lbl').textContent = L.notes;
+    document.getElementById('rm-notes').placeholder     = L.notesPh;
+    document.getElementById('rm-btn-text').textContent  = L.btn;
+    document.getElementById('rm-or-call').textContent   = L.orCall;
+    document.getElementById('reserve-box').style.direction = lang === 'he' ? 'rtl' : 'ltr';
+  }
+
+  // ─── SHOWCASE ─────────────────────────────────────────────────────────────
+  const SHOWCASE_IMAGES = [
+    'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=500&q=80',
+    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&q=80',
+    'https://images.unsplash.com/photo-1544025162-d76694265947?w=500&q=80',
+  ];
+  const SHOWCASE_CLIPS = ['sc-clip-bars','sc-clip-mosaic','sc-clip-grid'];
+  let showcaseActive = 0, masterTl = null;
+
+  function rebuildShowcase(lang) {
+    const t = TRANSLATIONS[lang];
+    const list = document.getElementById('showcase-list');
+    list.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      const isActive = i === showcaseActive;
+      const li = document.createElement('li');
+      li.style.cssText = 'cursor:pointer; user-select:none;';
+      li.innerHTML = `<div style="display:flex; align-items:flex-start; gap:20px;">
+        <span class="sc-num" style="font-size:1.6rem;font-weight:700;margin-top:6px;display:inline-block;font-family:'Cinzel Decorative','Cormorant Garamond',serif;
+          color:${isActive?'#C8860A':'#3a3020'};transform:${isActive?'scale(1.1)':'scale(1)'};">0${i+1}</span>
+        <h2 class="sc-label" style="font-family:'Cinzel Decorative','Cormorant Garamond',serif;font-size:clamp(2.2rem,5.5vw,3.6rem);
+          font-weight:900;line-height:0.88;letter-spacing:-0.02em;
+          transition:color 0.5s,opacity 0.5s,transform 0.5s;
+          color:${isActive?'#F5EFE6':'#6a5a48'};opacity:${isActive?'1':'0.4'};
+          transform:${isActive?'translateX(12px)':'translateX(0)'};">${t['showcase.'+i+'.l1']}<br>${t['showcase.'+i+'.l2']}</h2>
+      </div>`;
+      li.addEventListener('mouseenter', () => activateShowcase(i));
+      list.appendChild(li);
+    }
+    runShowcaseAnim(showcaseActive);
+  }
+
+  function runShowcaseAnim(idx) {
+    const clipId = SHOWCASE_CLIPS[idx];
+    const paths = document.querySelectorAll('#'+clipId+' .sc-path');
+    const img = document.getElementById('sc-image');
+    const grp = document.getElementById('sc-main-group');
+    if (masterTl) masterTl.kill();
+    img.setAttribute('href', SHOWCASE_IMAGES[idx]);
+    grp.setAttribute('clip-path','url(#'+clipId+')');
+    gsap.set(paths,{scale:0,transformOrigin:'50% 50%'});
+    const tl = gsap.timeline({repeat:-1,repeatDelay:1.2});
+    tl.to(paths,{scale:1,    duration:0.75,stagger:{amount:0.4, from:'random'},ease:'expo.out'})
+      .to(paths,{scale:1.04, duration:1.4, yoyo:true,repeat:1,stagger:{amount:0.18,from:'center'},ease:'sine.inOut'})
+      .to(paths,{scale:0,    duration:0.55,stagger:{amount:0.28,from:'edges'},ease:'expo.in'});
+    masterTl = tl;
+  }
+
+  function activateShowcase(idx) {
+    if (idx === showcaseActive) return;
+    const list = document.getElementById('showcase-list');
+    gsap.to(list.children[showcaseActive].querySelector('.sc-num'),   {color:'#3a3020', scale:1,   duration:0.3});
+    gsap.to(list.children[showcaseActive].querySelector('.sc-label'), {color:'#6a5a48', opacity:0.4, x:0, duration:0.4});
+    showcaseActive = idx;
+    gsap.to(list.children[showcaseActive].querySelector('.sc-num'),   {color:'#C8860A', scale:1.1, duration:0.3});
+    gsap.to(list.children[showcaseActive].querySelector('.sc-label'), {color:'#F5EFE6', opacity:1,  x:12, duration:0.4});
+    runShowcaseAnim(idx);
+  }
+
+  // ─── INIT ─────────────────────────────────────────────────────────────────
+  window.addEventListener('load', () => {
+    rebuildShowcase('he');
+    renderMenu('he');
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Steak fly-in
+    const steak = document.getElementById('steak-img');
+    if (steak) {
+      gsap.timeline({ scrollTrigger:{trigger:'#members',start:'top 75%',once:true} })
+        .to(steak,{opacity:1,x:0,y:0,rotation:0,duration:1.1,ease:'back.out(1.4)'})
+        .to(steak,{rotation:-6,duration:0.18,ease:'power2.out'})
+        .to(steak,{rotation:4, duration:0.15,ease:'power2.inOut'})
+        .to(steak,{rotation:0, duration:0.2, ease:'power2.in', onComplete() {
+          gsap.to(steak,{y:-14,rotation:3,duration:2,ease:'sine.inOut',yoyo:true,repeat:-1});
+        }});
+      gsap.to(steak,{yPercent:-30,ease:'none',scrollTrigger:{trigger:'#members',start:'top bottom',end:'bottom top',scrub:1.5}});
+    }
+
+    // Fade-in sections on scroll
+    gsap.utils.toArray('#about, #menu, #press, #members, #gallery').forEach(sec => {
+      gsap.from(sec, { opacity:0, y:40, duration:0.8, ease:'power2.out',
+        scrollTrigger:{trigger:sec, start:'top 85%', once:true} });
+    });
+  });
+  </script>
+</body>
+</html>

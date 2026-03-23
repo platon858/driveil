@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apple</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --nav-height: 44px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body { font-family: var(--font); background: #fff; color: #1d1d1f; overflow-x: hidden; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      height: var(--nav-height);
+      background: rgba(255,255,255,.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      display: flex; align-items: center; justify-content: center;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+    }
+    .nav-inner {
+      width: 100%; max-width: 1024px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 22px;
+    }
+    .nav-logo svg { display: block; fill: #1d1d1f; }
+    .nav-links { display: flex; gap: 0; list-style: none; }
+    .nav-links a {
+      display: block; padding: 0 10px;
+      font-size: 12px; color: #1d1d1f; text-decoration: none; opacity: .8;
+      transition: opacity .15s;
+    }
+    .nav-links a:hover { opacity: 1; }
+    .nav-icons { display: flex; gap: 6px; }
+    .nav-icons a { color: #1d1d1f; opacity: .8; text-decoration: none; font-size: 16px; padding: 0 4px; }
+    .nav-icons a:hover { opacity: 1; }
+
+    /* ── HERO SECTIONS ── */
+    section { width: 100%; overflow: hidden; }
+
+    /* generic hero */
+    .hero {
+      min-height: 500px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      text-align: center;
+      padding-bottom: 60px;
+      background-size: cover; background-position: center;
+      position: relative;
+    }
+    .hero-content { position: relative; z-index: 2; }
+    .hero-eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .02em; margin-bottom: 6px; }
+    .hero h1 { font-size: clamp(36px, 5vw, 64px); font-weight: 700; letter-spacing: -.025em; line-height: 1.05; }
+    .hero h2 { font-size: clamp(20px, 3vw, 36px); font-weight: 600; letter-spacing: -.02em; line-height: 1.1; margin-top: 4px; }
+    .hero p { font-size: 17px; margin-top: 8px; opacity: .8; }
+    .hero-ctas { display: flex; gap: 16px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 8px 20px; border-radius: 980px;
+      font-size: 14px; font-weight: 400; text-decoration: none;
+      transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-blue { background: #0071e3; color: #fff; }
+    .btn-outline-dark { background: transparent; color: #1d1d1f; border: 1px solid rgba(0,0,0,.25); }
+    .btn-outline-light { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.4); }
+    .btn-white { background: #fff; color: #1d1d1f; }
+    .btn-dark { background: #1d1d1f; color: #fff; }
+
+    /* light / dark variants */
+    .hero.dark { background-color: #000; color: #f5f5f7; }
+    .hero.dark .hero-eyebrow { color: #f5f5f7; }
+    .hero.silver { background-color: #f5f5f7; }
+    .hero.blue-grad { background: linear-gradient(180deg,#e8f0ff 0%,#f5f5f7 100%); }
+    .hero.dark-blue { background: linear-gradient(180deg,#0a0a1a 0%,#0d2060 100%); color: #f5f5f7; }
+
+    /* product image placeholder */
+    .product-img {
+      width: 100%; max-width: 680px;
+      margin: 0 auto 24px;
+      display: block;
+    }
+
+    /* SVG placeholder product shapes */
+    .shape-macbook { filter: drop-shadow(0 20px 40px rgba(0,0,0,.25)); }
+    .shape-iphone  { filter: drop-shadow(0 20px 40px rgba(0,0,0,.3)); }
+
+    /* ── GRID SECTION ── */
+    .grid-section {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px; padding: 8px;
+      background: #f5f5f7;
+    }
+    .grid-card {
+      min-height: 460px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      text-align: center; padding-bottom: 48px;
+      border-radius: 18px; overflow: hidden;
+      position: relative;
+    }
+    .grid-card-content { position: relative; z-index: 2; }
+    .grid-card h2 { font-size: clamp(22px, 2.5vw, 32px); font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
+    .grid-card p { font-size: 15px; margin-top: 4px; opacity: .75; }
+    .grid-card .hero-ctas { margin-top: 14px; }
+    .gc-white { background: #fff; color: #1d1d1f; }
+    .gc-dark  { background: #1d1d1f; color: #f5f5f7; }
+    .gc-silver{ background: #e8e8ed; color: #1d1d1f; }
+    .gc-blue  { background: #d2e4ff; color: #1d1d1f; }
+
+    /* ── ENTERTAINMENT ── */
+    .entertainment { background: #000; color: #f5f5f7; padding: 60px 0 0; }
+    .ent-header { text-align: center; padding: 0 24px 40px; }
+    .ent-header h2 { font-size: clamp(28px,4vw,52px); font-weight: 700; letter-spacing: -.025em; }
+    .ent-row { display: flex; gap: 0; overflow: hidden; }
+    .ent-card { flex: 1; min-height: 340px; position: relative; overflow: hidden; cursor: pointer; }
+    .ent-card img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; display: block; }
+    .ent-card:hover img { transform: scale(1.04); }
+    .ent-card-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0; padding: 20px;
+      background: linear-gradient(transparent, rgba(0,0,0,.7));
+      color: #fff; font-size: 13px;
+    }
+
+    /* ── TV+ banner ── */
+    .tv-banner {
+      background: #000; display: flex; align-items: center; justify-content: center;
+      gap: 20px; padding: 40px 24px; flex-wrap: wrap; text-align: center;
+    }
+    .tv-logo { font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -.02em; }
+    .tv-logo span { font-style: italic; }
+    .tv-banner p { color: #86868b; font-size: 15px; }
+
+    /* ── TRADE-IN ── */
+    .tradein-grid {
+      display: grid; grid-template-columns: repeat(2,1fr);
+      gap: 8px; padding: 8px; background: #f5f5f7;
+    }
+    .tradein-card {
+      background: #fff; border-radius: 18px; overflow: hidden;
+      min-height: 320px; display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      text-align: center; padding-bottom: 40px; position: relative;
+    }
+    .tradein-card h3 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+    .tradein-card p { font-size: 14px; margin-top: 4px; color: #6e6e73; max-width: 300px; }
+    .tradein-card a { color: #0071e3; text-decoration: none; font-size: 14px; margin-top: 6px; display: inline-block; }
+    .tradein-card a:hover { text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    footer { background: #f5f5f7; padding: 40px 0 20px; font-size: 12px; color: #6e6e73; }
+    .footer-inner { max-width: 1024px; margin: 0 auto; padding: 0 22px; }
+    .footer-note { border-bottom: 1px solid #d2d2d7; padding-bottom: 20px; line-height: 1.6; }
+    .footer-links-grid {
+      display: grid; grid-template-columns: repeat(5,1fr);
+      gap: 24px; padding: 28px 0;
+      border-bottom: 1px solid #d2d2d7;
+    }
+    .footer-col h4 { font-size: 12px; color: #1d1d1f; font-weight: 600; margin-bottom: 10px; }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 6px; }
+    .footer-col a { color: #6e6e73; text-decoration: none; }
+    .footer-col a:hover { text-decoration: underline; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; flex-wrap: wrap; gap: 12px; }
+    .footer-bottom-links { display: flex; gap: 16px; flex-wrap: wrap; }
+    .footer-bottom-links a { color: #6e6e73; text-decoration: none; }
+    .footer-bottom-links a:hover { text-decoration: underline; }
+
+    /* ── INLINE SVG PRODUCT ART ── */
+    /* MacBook Neo */
+    .macbook-neo-svg { max-width: 640px; margin: 0 auto 20px; display: block; }
+    /* iPhone */
+    .iphone-svg { max-width: 320px; margin: 0 auto 20px; display: block; }
+    /* Watch */
+    .watch-svg { max-width: 260px; margin: 0 auto 20px; display: block; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .grid-section, .tradein-grid { grid-template-columns: 1fr; }
+      .footer-links-grid { grid-template-columns: repeat(2,1fr); }
+      .ent-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAVIGATION ══ -->
+<nav>
+  <div class="nav-inner">
+    <!-- Apple logo -->
+    <a class="nav-logo" href="#">
+      <svg height="44" viewBox="0 0 14 44" width="14"><path d="m13.073 17.682a3.61 3.61 0 0 0 -1.725 3.037 3.513 3.513 0 0 0 2.138 3.222 8.394 8.394 0 0 1 -1.095 2.262c-.682.981-1.394 1.962-2.479 1.962s-1.363-.63-2.613-.63c-1.219 0-1.653.651-2.644.651s-1.683-.909-2.479-2.024a9.784 9.784 0 0 1 -1.663-5.278c0-3.098 2.014-4.74 3.997-4.74 1.053 0 1.931.692 2.592.692.63 0 1.611-.733 2.809-.733a3.758 3.758 0 0 1 3.16 1.58zm-3.728-2.892a3.562 3.562 0 0 0 .847-2.22 1.535 1.535 0 0 0 -.031-.32 3.569 3.569 0 0 0 -2.345 1.208 3.463 3.463 0 0 0 -.878 2.159 1.419 1.419 0 0 0 .031.289 1.19 1.19 0 0 0 .217.021 3.094 3.094 0 0 0 2.159-1.137z"/></svg>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#">Store</a></li>
+      <li><a href="#">Mac</a></li>
+      <li><a href="#">iPad</a></li>
+      <li><a href="#">iPhone</a></li>
+      <li><a href="#">Watch</a></li>
+      <li><a href="#">Vision</a></li>
+      <li><a href="#">AirPods</a></li>
+      <li><a href="#">TV &amp; Home</a></li>
+      <li><a href="#">Entertainment</a></li>
+      <li><a href="#">Accessories</a></li>
+      <li><a href="#">Support</a></li>
+    </ul>
+
+    <div class="nav-icons">
+      <!-- Search -->
+      <a href="#" aria-label="Search">
+        <svg height="44" viewBox="0 0 15 44" width="15" fill="currentColor"><path d="m14.298 27.202-3.87-3.87a6.15 6.15 0 1 0 -.84.84l3.87 3.87zm-7.048-2.109a4.85 4.85 0 1 1 4.85-4.85 4.856 4.856 0 0 1 -4.85 4.85z"/></svg>
+      </a>
+      <!-- Bag -->
+      <a href="#" aria-label="Shopping Bag">
+        <svg height="44" viewBox="0 0 14 44" width="14" fill="currentColor"><path d="m11.3 13.138a4.3 4.3 0 0 0 -8.6 0h-2.5v16.5a2.5 2.5 0 0 0 2.5 2.5h9a2.5 2.5 0 0 0 2.5-2.5v-16.5zm-4.3-3a3 3 0 0 1 3 3h-6a3 3 0 0 1 3-3zm5.5 19.5a1.5 1.5 0 0 1 -1.5 1.5h-9a1.5 1.5 0 0 1 -1.5-1.5v-15.5h2v2h1v-2h6v2h1v-2h2z"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO 1 — MacBook Neo ══ -->
+<section class="hero blue-grad" style="min-height:580px;">
+  <!-- MacBook SVG illustration -->
+  <svg class="macbook-neo-svg" viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+    <!-- screen body -->
+    <rect x="80" y="30" width="480" height="290" rx="12" fill="#1d1d1f"/>
+    <!-- display area -->
+    <rect x="90" y="40" width="460" height="270" rx="8" fill="#3a7bd5"/>
+    <!-- gradient overlay on screen -->
+    <defs>
+      <linearGradient id="screenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#6eb5ff;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#1a4fa8;stop-opacity:1" />
+      </linearGradient>
+      <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+        <stop offset="0%" style="stop-color:#a0d4ff;stop-opacity:.6" />
+        <stop offset="100%" style="stop-color:transparent;stop-opacity:0" />
+      </radialGradient>
+    </defs>
+    <rect x="90" y="40" width="460" height="270" rx="8" fill="url(#screenGrad)"/>
+    <ellipse cx="320" cy="155" rx="200" ry="120" fill="url(#glow)"/>
+    <!-- notch -->
+    <rect x="298" y="38" width="44" height="8" rx="4" fill="#000"/>
+    <!-- keyboard base -->
+    <rect x="50" y="320" width="540" height="14" rx="4" fill="#c8c8cc"/>
+    <!-- trackpad -->
+    <rect x="255" y="306" width="130" height="16" rx="4" fill="#d8d8dc"/>
+    <!-- Apple logo on lid -->
+    <text x="316" y="190" font-size="28" fill="rgba(255,255,255,.15)" text-anchor="middle" font-family="sans-serif"></text>
+  </svg>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow" style="color:#0071e3;">New</div>
+    <h1>MacBook Neo</h1>
+    <h2 style="font-weight:400;font-size:22px;color:#6e6e73;">Amazing Neo. Surprising price.</h2>
+    <div class="hero-ctas">
+      <a class="btn btn-blue" href="#">Learn more</a>
+      <a class="btn btn-outline-dark" href="#">Shop now</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HERO 2 — iPhone 17e ══ -->
+<section class="hero silver" style="min-height:560px;">
+  <!-- iPhone SVG -->
+  <svg class="iphone-svg" viewBox="0 0 220 440" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="phoneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#f0b8c8"/>
+        <stop offset="100%" style="stop-color:#c890b0"/>
+      </linearGradient>
+      <linearGradient id="screenGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#1a1a2e"/>
+        <stop offset="100%" style="stop-color:#16213e"/>
+      </linearGradient>
+    </defs>
+    <!-- body -->
+    <rect x="10" y="10" width="200" height="420" rx="36" fill="url(#phoneGrad)"/>
+    <!-- screen bezel -->
+    <rect x="18" y="18" width="184" height="404" rx="30" fill="#111"/>
+    <!-- screen -->
+    <rect x="20" y="20" width="180" height="400" rx="28" fill="url(#screenGrad2)"/>
+    <!-- dynamic island -->
+    <rect x="78" y="32" width="64" height="22" rx="11" fill="#000"/>
+    <!-- home screen icons mockup -->
+    <rect x="36" y="80" width="40" height="40" rx="10" fill="#4A90D9" opacity=".8"/>
+    <rect x="90" y="80" width="40" height="40" rx="10" fill="#E74C3C" opacity=".8"/>
+    <rect x="144" y="80" width="40" height="40" rx="10" fill="#2ECC71" opacity=".8"/>
+    <rect x="36" y="134" width="40" height="40" rx="10" fill="#F39C12" opacity=".8"/>
+    <rect x="90" y="134" width="40" height="40" rx="10" fill="#9B59B6" opacity=".8"/>
+    <rect x="144" y="134" width="40" height="40" rx="10" fill="#1ABC9C" opacity=".8"/>
+    <!-- volume buttons -->
+    <rect x="6" y="110" width="4" height="30" rx="2" fill="#c090a8"/>
+    <rect x="6" y="150" width="4" height="50" rx="2" fill="#c090a8"/>
+    <!-- power button -->
+    <rect x="210" y="130" width="4" height="60" rx="2" fill="#c090a8"/>
+    <!-- home indicator -->
+    <rect x="80" y="400" width="60" height="4" rx="2" fill="rgba(255,255,255,.3)"/>
+  </svg>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow" style="color:#0071e3;">New</div>
+    <h1>iPhone 17e</h1>
+    <h2 style="font-weight:400;font-size:22px;color:#6e6e73;">Feature-stacked. Value-packed.</h2>
+    <div class="hero-ctas">
+      <a class="btn btn-blue" href="#">Learn more</a>
+      <a class="btn btn-outline-dark" href="#">Shop now</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HERO 3 — MacBook Pro (dark) ══ -->
+<section class="hero dark" style="min-height:600px;">
+  <!-- MacBook Pro SVG — dark sleek look -->
+  <svg class="macbook-neo-svg" viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="proScreen" x1="20%" y1="0%" x2="80%" y2="100%">
+        <stop offset="0%" style="stop-color:#2c2c2e"/>
+        <stop offset="100%" style="stop-color:#1c1c1e"/>
+      </linearGradient>
+      <radialGradient id="proGlow" cx="50%" cy="30%" r="50%">
+        <stop offset="0%" style="stop-color:#444;stop-opacity:.8"/>
+        <stop offset="100%" style="stop-color:transparent;stop-opacity:0"/>
+      </radialGradient>
+    </defs>
+    <rect x="80" y="30" width="480" height="290" rx="14" fill="#1c1c1e"/>
+    <rect x="90" y="40" width="460" height="270" rx="8" fill="url(#proScreen)"/>
+    <ellipse cx="320" cy="130" rx="220" ry="100" fill="url(#proGlow)"/>
+    <!-- "V" shape light -->
+    <polygon points="260,60 320,200 380,60" fill="none" stroke="rgba(200,200,200,.15)" stroke-width="2"/>
+    <rect x="298" y="38" width="44" height="8" rx="4" fill="#000"/>
+    <rect x="50" y="320" width="540" height="14" rx="4" fill="#2c2c2e"/>
+    <rect x="255" y="306" width="130" height="16" rx="4" fill="#3a3a3c"/>
+  </svg>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow" style="color:#a0a0a8;">Pro</div>
+    <h1 style="color:#f5f5f7;">MacBook Pro</h1>
+    <h2 style="font-weight:400;font-size:22px;color:#86868b;">Now with M5, M5 Pro, and M5 Max.</h2>
+    <div class="hero-ctas">
+      <a class="btn btn-blue" href="#">Learn more</a>
+      <a class="btn btn-outline-light" href="#">Shop now</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ GRID — MacBook Air + iPad Air ══ -->
+<div class="grid-section">
+
+  <!-- MacBook Air -->
+  <div class="grid-card gc-silver">
+    <svg viewBox="0 0 420 260" style="max-width:360px;margin:0 auto 16px;display:block;">
+      <defs>
+        <linearGradient id="airGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#e8e8ed"/>
+          <stop offset="100%" style="stop-color:#c8c8cc"/>
+        </linearGradient>
+      </defs>
+      <rect x="30" y="10" width="360" height="218" rx="10" fill="#c8c8cc"/>
+      <rect x="38" y="18" width="344" height="200" rx="7" fill="#3a7bd5"/>
+      <defs>
+        <linearGradient id="airScreen" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#7eb8ff"/>
+          <stop offset="100%" style="stop-color:#2255cc"/>
+        </linearGradient>
+      </defs>
+      <rect x="38" y="18" width="344" height="200" rx="7" fill="url(#airScreen)"/>
+      <rect x="208" y="16" width="30" height="6" rx="3" fill="#b0b0b4"/>
+      <rect x="10" y="228" width="400" height="10" rx="3" fill="url(#airGrad)"/>
+      <rect x="165" y="220" width="90" height="10" rx="3" fill="#d0d0d4"/>
+    </svg>
+    <div class="grid-card-content">
+      <h2>MacBook Air</h2>
+      <p>Supercharged by M4.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-blue" href="#">Learn more</a>
+        <a class="btn btn-outline-dark" href="#">Shop now</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- iPad Air -->
+  <div class="grid-card gc-blue">
+    <svg viewBox="0 0 300 380" style="max-width:200px;margin:0 auto 16px;display:block;">
+      <defs>
+        <linearGradient id="ipadGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#a8d8ff"/>
+          <stop offset="100%" style="stop-color:#5aabff"/>
+        </linearGradient>
+      </defs>
+      <rect x="10" y="10" width="280" height="360" rx="24" fill="url(#ipadGrad)"/>
+      <rect x="18" y="18" width="264" height="344" rx="18" fill="#1c1c1e"/>
+      <defs>
+        <linearGradient id="ipadScreen" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#2a5fba"/>
+          <stop offset="100%" style="stop-color:#0a2a6a"/>
+        </linearGradient>
+      </defs>
+      <rect x="20" y="20" width="260" height="340" rx="16" fill="url(#ipadScreen)"/>
+      <rect x="132" y="16" width="36" height="8" rx="4" fill="#8ab0e0"/>
+      <!-- ipad home button area -->
+      <rect x="130" y="352" width="40" height="4" rx="2" fill="rgba(255,255,255,.2)"/>
+    </svg>
+    <div class="grid-card-content">
+      <h2>iPad Air</h2>
+      <p>Supercharged by M3.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-blue" href="#">Learn more</a>
+        <a class="btn btn-outline-dark" href="#">Shop now</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- iPhone 17 Pro -->
+  <div class="grid-card gc-dark">
+    <svg viewBox="0 0 200 380" style="max-width:140px;margin:0 auto 16px;display:block;">
+      <defs>
+        <linearGradient id="proPhoneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#4a3a2a"/>
+          <stop offset="100%" style="stop-color:#2a1a0a"/>
+        </linearGradient>
+      </defs>
+      <rect x="8" y="8" width="184" height="364" rx="34" fill="url(#proPhoneGrad)"/>
+      <rect x="16" y="16" width="168" height="348" rx="28" fill="#0a0a0a"/>
+      <rect x="18" y="18" width="164" height="344" rx="26" fill="#111"/>
+      <!-- camera island -->
+      <rect x="60" y="30" width="80" height="28" rx="14" fill="#000"/>
+      <!-- camera lenses -->
+      <circle cx="85" cy="100" r="22" fill="#1a1a1a"/>
+      <circle cx="115" cy="100" r="22" fill="#1a1a1a"/>
+      <circle cx="85" cy="100" r="16" fill="#0d0d0d"/>
+      <circle cx="115" cy="100" r="16" fill="#0d0d0d"/>
+      <circle cx="88" cy="97" r="5" fill="#3a3a4a"/>
+      <circle cx="118" cy="97" r="5" fill="#3a3a4a"/>
+      <!-- flash -->
+      <circle cx="100" cy="130" r="6" fill="#2a2a3a"/>
+    </svg>
+    <div class="grid-card-content">
+      <h2 style="color:#f5f5f7;">iPhone 17 Pro</h2>
+      <p style="color:#86868b;">All new. All Pro.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-white" href="#">Learn more</a>
+        <a class="btn btn-outline-light" href="#">Shop now</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Apple Watch Series 11 -->
+  <div class="grid-card gc-white">
+    <svg viewBox="0 0 240 300" style="max-width:180px;margin:0 auto 16px;display:block;">
+      <defs>
+        <linearGradient id="watchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#d8d8dc"/>
+          <stop offset="100%" style="stop-color:#a8a8b0"/>
+        </linearGradient>
+        <linearGradient id="watchScreen" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1a2a4a"/>
+          <stop offset="100%" style="stop-color:#0a1020"/>
+        </linearGradient>
+        <radialGradient id="watchFace" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" style="stop-color:#2060d0;stop-opacity:.6"/>
+          <stop offset="100%" style="stop-color:transparent;stop-opacity:0"/>
+        </radialGradient>
+      </defs>
+      <!-- band top -->
+      <rect x="90" y="0" width="60" height="80" rx="8" fill="#e8d0c0"/>
+      <!-- band bottom -->
+      <rect x="90" y="220" width="60" height="80" rx="8" fill="#e8d0c0"/>
+      <!-- watch body -->
+      <rect x="44" y="66" width="152" height="168" rx="38" fill="url(#watchGrad)"/>
+      <!-- screen -->
+      <rect x="52" y="74" width="136" height="152" rx="32" fill="url(#watchScreen)"/>
+      <rect x="54" y="76" width="132" height="148" rx="30" fill="url(#watchFace)"/>
+      <!-- time display -->
+      <text x="120" y="142" font-size="32" font-weight="700" fill="white" text-anchor="middle" font-family="sans-serif">10:09</text>
+      <text x="120" y="166" font-size="12" fill="rgba(255,255,255,.6)" text-anchor="middle" font-family="sans-serif">WED 10</text>
+      <!-- activity rings -->
+      <circle cx="120" cy="196" r="18" fill="none" stroke="rgba(255,0,80,.3)" stroke-width="5"/>
+      <circle cx="120" cy="196" r="18" fill="none" stroke="#ff0050" stroke-width="5" stroke-dasharray="90,113" stroke-linecap="round" transform="rotate(-90 120 196)"/>
+      <!-- crown -->
+      <rect x="195" y="118" width="8" height="36" rx="4" fill="#c0c0c8"/>
+    </svg>
+    <div class="grid-card-content">
+      <h2>Apple Watch Series&nbsp;11</h2>
+      <p>The ultimate device for a healthy life.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-blue" href="#">Learn more</a>
+        <a class="btn btn-outline-dark" href="#">Shop now</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TRADE-IN + CARRIER ══ -->
+<div class="tradein-grid">
+  <div class="tradein-card">
+    <!-- trade-in illustration -->
+    <svg viewBox="0 0 300 220" style="max-width:280px;margin-bottom:20px;">
+      <defs>
+        <linearGradient id="tg1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#c0d8f0"/>
+          <stop offset="100%" style="stop-color:#e0eeff"/>
+        </linearGradient>
+      </defs>
+      <!-- old phone -->
+      <rect x="20" y="30" width="100" height="160" rx="16" fill="#d0d0d4" opacity=".6"/>
+      <rect x="28" y="40" width="84" height="140" rx="12" fill="#a0a0a8" opacity=".4"/>
+      <!-- arrow -->
+      <path d="M140 110 L165 90 L165 105 L185 105 L185 115 L165 115 L165 130 Z" fill="#0071e3"/>
+      <!-- new phone -->
+      <rect x="190" y="20" width="100" height="170" rx="20" fill="url(#tg1)"/>
+      <rect x="198" y="28" width="84" height="154" rx="14" fill="#1a3a6a" opacity=".7"/>
+    </svg>
+    <div>
+      <h3>Apple Trade In</h3>
+      <p>Get $50–$650 in credit when you trade in iPhone&nbsp;13 or higher.</p>
+      <a href="#">See what your device is worth →</a>
+    </div>
+  </div>
+
+  <div class="tradein-card">
+    <!-- carrier illustration -->
+    <svg viewBox="0 0 300 220" style="max-width:280px;margin-bottom:20px;">
+      <defs>
+        <linearGradient id="cg1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#f0e8ff"/>
+          <stop offset="100%" style="stop-color:#d8d0ff"/>
+        </linearGradient>
+      </defs>
+      <!-- 3 phones showing different colors -->
+      <rect x="10" y="40" width="80" height="140" rx="16" fill="#f0d0e0" opacity=".9"/>
+      <rect x="110" y="30" width="80" height="160" rx="16" fill="#d0e8f0" opacity=".9"/>
+      <rect x="210" y="40" width="80" height="140" rx="16" fill="#e0f0d0" opacity=".9"/>
+    </svg>
+    <div>
+      <h3>Any condition carrier deals are here.</h3>
+      <p>Select carriers accept any trade-in in any condition.</p>
+      <a href="#">See carrier deals →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ENTERTAINMENT ══ -->
+<div class="entertainment">
+  <div class="ent-header">
+    <p style="color:#86868b;font-size:14px;margin-bottom:8px;">Apple TV+</p>
+    <h2>Endless entertainment.</h2>
+  </div>
+
+  <!-- TV+ shows grid -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:0 8px 8px;">
+
+    <!-- Show card 1 -->
+    <div style="border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;background:#1a1a2e;cursor:pointer;">
+      <svg viewBox="0 0 320 180" style="width:100%;height:100%;">
+        <rect width="320" height="180" fill="#0d1b2a"/>
+        <circle cx="160" cy="90" r="60" fill="rgba(30,80,150,.4)"/>
+        <text x="160" y="100" font-size="22" font-weight="700" fill="white" text-anchor="middle" font-family="sans-serif">MONARCH</text>
+        <text x="160" y="124" font-size="10" fill="rgba(255,255,255,.6)" text-anchor="middle" font-family="sans-serif">Legacy of Monsters</text>
+      </svg>
+    </div>
+
+    <!-- Show card 2 -->
+    <div style="border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;background:#2a1a0a;cursor:pointer;">
+      <svg viewBox="0 0 320 180" style="width:100%;height:100%;">
+        <rect width="320" height="180" fill="#1a0d00"/>
+        <rect x="0" y="0" width="320" height="180" fill="rgba(200,100,0,.15)"/>
+        <text x="160" y="90" font-size="20" font-weight="700" fill="white" text-anchor="middle" font-family="sans-serif">SILO</text>
+        <text x="160" y="114" font-size="10" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="sans-serif">Season 3</text>
+      </svg>
+    </div>
+
+    <!-- Show card 3 -->
+    <div style="border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;background:#0a1a2a;cursor:pointer;">
+      <svg viewBox="0 0 320 180" style="width:100%;height:100%;">
+        <rect width="320" height="180" fill="#060c16"/>
+        <circle cx="160" cy="70" r="40" fill="rgba(50,120,200,.3)"/>
+        <text x="160" y="100" font-size="20" font-weight="700" fill="white" text-anchor="middle" font-family="sans-serif">SEVERANCE</text>
+        <text x="160" y="120" font-size="10" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="sans-serif">Season 3</text>
+      </svg>
+    </div>
+
+    <!-- Show card 4 -->
+    <div style="border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;background:#1a0a2a;cursor:pointer;">
+      <svg viewBox="0 0 320 180" style="width:100%;height:100%;">
+        <rect width="320" height="180" fill="#120820"/>
+        <rect x="0" y="0" width="320" height="180" fill="rgba(150,50,200,.1)"/>
+        <text x="160" y="90" font-size="20" font-weight="700" fill="white" text-anchor="middle" font-family="sans-serif">THE MORNING SHOW</text>
+        <text x="160" y="114" font-size="10" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="sans-serif">Season 4</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Apple TV+ CTA -->
+  <div class="tv-banner">
+    <div>
+      <div class="tv-logo">Apple TV<span>+</span></div>
+      <p>Watch anywhere. Cancel anytime.</p>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <a class="btn btn-white" href="#">Try it free</a>
+      <a class="btn btn-outline-light" href="#">Learn more</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-note">
+      1. Trade‑in values will vary based on the condition, year, and configuration of your eligible trade‑in device. Not all devices are eligible for credit. You must be at least 18 years old to be eligible to trade in for credit or for an Apple Gift Card. Trade‑in value may be applied toward qualifying new device purchase, or added to an Apple Gift Card.
+    </div>
+
+    <div class="footer-links-grid">
+      <div class="footer-col">
+        <h4>Shop and Learn</h4>
+        <ul>
+          <li><a href="#">Store</a></li>
+          <li><a href="#">Mac</a></li>
+          <li><a href="#">iPad</a></li>
+          <li><a href="#">iPhone</a></li>
+          <li><a href="#">Watch</a></li>
+          <li><a href="#">Vision</a></li>
+          <li><a href="#">AirPods</a></li>
+          <li><a href="#">TV &amp; Home</a></li>
+          <li><a href="#">AirTag</a></li>
+          <li><a href="#">Accessories</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Apple Wallet</h4>
+        <ul>
+          <li><a href="#">Wallet</a></li>
+          <li><a href="#">Apple Card</a></li>
+          <li><a href="#">Apple Pay</a></li>
+          <li><a href="#">Apple Cash</a></li>
+        </ul>
+        <h4 style="margin-top:16px;">Account</h4>
+        <ul>
+          <li><a href="#">Manage Your Apple Account</a></li>
+          <li><a href="#">Apple Store Account</a></li>
+          <li><a href="#">iCloud.com</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Entertainment</h4>
+        <ul>
+          <li><a href="#">Apple One</a></li>
+          <li><a href="#">Apple TV+</a></li>
+          <li><a href="#">Apple Music</a></li>
+          <li><a href="#">Apple Arcade</a></li>
+          <li><a href="#">Apple Fitness+</a></li>
+          <li><a href="#">Apple News+</a></li>
+          <li><a href="#">Apple Podcasts</a></li>
+          <li><a href="#">Apple Books</a></li>
+          <li><a href="#">App Store</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Apple Store</h4>
+        <ul>
+          <li><a href="#">Find a Store</a></li>
+          <li><a href="#">Genius Bar</a></li>
+          <li><a href="#">Today at Apple</a></li>
+          <li><a href="#">Apple Camp</a></li>
+          <li><a href="#">Apple Trade In</a></li>
+          <li><a href="#">Financing</a></li>
+          <li><a href="#">Carrier Deals at Apple</a></li>
+          <li><a href="#">Order Status</a></li>
+          <li><a href="#">Shopping Help</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>For Business</h4>
+        <ul>
+          <li><a href="#">Apple and Business</a></li>
+          <li><a href="#">Shop for Business</a></li>
+        </ul>
+        <h4 style="margin-top:16px;">For Education</h4>
+        <ul>
+          <li><a href="#">Apple and Education</a></li>
+          <li><a href="#">Shop for K-12</a></li>
+          <li><a href="#">Shop for College</a></li>
+        </ul>
+        <h4 style="margin-top:16px;">For Healthcare</h4>
+        <ul>
+          <li><a href="#">Apple in Healthcare</a></li>
+          <li><a href="#">Health on Apple Watch</a></li>
+          <li><a href="#">Health Records on iPhone</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>Copyright &copy; 2025 Apple Inc. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Sales and Refunds</a>
+        <a href="#">Legal</a>
+        <a href="#">Site Map</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

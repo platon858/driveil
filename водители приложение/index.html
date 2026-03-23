@@ -6,6 +6,7 @@
   <title>DriveIL | מנהל נהיגה</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -946,6 +947,35 @@
     html.dark .auth-close { background: #1c2128; border-color: #30363d; color: #e6edf3; box-shadow: 2px 2px 0 0 #30363d; }
     .auth-close:hover { background: #0a1628; color: white; }
     .auth-modal-wrap { position: relative; }
+    /* role selector */
+    .auth-role-label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #6c757d; }
+    .auth-role-wrap { display: flex; gap: 10px; }
+    .auth-role-btn {
+      flex: 1; padding: 12px 8px; border: 2.5px solid #e2e8f0; border-radius: 12px;
+      background: white; color: #6c757d; font-size: 0.82rem; font-weight: 800;
+      cursor: pointer; font-family: inherit; transition: all 0.2s; text-align: center;
+    }
+    html.dark .auth-role-btn { background: #1c2128; border-color: #30363d; color: #8b949e; }
+    .auth-role-btn .role-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+    .auth-role-btn.active {
+      border-color: #1a73e8; color: #1a73e8; background: #e8f0fe;
+      box-shadow: 3px 3px 0 0 rgba(26,115,232,0.25);
+    }
+    html.dark .auth-role-btn.active { background: #0d1f40; border-color: #1a73e8; color: #4d9ff8; }
+    .auth-role-btn:hover:not(.active) { border-color: #0a1628; color: #0a1628; }
+    html.dark .auth-role-btn:hover:not(.active) { border-color: #e6edf3; color: #e6edf3; }
+    /* school extra fields */
+    .auth-school-fields { display: none; flex-direction: column; gap: 14px; }
+    .auth-school-fields.visible { display: flex; }
+    .auth-select {
+      padding: 12px 14px; border: 2px solid #0a1628; border-radius: 10px;
+      font-size: 0.92rem; font-family: inherit; background: white; color: #0a1628;
+      transition: border-color 0.2s; cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230a1628' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+    }
+    html.dark .auth-select { background-color: #1c2128; border-color: #30363d; color: #e6edf3; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23e6edf3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); }
+    .auth-select:focus { outline: none; border-color: #1a73e8; }
 
     /* ─── HAMBURGER ─── */
     .hamburger {
@@ -2177,6 +2207,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+const db = firebase.firestore();
 
 // Слушаем — вошёл пользователь или вышел
 auth.onAuthStateChanged(function(user) {
@@ -2216,22 +2247,44 @@ function handleOverlayClick(e) {
 
 // Переключение вкладок Войти / Регистрация
 let authMode = 'login';
+let authRole = 'student'; // 'student' или 'school'
+
 function switchAuthTab(mode) {
   authMode = mode;
   document.getElementById('tab-login').classList.toggle('active', mode === 'login');
   document.getElementById('tab-register').classList.toggle('active', mode === 'register');
-  document.getElementById('auth-name-wrap').style.display = mode === 'register' ? 'flex' : 'none';
-  document.getElementById('auth-submit-btn').textContent = mode === 'login' ? 'Войти' : 'Зарегистрироваться';
+  const isReg = mode === 'register';
+  document.getElementById('auth-name-wrap').style.display = isReg ? 'flex' : 'none';
+  document.getElementById('auth-role-block').style.display = isReg ? 'flex' : 'none';
+  document.getElementById('auth-submit-btn').textContent = isReg ? 'Зарегистрироваться' : 'Войти';
   document.getElementById('auth-error').style.display = 'none';
+  if (isReg) selectRole(authRole);
+}
+
+function selectRole(role) {
+  authRole = role;
+  document.getElementById('role-student').classList.toggle('active', role === 'student');
+  document.getElementById('role-school').classList.toggle('active', role === 'school');
+  const nameLabel = document.getElementById('auth-name-label');
+  const nameInput = document.getElementById('auth-name');
+  const schoolFields = document.getElementById('auth-school-fields');
+  if (role === 'school') {
+    nameLabel.textContent = 'Ваше имя (владелец)';
+    nameInput.placeholder = 'Матфей';
+    schoolFields.classList.add('visible');
+  } else {
+    nameLabel.textContent = 'Ваше имя';
+    nameInput.placeholder = 'Матфей';
+    schoolFields.classList.remove('visible');
+  }
 }
 
 // Войти или зарегистрироваться
 function submitAuth() {
-  const email = document.getElementById('auth-email').value.trim();
+  const email    = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
-  const name = document.getElementById('auth-name').value.trim();
-  const errEl = document.getElementById('auth-error');
-  const btn = document.getElementById('auth-submit-btn');
+  const name     = document.getElementById('auth-name').value.trim();
+  const btn      = document.getElementById('auth-submit-btn');
 
   if (!email || !password) { showAuthError('Заполни все поля'); return; }
   if (password.length < 6) { showAuthError('Пароль минимум 6 символов'); return; }
@@ -2252,19 +2305,85 @@ function submitAuth() {
       });
   } else {
     if (!name) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showAuthError('Введи своё имя'); return; }
-    auth.createUserWithEmailAndPassword(email, password)
-      .then(function(result) {
-        return result.user.updateProfile({ displayName: name });
-      })
-      .catch(function(err) {
-        btn.disabled = false;
-        btn.textContent = 'Зарегистрироваться';
-        if (err.code === 'auth/email-already-in-use') {
-          showAuthError('Этот email уже зарегистрирован');
-        } else {
-          showAuthError('Ошибка: ' + err.message);
-        }
-      });
+
+    // Если регистрируется автошкола — проверяем доп. поля
+    if (authRole === 'school') {
+      const schoolName    = document.getElementById('auth-school-name').value.trim();
+      const citySelect    = document.getElementById('auth-school-city');
+      const cityOption    = citySelect.options[citySelect.selectedIndex];
+      const schoolAddress = document.getElementById('auth-school-address').value.trim();
+      const schoolPhone   = document.getElementById('auth-school-phone').value.trim();
+      if (!schoolName) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showAuthError('Введи название автошколы'); return; }
+      if (!citySelect.value) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showAuthError('Выбери город'); return; }
+      if (!schoolAddress) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showAuthError('Введи адрес'); return; }
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(function(result) {
+          const uid = result.user.uid;
+          return result.user.updateProfile({ displayName: name }).then(function() {
+            // Сохраняем школу в Firestore
+            const lat = parseFloat(cityOption.dataset.lat);
+            const lng = parseFloat(cityOption.dataset.lng);
+            return db.collection('schools').doc(uid).set({
+              uid: uid,
+              name: schoolName,
+              ownerName: name,
+              email: email,
+              phone: schoolPhone || '',
+              address: schoolAddress,
+              city: cityOption.dataset.he || '',
+              cityEn: cityOption.dataset.en || '',
+              cityRu: cityOption.dataset.ru || '',
+              lat: lat,
+              lng: lng,
+              rating: 0,
+              students: 0,
+              pass_rate: 0,
+              price: '—',
+              badge: '',
+              region: '',
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          });
+        })
+        .then(function() {
+          // Перезагружаем маркеры если карта открыта
+          loadFirestoreSchools();
+        })
+        .catch(function(err) {
+          btn.disabled = false;
+          btn.textContent = 'Зарегистрироваться';
+          if (err.code === 'auth/email-already-in-use') {
+            showAuthError('Этот email уже зарегистрирован');
+          } else {
+            showAuthError('Ошибка: ' + err.message);
+          }
+        });
+    } else {
+      // Ученик
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(function(result) {
+          const uid = result.user.uid;
+          return result.user.updateProfile({ displayName: name }).then(function() {
+            return db.collection('users').doc(uid).set({
+              uid: uid,
+              name: name,
+              email: email,
+              role: 'student',
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          });
+        })
+        .catch(function(err) {
+          btn.disabled = false;
+          btn.textContent = 'Зарегистрироваться';
+          if (err.code === 'auth/email-already-in-use') {
+            showAuthError('Этот email уже зарегистрирован');
+          } else {
+            showAuthError('Ошибка: ' + err.message);
+          }
+        });
+    }
   }
 }
 
@@ -2819,10 +2938,46 @@ function initSchoolsMap() {
     subdomains: 'abcd', maxZoom: 19
   }).addTo(schoolsMap);
 
-  // zoom control bottom-right
   L.control.zoom({ position: 'bottomright' }).addTo(schoolsMap);
+  // Сначала показываем статичные школы, потом добавляем из Firestore
   renderMapMarkers(schools);
   updateLocateLabel();
+  loadFirestoreSchools();
+}
+
+function loadFirestoreSchools() {
+  db.collection('schools').get().then(function(snapshot) {
+    const firestoreSchools = [];
+    snapshot.forEach(function(doc) {
+      const d = doc.data();
+      if (d.lat && d.lng && d.name) {
+        firestoreSchools.push({
+          id: doc.id,
+          name: d.name,
+          city: d.city || '',
+          cityEn: d.cityEn || '',
+          cityRu: d.cityRu || '',
+          region: d.region || '',
+          rating: d.rating || 0,
+          students: d.students || 0,
+          price: d.price || '—',
+          badge: d.badge || '',
+          pass_rate: d.pass_rate || 0,
+          lat: d.lat,
+          lng: d.lng,
+          phone: d.phone || '',
+          address: d.address || '',
+          fromFirestore: true
+        });
+      }
+    });
+    if (firestoreSchools.length > 0 && schoolsMap) {
+      const combined = schools.concat(firestoreSchools);
+      renderMapMarkers(combined);
+    }
+  }).catch(function(err) {
+    console.warn('Firestore load error:', err);
+  });
 }
 
 function renderMapMarkers(list) {
@@ -3072,8 +3227,22 @@ function initScrollAnimations() {
         <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Регистрация</button>
       </div>
       <div class="auth-form">
+        <!-- Блок выбора роли — только при регистрации -->
+        <div id="auth-role-block" style="display:none; flex-direction:column; gap:8px;">
+          <span class="auth-role-label">Я регистрируюсь как:</span>
+          <div class="auth-role-wrap">
+            <button class="auth-role-btn active" id="role-student" onclick="selectRole('student')">
+              <span class="role-icon">🎓</span>Ученик
+            </button>
+            <button class="auth-role-btn" id="role-school" onclick="selectRole('school')">
+              <span class="role-icon">🏫</span>Автошкола
+            </button>
+          </div>
+        </div>
+
+        <!-- Общие поля -->
         <div class="auth-input-wrap" id="auth-name-wrap" style="display:none;">
-          <label>Имя</label>
+          <label id="auth-name-label">Имя</label>
           <input class="auth-input" type="text" id="auth-name" placeholder="Матфей"/>
         </div>
         <div class="auth-input-wrap">
@@ -3084,6 +3253,47 @@ function initScrollAnimations() {
           <label>Пароль</label>
           <input class="auth-input" type="password" id="auth-password" placeholder="Минимум 6 символов"/>
         </div>
+
+        <!-- Поля только для автошколы -->
+        <div class="auth-school-fields" id="auth-school-fields">
+          <div class="auth-input-wrap">
+            <label>Название автошколы</label>
+            <input class="auth-input" type="text" id="auth-school-name" placeholder="например, Drive Academy"/>
+          </div>
+          <div class="auth-input-wrap">
+            <label>Город</label>
+            <select class="auth-select" id="auth-school-city">
+              <option value="">— Выбрать город —</option>
+              <option value="tel-aviv" data-lat="32.0853" data-lng="34.7818" data-he="תל אביב" data-en="Tel Aviv" data-ru="Тель-Авив">Тель-Авив</option>
+              <option value="jerusalem" data-lat="31.7683" data-lng="35.2137" data-he="ירושלים" data-en="Jerusalem" data-ru="Иерусалим">Иерусалим</option>
+              <option value="haifa" data-lat="32.7940" data-lng="34.9896" data-he="חיפה" data-en="Haifa" data-ru="Хайфа">Хайфа</option>
+              <option value="beer-sheva" data-lat="31.2518" data-lng="34.7913" data-he="באר שבע" data-en="Beer Sheva" data-ru="Беэр-Шева">Беэр-Шева</option>
+              <option value="rishon" data-lat="31.9730" data-lng="34.7925" data-he="ראשון לציון" data-en="Rishon LeZion" data-ru="Ришон-ле-Цион">Ришон-ле-Цион</option>
+              <option value="petah-tikva" data-lat="32.0875" data-lng="34.8867" data-he="פתח תקווה" data-en="Petah Tikva" data-ru="Петах-Тиква">Петах-Тиква</option>
+              <option value="ashdod" data-lat="31.8044" data-lng="34.6553" data-he="אשדוד" data-en="Ashdod" data-ru="Ашдод">Ашдод</option>
+              <option value="netanya" data-lat="32.3328" data-lng="34.8600" data-he="נתניה" data-en="Netanya" data-ru="Нетания">Нетания</option>
+              <option value="herzliya" data-lat="32.1663" data-lng="34.8439" data-he="הרצליה" data-en="Herzliya" data-ru="Герцлия">Герцлия</option>
+              <option value="holon" data-lat="32.0115" data-lng="34.7737" data-he="חולון" data-en="Holon" data-ru="Холон">Холон</option>
+              <option value="bat-yam" data-lat="32.0228" data-lng="34.7503" data-he="בת ים" data-en="Bat Yam" data-ru="Бат-Ям">Бат-Ям</option>
+              <option value="rehovot" data-lat="31.8950" data-lng="34.8122" data-he="רחובות" data-en="Rehovot" data-ru="Реховот">Реховот</option>
+              <option value="ashkelon" data-lat="31.6688" data-lng="34.5714" data-he="אשקלון" data-en="Ashkelon" data-ru="Ашкелон">Ашкелон</option>
+              <option value="kfar-saba" data-lat="32.1784" data-lng="34.9070" data-he="כפר סבא" data-en="Kfar Saba" data-ru="Кфар-Саба">Кфар-Саба</option>
+              <option value="nazareth" data-lat="32.6996" data-lng="35.3035" data-he="נצרת" data-en="Nazareth" data-ru="Назарет">Назарет</option>
+              <option value="modiin" data-lat="31.8934" data-lng="35.0103" data-he="מודיעין" data-en="Modiin" data-ru="Модиин">Модиин</option>
+              <option value="tiberias" data-lat="32.7940" data-lng="35.5300" data-he="טבריה" data-en="Tiberias" data-ru="Тверия">Тверия</option>
+              <option value="eilat" data-lat="29.5581" data-lng="34.9482" data-he="אילת" data-en="Eilat" data-ru="Эйлат">Эйлат</option>
+            </select>
+          </div>
+          <div class="auth-input-wrap">
+            <label>Адрес (улица, номер)</label>
+            <input class="auth-input" type="text" id="auth-school-address" placeholder="ул. Алленби, 45"/>
+          </div>
+          <div class="auth-input-wrap">
+            <label>Телефон</label>
+            <input class="auth-input" type="tel" id="auth-school-phone" placeholder="+972-50-000-0000"/>
+          </div>
+        </div>
+
         <div class="auth-error" id="auth-error"></div>
         <button class="auth-submit" id="auth-submit-btn" onclick="submitAuth()">Войти</button>
       </div>
