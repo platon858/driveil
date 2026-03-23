@@ -1438,9 +1438,9 @@
       <div class="stats-grid" id="stats-grid">
         <div class="stat-card">
           <div class="stat-icon">🏫</div>
-          <div class="stat-num" data-target="1247" data-suffix="">0</div>
+          <div class="stat-num" id="stat-schools-count" data-target="0" data-suffix="">0</div>
           <div class="stat-label" data-i18n="stat1">בתי ספר רשומים</div>
-          <div class="stat-source" data-i18n="stat1_src">מקור: משרד התחבורה 2024</div>
+          <div class="stat-source" data-i18n="stat1_src">DriveIL</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">🎓</div>
@@ -1701,13 +1701,7 @@
             <div class="form-group">
               <label data-i18n="reg_school">בית ספר לנהיגה</label>
               <select id="reg-school">
-                <option value="" data-i18n="reg_select">-- בחר --</option>
-                <option>נהיגה ישראלית - תל אביב</option>
-                <option>בית ספר רגב - חיפה</option>
-                <option>מרכז הנהיגה - ירושלים</option>
-                <option>נהיגה בטוחה - באר שבע</option>
-                <option>אקדמיית הנהיגה - נצרת</option>
-                <option>כביש פתוח - ראשון לציון</option>
+                <option value="">-- Выбрать --</option>
               </select>
             </div>
             <div class="form-group">
@@ -2319,11 +2313,18 @@ function submitAuth() {
       if (!citySelect.value) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showAuthError('Выбери город'); return; }
       if (!schoolAddress) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showAuthError('Введи адрес'); return; }
 
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(function(result) {
+      // Проверяем дублирующийся телефон
+      const phoneCheckPromise = schoolPhone
+        ? db.collection('schools').where('phone', '==', schoolPhone).get().then(function(snap) {
+            if (!snap.empty) throw { code: 'phone-duplicate' };
+          })
+        : Promise.resolve();
+
+      phoneCheckPromise.then(function() {
+        return auth.createUserWithEmailAndPassword(email, password);
+      }).then(function(result) {
           const uid = result.user.uid;
           return result.user.updateProfile({ displayName: name }).then(function() {
-            // Сохраняем школу в Firestore
             const lat = parseFloat(cityOption.dataset.lat);
             const lng = parseFloat(cityOption.dataset.lng);
             return db.collection('schools').doc(uid).set({
@@ -2348,19 +2349,19 @@ function submitAuth() {
             });
           });
         })
-        .then(function() {
-          // Перезагружаем маркеры если карта открыта
-          loadFirestoreSchools();
-        })
+        .then(function() { loadFirestoreSchools(); })
         .catch(function(err) {
           btn.disabled = false;
           btn.textContent = 'Зарегистрироваться';
-          if (err.code === 'auth/email-already-in-use') {
+          if (err.code === 'phone-duplicate') {
+            showAuthError('Этот номер телефона уже зарегистрирован');
+          } else if (err.code === 'auth/email-already-in-use') {
             showAuthError('Этот email уже зарегистрирован');
           } else {
             showAuthError('Ошибка: ' + err.message);
           }
         });
+      return;
     } else {
       // Ученик
       auth.createUserWithEmailAndPassword(email, password)
@@ -2999,6 +3000,26 @@ function loadFirestoreSchools() {
     });
     renderSchools(currentSchoolFilter);
     if (schoolsMap) renderMapMarkers(schools);
+
+    // Обновляем счётчик на главной
+    const countEl = document.getElementById('stat-schools-count');
+    if (countEl) {
+      countEl.dataset.target = schools.length;
+      countEl.textContent = schools.length;
+    }
+
+    // Обновляем дропдаун выбора школы в форме регистрации
+    const regSelect = document.getElementById('reg-school');
+    if (regSelect) {
+      const selectLbl = currentLang === 'ru' ? '-- Выбрать --' : currentLang === 'en' ? '-- Select --' : '-- בחר --';
+      regSelect.innerHTML = `<option value="">${selectLbl}</option>` +
+        schools.map(s => {
+          const name = currentLang === 'ru' ? (s.cityRu ? s.name + ' — ' + s.cityRu : s.name)
+                     : currentLang === 'en' ? (s.cityEn ? s.name + ' — ' + s.cityEn : s.name)
+                     : (s.city ? s.name + ' - ' + s.city : s.name);
+          return `<option value="${s.id}">${name}</option>`;
+        }).join('');
+    }
   }, function(err) {
     console.error('Firestore error:', err);
     const list2 = document.getElementById('school-list');
