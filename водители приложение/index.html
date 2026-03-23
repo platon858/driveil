@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DriveIL | מנהל נהיגה</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -853,6 +855,98 @@
     /* Mobile nav */
     html.dark .mobile-nav { background: #0a1628; border-color: #30363d; }
 
+    /* ─── AUTH BUTTON (header) ─── */
+    .auth-btn {
+      padding: 7px 18px; border-radius: 50px;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      background: transparent; color: white;
+      font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .auth-btn:hover { background: white; color: #0a1628; }
+    .user-chip {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 14px 4px 4px; border-radius: 50px;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      cursor: default;
+    }
+    .user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a73e8, #ff6b35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 900; color: white;
+    }
+    .user-name { font-size: 0.82rem; font-weight: 700; color: white; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .logout-btn {
+      width: 22px; height: 22px; border-radius: 50%; border: none;
+      background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7);
+      cursor: pointer; font-size: 0.75rem; display: flex;
+      align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .logout-btn:hover { background: #e74c3c; color: white; }
+
+    /* ─── AUTH MODAL ─── */
+    .auth-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .auth-modal {
+      background: white; border: 2.5px solid #0a1628; border-radius: 24px;
+      padding: 36px 32px; width: 100%; max-width: 420px;
+      box-shadow: 6px 6px 0 0 #0a1628;
+      animation: modalPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    html.dark .auth-modal { background: #161b22; border-color: #30363d; box-shadow: 6px 6px 0 0 #30363d; }
+    .auth-logo { font-size: 1.6rem; font-weight: 900; color: #0a1628; margin-bottom: 6px; }
+    .auth-logo span { color: #ff6b35; }
+    html.dark .auth-logo { color: #e6edf3; }
+    .auth-subtitle { font-size: 0.85rem; color: #6c757d; margin-bottom: 28px; }
+    .auth-tabs { display: flex; gap: 4px; background: #f0f4ff; border-radius: 12px; padding: 4px; margin-bottom: 28px; }
+    html.dark .auth-tabs { background: #1c2128; }
+    .auth-tab {
+      flex: 1; padding: 9px; border: none; border-radius: 9px;
+      font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      font-family: inherit; background: transparent; color: #6c757d;
+      transition: all 0.2s;
+    }
+    .auth-tab.active { background: white; color: #0a1628; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    html.dark .auth-tab.active { background: #0a1628; color: white; }
+    .auth-form { display: flex; flex-direction: column; gap: 14px; }
+    .auth-input-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .auth-input-wrap label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #6c757d; }
+    .auth-input {
+      padding: 12px 14px; border: 2px solid #0a1628; border-radius: 10px;
+      font-size: 0.92rem; font-family: inherit; background: white; color: #0a1628;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    html.dark .auth-input { background: #1c2128; border-color: #30363d; color: #e6edf3; }
+    .auth-input:focus { outline: none; border-color: #1a73e8; box-shadow: 3px 3px 0 0 rgba(26,115,232,0.25); }
+    .auth-submit {
+      padding: 14px; border: 2.5px solid #0a1628; border-radius: 12px;
+      background: #1a73e8; color: white; font-size: 0.95rem; font-weight: 800;
+      cursor: pointer; font-family: inherit; margin-top: 4px;
+      box-shadow: 4px 4px 0 0 #0a1628; transition: all 0.2s;
+    }
+    html.dark .auth-submit { border-color: #1a73e8; box-shadow: 4px 4px 0 0 #1a73e8; }
+    .auth-submit:hover { box-shadow: 6px 6px 0 0 #0a1628; transform: translate(-2px,-2px); background: #0d5bd4; }
+    .auth-error { padding: 10px 14px; border-radius: 10px; background: #fdecea; color: #c0392b; font-size: 0.82rem; font-weight: 600; display: none; }
+    html.dark .auth-error { background: #2d1117; color: #f85149; }
+    .auth-close {
+      position: absolute; top: 16px; right: 16px; /* adjusted per RTL */
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 2px solid #0a1628; background: white;
+      cursor: pointer; font-size: 1rem; display: flex;
+      align-items: center; justify-content: center;
+      box-shadow: 2px 2px 0 0 #0a1628; transition: all 0.18s;
+    }
+    html.dark .auth-close { background: #1c2128; border-color: #30363d; color: #e6edf3; box-shadow: 2px 2px 0 0 #30363d; }
+    .auth-close:hover { background: #0a1628; color: white; }
+    .auth-modal-wrap { position: relative; }
+
     /* ─── HAMBURGER ─── */
     .hamburger {
       display: none; flex-direction: column; justify-content: center; gap: 5px;
@@ -1264,6 +1358,9 @@
       <button class="nav-btn" onclick="showPage('register')" id="nav-register"><span class="nav-spotlight"></span><span class="nav-label" data-i18n="nav_register_t">הרשמה</span></button>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+      <div id="auth-header-btn">
+        <button class="auth-btn" onclick="openAuthModal()" id="login-btn" data-i18n="nav_login">Войти</button>
+      </div>
       <button class="theme-toggle light-mode" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
         <div class="tt-thumb-bg" id="tt-thumb-bg"></div>
         <div class="tt-icon tt-left" id="tt-icon-left"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
@@ -2069,6 +2166,118 @@ function applyTranslations() {
   });
 }
 
+// ── FIREBASE ──
+const firebaseConfig = {
+  apiKey: "AIzaSyCKpwPcFZqsJPBv5y3kRxz3OeLKQ8kijJM",
+  authDomain: "driveil-6283c.firebaseapp.com",
+  projectId: "driveil-6283c",
+  storageBucket: "driveil-6283c.firebasestorage.app",
+  messagingSenderId: "320521092801",
+  appId: "1:320521092801:web:c27688243c96061fac5e40"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// Слушаем — вошёл пользователь или вышел
+auth.onAuthStateChanged(function(user) {
+  const wrap = document.getElementById('auth-header-btn');
+  if (user) {
+    // Пользователь вошёл — показываем его имя
+    const name = user.displayName || user.email.split('@')[0];
+    const letter = name.charAt(0).toUpperCase();
+    wrap.innerHTML = `
+      <div class="user-chip">
+        <div class="user-avatar">${letter}</div>
+        <span class="user-name">${name}</span>
+        <button class="logout-btn" onclick="logoutUser()" title="Выйти">✕</button>
+      </div>`;
+    closeAuthModal();
+  } else {
+    // Не вошёл — показываем кнопку "Войти"
+    wrap.innerHTML = `<button class="auth-btn" onclick="openAuthModal()">Войти</button>`;
+  }
+});
+
+// Открыть / закрыть модальное окно
+function openAuthModal() {
+  document.getElementById('auth-overlay').style.display = 'flex';
+  document.getElementById('auth-email').focus();
+}
+function closeAuthModal() {
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+  document.getElementById('auth-name').value = '';
+}
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('auth-overlay')) closeAuthModal();
+}
+
+// Переключение вкладок Войти / Регистрация
+let authMode = 'login';
+function switchAuthTab(mode) {
+  authMode = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+  document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+  document.getElementById('auth-name-wrap').style.display = mode === 'register' ? 'flex' : 'none';
+  document.getElementById('auth-submit-btn').textContent = mode === 'login' ? 'Войти' : 'Зарегистрироваться';
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+// Войти или зарегистрироваться
+function submitAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const name = document.getElementById('auth-name').value.trim();
+  const errEl = document.getElementById('auth-error');
+  const btn = document.getElementById('auth-submit-btn');
+
+  if (!email || !password) { showAuthError('Заполни все поля'); return; }
+  if (password.length < 6) { showAuthError('Пароль минимум 6 символов'); return; }
+
+  btn.textContent = '...';
+  btn.disabled = true;
+
+  if (authMode === 'login') {
+    auth.signInWithEmailAndPassword(email, password)
+      .catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'Войти';
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+          showAuthError('Неверный email или пароль');
+        } else {
+          showAuthError('Ошибка: ' + err.message);
+        }
+      });
+  } else {
+    if (!name) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showAuthError('Введи своё имя'); return; }
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(function(result) {
+        return result.user.updateProfile({ displayName: name });
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'Зарегистрироваться';
+        if (err.code === 'auth/email-already-in-use') {
+          showAuthError('Этот email уже зарегистрирован');
+        } else {
+          showAuthError('Ошибка: ' + err.message);
+        }
+      });
+  }
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function logoutUser() {
+  auth.signOut();
+}
+
 // ── Theme ──
 function applyTheme(dark) {
   const btn = document.getElementById('theme-toggle');
@@ -2851,5 +3060,35 @@ function initScrollAnimations() {
   });
 }
 </script>
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="auth-overlay" style="display:none;" onclick="handleOverlayClick(event)">
+  <div class="auth-modal-wrap">
+    <div class="auth-modal" id="auth-modal">
+      <button class="auth-close" onclick="closeAuthModal()">✕</button>
+      <div class="auth-logo">Drive<span>IL</span></div>
+      <div class="auth-subtitle" id="auth-subtitle">ברוך הבא — הכנס לחשבון שלך</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Войти</button>
+        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Регистрация</button>
+      </div>
+      <div class="auth-form">
+        <div class="auth-input-wrap" id="auth-name-wrap" style="display:none;">
+          <label>Имя</label>
+          <input class="auth-input" type="text" id="auth-name" placeholder="Матфей"/>
+        </div>
+        <div class="auth-input-wrap">
+          <label>Email</label>
+          <input class="auth-input" type="email" id="auth-email" placeholder="example@gmail.com"/>
+        </div>
+        <div class="auth-input-wrap">
+          <label>Пароль</label>
+          <input class="auth-input" type="password" id="auth-password" placeholder="Минимум 6 символов"/>
+        </div>
+        <div class="auth-error" id="auth-error"></div>
+        <button class="auth-submit" id="auth-submit-btn" onclick="submitAuth()">Войти</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
