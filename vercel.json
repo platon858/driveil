@@ -1,0 +1,4 @@
+{
+  "outputDirectory": "водители приложение",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
