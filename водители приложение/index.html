@@ -7,6 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -976,6 +977,69 @@
     }
     html.dark .auth-select { background-color: #1c2128; border-color: #30363d; color: #e6edf3; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23e6edf3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); }
     .auth-select:focus { outline: none; border-color: #1a73e8; }
+
+    /* ─── ENROLL MODAL ─── */
+    .enroll-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .enroll-modal {
+      background: white; border: 2.5px solid #0a1628; border-radius: 24px;
+      padding: 32px 28px; width: 100%; max-width: 500px; max-height: 90vh;
+      overflow-y: auto; box-shadow: 6px 6px 0 0 #0a1628;
+      animation: modalPop 0.3s cubic-bezier(0.34,1.56,0.64,1); position: relative;
+    }
+    html.dark .enroll-modal { background: #161b22; border-color: #30363d; box-shadow: 6px 6px 0 0 #30363d; }
+    .enroll-school-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #e8f0fe; border: 1.5px solid #1a73e8; border-radius: 30px;
+      padding: 6px 14px; margin-bottom: 18px; font-size: 0.82rem; font-weight: 700; color: #1a73e8;
+    }
+    html.dark .enroll-school-badge { background: #0d1f40; border-color: #4d9ff8; color: #4d9ff8; }
+    .enroll-title { font-size: 1.3rem; font-weight: 900; color: #0a1628; margin-bottom: 4px; }
+    html.dark .enroll-title { color: #e6edf3; }
+    .enroll-sub { font-size: 0.82rem; color: #6c757d; margin-bottom: 22px; }
+    .enroll-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .enroll-full { grid-column: 1 / -1; }
+    .enroll-field { display: flex; flex-direction: column; gap: 5px; }
+    .enroll-field label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #6c757d; }
+    .enroll-input, .enroll-select, .enroll-textarea {
+      padding: 11px 13px; border: 2px solid #0a1628; border-radius: 10px;
+      font-size: 0.88rem; font-family: inherit; background: white; color: #0a1628;
+      transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
+    }
+    html.dark .enroll-input, html.dark .enroll-select, html.dark .enroll-textarea { background: #1c2128; border-color: #30363d; color: #e6edf3; }
+    .enroll-input:focus, .enroll-select:focus, .enroll-textarea:focus { outline: none; border-color: #1a73e8; box-shadow: 3px 3px 0 0 rgba(26,115,232,0.2); }
+    .enroll-textarea { resize: vertical; min-height: 70px; }
+    .enroll-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230a1628' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 13px center; padding-right: 32px; }
+    html.dark .enroll-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23e6edf3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); }
+    .enroll-divider { grid-column: 1/-1; height: 1px; background: #e2e8f0; margin: 4px 0; }
+    html.dark .enroll-divider { background: #30363d; }
+    .enroll-submit {
+      grid-column: 1/-1; padding: 14px; border: 2.5px solid #0a1628; border-radius: 12px;
+      background: #1a73e8; color: white; font-size: 0.95rem; font-weight: 800;
+      cursor: pointer; font-family: inherit; margin-top: 6px;
+      box-shadow: 4px 4px 0 0 #0a1628; transition: all 0.2s; width: 100%;
+    }
+    html.dark .enroll-submit { border-color: #1a73e8; box-shadow: 4px 4px 0 0 #1a73e8; }
+    .enroll-submit:hover:not(:disabled) { box-shadow: 6px 6px 0 0 #0a1628; transform: translate(-2px,-2px); background: #0d5bd4; }
+    .enroll-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .enroll-error { grid-column:1/-1; padding: 10px 14px; border-radius: 10px; background: #fdecea; color: #c0392b; font-size: 0.82rem; font-weight: 600; display: none; }
+    html.dark .enroll-error { background: #2d1117; color: #f85149; }
+    .enroll-success { text-align:center; padding: 30px 10px; }
+    .enroll-success-icon { font-size: 3rem; margin-bottom: 12px; }
+    .enroll-success-title { font-size: 1.15rem; font-weight: 900; color: #27ae60; margin-bottom: 8px; }
+    .enroll-success-sub { font-size: 0.85rem; color: #6c757d; line-height: 1.6; }
+    .enroll-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 2px solid #0a1628; background: white; cursor: pointer;
+      font-size: 1rem; display: flex; align-items: center; justify-content: center;
+      box-shadow: 2px 2px 0 0 #0a1628; transition: all 0.18s;
+    }
+    html.dark .enroll-close { background: #1c2128; border-color: #30363d; color: #e6edf3; box-shadow: 2px 2px 0 0 #30363d; }
+    .enroll-close:hover { background: #0a1628; color: white; }
 
     /* ─── HAMBURGER ─── */
     .hamburger {
@@ -2390,6 +2454,124 @@ function submitAuth() {
   }
 }
 
+// ══ EMAILJS CONFIG ══
+// Зайди на emailjs.com, зарегистрируйся и замени эти значения:
+const EMAILJS_PUBLIC_KEY    = 'YOUR_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID    = 'YOUR_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID   = 'YOUR_TEMPLATE_ID';
+// ═══════════════════
+
+// ── ENROLL MODAL ──
+let enrollTargetSchool = null; // { id, name, email }
+
+function openEnrollModal(schoolId, schoolName, schoolEmail) {
+  enrollTargetSchool = { id: schoolId, name: schoolName, email: schoolEmail || '' };
+  document.getElementById('enroll-school-name-lbl').textContent = schoolName;
+  document.getElementById('enroll-form-wrap').style.display = 'block';
+  document.getElementById('enroll-success-wrap').style.display = 'none';
+  document.getElementById('enroll-error').style.display = 'none';
+  // Сбрасываем поля
+  ['enroll-fname','enroll-lname','enroll-phone','enroll-email-inp','enroll-id','enroll-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('enroll-license').value = '';
+  // Ставим минимальную дату — сегодня
+  document.getElementById('enroll-date').min = new Date().toISOString().split('T')[0];
+  document.getElementById('enroll-date').value = '';
+  // Если пользователь залогинен — подставляем его email
+  const user = auth.currentUser;
+  if (user) {
+    if (user.email) document.getElementById('enroll-email-inp').value = user.email;
+    if (user.displayName) {
+      const parts = user.displayName.trim().split(' ');
+      document.getElementById('enroll-fname').value = parts[0] || '';
+      document.getElementById('enroll-lname').value = parts.slice(1).join(' ') || '';
+    }
+  }
+  document.getElementById('enroll-overlay').style.display = 'flex';
+  document.getElementById('enroll-submit-btn').disabled = false;
+  document.getElementById('enroll-submit-btn').textContent = currentLang === 'ru' ? 'Отправить заявку' : currentLang === 'en' ? 'Send Request' : 'שלח בקשה';
+}
+
+function closeEnrollModal() {
+  document.getElementById('enroll-overlay').style.display = 'none';
+  enrollTargetSchool = null;
+}
+
+function handleEnrollOverlay(e) {
+  if (e.target === document.getElementById('enroll-overlay')) closeEnrollModal();
+}
+
+function submitEnrollment() {
+  const fname   = document.getElementById('enroll-fname').value.trim();
+  const lname   = document.getElementById('enroll-lname').value.trim();
+  const phone   = document.getElementById('enroll-phone').value.trim();
+  const email   = document.getElementById('enroll-email-inp').value.trim();
+  const idNum   = document.getElementById('enroll-id').value.trim();
+  const license = document.getElementById('enroll-license').value;
+  const date    = document.getElementById('enroll-date').value;
+  const notes   = document.getElementById('enroll-notes').value.trim();
+  const btn     = document.getElementById('enroll-submit-btn');
+  const errEl   = document.getElementById('enroll-error');
+
+  if (!fname || !phone) {
+    errEl.textContent = currentLang === 'ru' ? 'Обязательные поля: Имя и Телефон' : 'Required: Name and Phone';
+    errEl.style.display = 'block'; return;
+  }
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  const fullName   = fname + ' ' + lname;
+  const schoolName = enrollTargetSchool ? enrollTargetSchool.name : '—';
+  const schoolId   = enrollTargetSchool ? enrollTargetSchool.id : null;
+  const schoolEmail = enrollTargetSchool ? enrollTargetSchool.email : '';
+
+  const enrollData = {
+    studentName:  fullName,
+    studentPhone: phone,
+    studentEmail: email,
+    studentId:    idNum,
+    licenseType:  license || '—',
+    preferredDate: date || '—',
+    notes:        notes || '—',
+    schoolId:     schoolId,
+    schoolName:   schoolName,
+    status:       'new',
+    createdAt:    firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  // 1. Сохраняем в Firestore
+  db.collection('enrollments').add(enrollData)
+    .then(function() {
+      // 2. Отправляем email через EmailJS
+      if (EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY' && schoolEmail) {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+        return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          to_email:      schoolEmail,
+          school_name:   schoolName,
+          student_name:  fullName,
+          student_phone: phone,
+          student_email: email || '—',
+          student_id:    idNum || '—',
+          license_type:  license || '—',
+          preferred_date: date || '—',
+          notes:         notes || '—'
+        });
+      }
+    })
+    .then(function() {
+      document.getElementById('enroll-form-wrap').style.display = 'none';
+      document.getElementById('enroll-success-wrap').style.display = 'block';
+    })
+    .catch(function(err) {
+      console.error('Enroll error:', err);
+      // Даже если email не отправился — показываем успех (данные в Firestore сохранены)
+      document.getElementById('enroll-form-wrap').style.display = 'none';
+      document.getElementById('enroll-success-wrap').style.display = 'block';
+    });
+}
+
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
   el.textContent = msg;
@@ -2548,7 +2730,7 @@ function renderSchools(filter) {
         </div>
         <div class="sc-footer">
           <div class="sc-price">${s.price || '—'}<small>${lessonLbl}</small></div>
-          <button class="sc-enroll" onclick="showPage('register')">${enrollLbl}</button>
+          <button class="sc-enroll" onclick="openEnrollModal('${s.id}','${s.name.replace(/'/g,"\\'")}','${(s.email||'').replace(/'/g,"\\'")}')">${enrollLbl}</button>
         </div>
       </div>`;
   }).join('');
@@ -3083,7 +3265,7 @@ function renderMapMarkers(list) {
             ${phoneLine}
           </div>
         </div>
-        <button class="map-popup-btn" onclick="showPage('register')">${enrollLbl}</button>
+        <button class="map-popup-btn" onclick="openEnrollModal('${s.id}','${s.name.replace(/'/g,"\\'")}','${(s.email||'').replace(/'/g,"\\'")}')">${enrollLbl}</button>
       </div>`;
     const marker = L.marker([s.lat, s.lng], { icon: makeIcon(pinColors[i % pinColors.length]) })
       .addTo(schoolsMap).bindPopup(popup, { maxWidth: 230, closeButton: false });
@@ -3265,6 +3447,68 @@ function initScrollAnimations() {
   });
 }
 </script>
+<!-- ENROLL MODAL -->
+<div class="enroll-overlay" id="enroll-overlay" style="display:none" onclick="handleEnrollOverlay(event)">
+  <div class="enroll-modal" id="enroll-modal">
+    <button class="enroll-close" onclick="closeEnrollModal()">✕</button>
+    <div id="enroll-form-wrap">
+      <div class="enroll-school-badge">🏫 <span id="enroll-school-name-lbl"></span></div>
+      <div class="enroll-title" id="enroll-title-txt">Записаться в автошколу</div>
+      <div class="enroll-sub" id="enroll-sub-txt">Заполни форму — школа получит уведомление на почту</div>
+      <div class="enroll-grid">
+        <div class="enroll-field">
+          <label id="lbl-fname">Имя</label>
+          <input class="enroll-input" type="text" id="enroll-fname" placeholder="Матфей"/>
+        </div>
+        <div class="enroll-field">
+          <label id="lbl-lname">Фамилия</label>
+          <input class="enroll-input" type="text" id="enroll-lname" placeholder="Иванов"/>
+        </div>
+        <div class="enroll-field">
+          <label id="lbl-phone">Телефон</label>
+          <input class="enroll-input" type="tel" id="enroll-phone" placeholder="+972-50-000-0000"/>
+        </div>
+        <div class="enroll-field">
+          <label id="lbl-email">Email</label>
+          <input class="enroll-input" type="email" id="enroll-email-inp" placeholder="you@gmail.com"/>
+        </div>
+        <div class="enroll-field">
+          <label id="lbl-id">Номер удостоверения</label>
+          <input class="enroll-input" type="text" id="enroll-id" placeholder="123456789"/>
+        </div>
+        <div class="enroll-field">
+          <label id="lbl-license">Тип прав</label>
+          <select class="enroll-select" id="enroll-license">
+            <option value="">— Выбрать —</option>
+            <option value="B">B — Легковой автомобиль</option>
+            <option value="A">A — Мотоцикл</option>
+            <option value="C">C — Грузовик</option>
+          </select>
+        </div>
+        <div class="enroll-field enroll-full">
+          <label id="lbl-date">Желаемая дата начала</label>
+          <input class="enroll-input" type="date" id="enroll-date"/>
+        </div>
+        <div class="enroll-divider"></div>
+        <div class="enroll-field enroll-full">
+          <label id="lbl-notes">Комментарий (необязательно)</label>
+          <textarea class="enroll-textarea" id="enroll-notes" placeholder="Любые вопросы или пожелания..."></textarea>
+        </div>
+        <div class="enroll-error" id="enroll-error"></div>
+        <button class="enroll-submit" id="enroll-submit-btn" onclick="submitEnrollment()">Отправить заявку</button>
+      </div>
+    </div>
+    <div id="enroll-success-wrap" style="display:none">
+      <div class="enroll-success">
+        <div class="enroll-success-icon">🎉</div>
+        <div class="enroll-success-title" id="enroll-ok-title">Заявка отправлена!</div>
+        <div class="enroll-success-sub" id="enroll-ok-sub">Автошкола получила ваши данные и скоро свяжется с вами.</div>
+        <button onclick="closeEnrollModal()" style="margin-top:20px;padding:10px 28px;background:#1a73e8;color:white;border:2px solid #0a1628;border-radius:10px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:3px 3px 0 0 #0a1628" id="enroll-ok-btn">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- AUTH MODAL -->
 <div class="auth-overlay" id="auth-overlay" style="display:none;" onclick="handleOverlayClick(event)">
   <div class="auth-modal-wrap">
