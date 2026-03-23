@@ -2271,6 +2271,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+emailjs.init('eRJ-MZjHIVvd2WeQw');
 
 // Слушаем — вошёл пользователь или вышел
 auth.onAuthStateChanged(function(user) {
@@ -2548,8 +2549,7 @@ function submitEnrollment() {
   db.collection('enrollments').add(enrollData)
     .then(function() {
       // 2. Отправляем email через EmailJS
-      if (EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY' && schoolEmail) {
-        emailjs.init(EMAILJS_PUBLIC_KEY);
+      if (schoolEmail) {
         return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
           to_email:      schoolEmail,
           school_name:   schoolName,
@@ -3179,7 +3179,8 @@ function loadFirestoreSchools() {
           lat: d.lat || null,
           lng: d.lng || null,
           phone: d.phone || '',
-          address: d.address || ''
+          address: d.address || '',
+          email: d.email || ''
         });
       }
     });
