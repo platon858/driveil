@@ -979,6 +979,65 @@
     html.dark .auth-select { background-color: #1c2128; border-color: #30363d; color: #e6edf3; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23e6edf3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); }
     .auth-select:focus { outline: none; border-color: #1a73e8; }
 
+    /* ─── SCHOOL PROFILE MODAL ─── */
+    .school-profile-overlay {
+      position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
+      display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;
+    }
+    .school-profile-modal {
+      background:white;border:2.5px solid #0a1628;border-radius:24px;width:100%;max-width:560px;
+      box-shadow:6px 6px 0 0 #0a1628;animation:modalPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      position:relative;overflow:hidden;margin:auto;
+    }
+    html.dark .school-profile-modal{background:#161b22;border-color:#30363d;box-shadow:6px 6px 0 0 #30363d;}
+    .sp-header{background:linear-gradient(135deg,#0a1628,#1a73e8);padding:28px 28px 20px;color:white;}
+    .sp-avatar{width:60px;height:60px;border-radius:14px;border:3px solid rgba(255,255,255,0.3);
+      display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;
+      background:rgba(255,255,255,0.15);margin-bottom:12px;}
+    .sp-name{font-size:1.3rem;font-weight:900;margin-bottom:4px;}
+    .sp-city{font-size:0.85rem;opacity:0.8;margin-bottom:2px;}
+    .sp-address{font-size:0.78rem;opacity:0.65;}
+    .sp-phone{font-size:0.82rem;color:#7dd3fc;margin-top:4px;}
+    .sp-body{padding:24px 28px;}
+    .sp-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+    .sp-stat{background:#f0f4ff;border-radius:12px;padding:14px 8px;text-align:center;border:1.5px solid #e2e8f0;}
+    html.dark .sp-stat{background:#1c2128;border-color:#30363d;}
+    .sp-stat-val{font-size:1.2rem;font-weight:900;color:#0a1628;}
+    html.dark .sp-stat-val{color:#e6edf3;}
+    .sp-stat-lbl{font-size:0.6rem;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:0.06em;margin-top:3px;}
+    /* Stars rating */
+    .sp-rating-section{margin-bottom:20px;}
+    .sp-section-title{font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#6c757d;margin-bottom:8px;}
+    .stars-display{display:flex;gap:4px;align-items:center;}
+    .star-btn{font-size:1.6rem;cursor:pointer;background:none;border:none;padding:0;line-height:1;transition:transform 0.15s;color:#d1d5db;}
+    .star-btn.lit{color:#f59e0b;}
+    .star-btn:hover{transform:scale(1.2);}
+    .rating-count{font-size:0.78rem;color:#6c757d;margin-left:8px;}
+    .rating-user-note{font-size:0.75rem;color:#27ae60;margin-top:4px;display:none;}
+    /* Instructors */
+    .sp-instructors{margin-bottom:20px;}
+    .instructor-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+    .instructor-chip{padding:6px 14px;background:#f0f4ff;border:1.5px solid #0a1628;border-radius:20px;font-size:0.8rem;font-weight:700;color:#0a1628;}
+    html.dark .instructor-chip{background:#1c2128;border-color:#30363d;color:#e6edf3;}
+    .instructor-empty{font-size:0.82rem;color:#6c757d;font-style:italic;}
+    /* Edit panel */
+    .sp-edit-section{background:#f8faff;border:1.5px dashed #1a73e8;border-radius:14px;padding:18px;margin-bottom:20px;}
+    html.dark .sp-edit-section{background:#0d1f40;border-color:#4d9ff8;}
+    .sp-edit-title{font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#1a73e8;margin-bottom:12px;}
+    .sp-edit-row{display:flex;gap:8px;margin-bottom:10px;align-items:center;}
+    .sp-edit-input{flex:1;padding:9px 12px;border:2px solid #0a1628;border-radius:10px;font-size:0.85rem;font-family:inherit;background:white;color:#0a1628;}
+    html.dark .sp-edit-input{background:#1c2128;border-color:#30363d;color:#e6edf3;}
+    .sp-edit-input:focus{outline:none;border-color:#1a73e8;}
+    .sp-edit-btn{padding:9px 16px;border:2px solid #0a1628;border-radius:10px;background:#0a1628;color:white;font-weight:700;font-size:0.8rem;cursor:pointer;font-family:inherit;white-space:nowrap;}
+    .sp-edit-btn:hover{background:#1a73e8;border-color:#1a73e8;}
+    .sp-edit-btn.danger{background:white;color:#c0392b;border-color:#c0392b;}
+    .sp-edit-btn.danger:hover{background:#c0392b;color:white;}
+    .sp-enroll-btn{width:100%;padding:14px;border:2.5px solid #0a1628;border-radius:12px;background:#1a73e8;color:white;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:4px 4px 0 0 #0a1628;transition:all 0.2s;}
+    html.dark .sp-enroll-btn{border-color:#1a73e8;box-shadow:4px 4px 0 0 #1a73e8;}
+    .sp-enroll-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 0 #0a1628;}
+    .sp-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.18s;}
+    .sp-close:hover{background:white;color:#0a1628;}
+
     /* ─── ENROLL MODAL ─── */
     .enroll-overlay {
       position: fixed; inset: 0; z-index: 2000;
@@ -2380,6 +2439,13 @@ function submitAuth() {
       if (!schoolName) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showAuthError('Введи название автошколы'); return; }
       if (!citySelect.value) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showAuthError('Выбери город'); return; }
       if (!schoolAddress) { btn.disabled = false; btn.textContent = 'Зарегистрироваться'; showAuthError('Введи адрес'); return; }
+      // Валидация: координаты выбранного города должны быть в Израиле (широта 29–34, долгота 34–36)
+      const lat = parseFloat(cityOption.dataset.lat);
+      const lng = parseFloat(cityOption.dataset.lng);
+      if (isNaN(lat) || isNaN(lng) || lat < 29 || lat > 34 || lng < 34 || lng > 36) {
+        btn.disabled = false; btn.textContent = 'Зарегистрироваться';
+        showAuthError('Выбранный город находится вне Израиля. Мы работаем только в Израиле.'); return;
+      }
 
       // Проверяем дублирующийся телефон
       const phoneCheckPromise = schoolPhone
@@ -2465,6 +2531,162 @@ const EMAILJS_SERVICE_ID    = 'service_032c1cn';
 const EMAILJS_TEMPLATE_ID   = 'template_wjy8fw6';
 // ═══════════════════
 
+// ══ SCHOOL PROFILE ══
+let spCurrentSchool = null;
+
+function openSchoolProfile(schoolId) {
+  const s = schools.find(x => x.id === schoolId);
+  if (!s) return;
+  spCurrentSchool = s;
+
+  const initials = s.name.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('sp-avatar').textContent = initials;
+  document.getElementById('sp-name').textContent = s.name;
+  document.getElementById('sp-city').textContent = (currentLang==='ru'?s.cityRu:currentLang==='en'?s.cityEn:s.city) || '';
+  document.getElementById('sp-address').textContent = s.address || '';
+  document.getElementById('sp-phone').textContent = s.phone || '';
+  document.getElementById('sp-students').textContent = s.students || 0;
+  document.getElementById('sp-price').textContent = s.price || '—';
+  document.getElementById('sp-pass').textContent = s.pass_rate ? s.pass_rate + '%' : '—';
+
+  // Инструкторы
+  renderSpInstructors(s.instructors || []);
+
+  // Рейтинг
+  updateStarDisplay(s.rating || 0);
+  const cnt = s.ratingCount || 0;
+  document.getElementById('sp-rating-count').textContent = cnt > 0 ? `${(s.rating||0).toFixed(1)} (${cnt} отзывов)` : 'Нет оценок';
+
+  // Проверяем — оценивал ли пользователь
+  document.getElementById('sp-rating-note').style.display = 'none';
+  const user = auth.currentUser;
+  if (user) {
+    db.collection('ratings').doc(schoolId + '_' + user.uid).get().then(doc => {
+      if (doc.exists) {
+        document.getElementById('sp-rating-note').style.display = 'block';
+        updateStarDisplay(doc.data().rating);
+      }
+    });
+  }
+
+  // Панель редактирования — только владелец школы
+  const editSection = document.getElementById('sp-edit-section');
+  if (user && user.uid === schoolId) {
+    editSection.style.display = 'block';
+    document.getElementById('sp-price-input').value = s.price || '';
+    renderEditInstructors(s.instructors || []);
+    document.getElementById('sp-enroll-btn').style.display = 'none';
+  } else {
+    editSection.style.display = 'none';
+    document.getElementById('sp-enroll-btn').style.display = 'block';
+  }
+
+  document.getElementById('sp-overlay').style.display = 'flex';
+}
+
+function closeSchoolProfile() {
+  document.getElementById('sp-overlay').style.display = 'none';
+  spCurrentSchool = null;
+}
+
+function handleSpOverlay(e) {
+  if (e.target === document.getElementById('sp-overlay')) closeSchoolProfile();
+}
+
+function renderSpInstructors(list) {
+  const el = document.getElementById('sp-instructor-list');
+  if (!list || list.length === 0) {
+    el.innerHTML = '<span class="instructor-empty">Инструкторы не добавлены</span>';
+  } else {
+    el.innerHTML = list.map(name => `<div class="instructor-chip">${name}</div>`).join('');
+  }
+}
+
+function renderEditInstructors(list) {
+  const el = document.getElementById('sp-edit-instructors');
+  el.innerHTML = (list||[]).map((name,i) =>
+    `<div class="instructor-chip" style="cursor:pointer" onclick="removeInstructor(${i})">${name} ✕</div>`
+  ).join('');
+}
+
+function updateStarDisplay(rating) {
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.classList.toggle('lit', i < Math.round(rating));
+  });
+}
+
+function rateSchool(stars) {
+  const user = auth.currentUser;
+  if (!user) { alert('Войдите чтобы поставить оценку'); return; }
+  if (!spCurrentSchool) return;
+  const schoolId = spCurrentSchool.id;
+  if (user.uid === schoolId) { alert('Нельзя оценивать собственную школу'); return; }
+
+  const ratingRef = db.collection('ratings').doc(schoolId + '_' + user.uid);
+  const schoolRef = db.collection('schools').doc(schoolId);
+
+  ratingRef.get().then(doc => {
+    if (doc.exists) {
+      document.getElementById('sp-rating-note').style.display = 'block';
+      return;
+    }
+    return ratingRef.set({ userId: user.uid, schoolId, rating: stars, createdAt: firebase.firestore.FieldValue.serverTimestamp() })
+      .then(() => {
+        // Пересчитываем средний рейтинг
+        return db.collection('ratings').where('schoolId','==',schoolId).get();
+      }).then(snap => {
+        let total = 0;
+        snap.forEach(d => total += d.data().rating);
+        const avg = total / snap.size;
+        return schoolRef.update({ rating: Math.round(avg*10)/10, ratingCount: snap.size });
+      }).then(() => {
+        updateStarDisplay(stars);
+        document.getElementById('sp-rating-note').style.display = 'block';
+        document.getElementById('sp-rating-count').textContent = 'Спасибо за оценку!';
+      });
+  });
+}
+
+function saveSchoolPrice() {
+  if (!spCurrentSchool) return;
+  const price = document.getElementById('sp-price-input').value.trim();
+  if (!price) return;
+  db.collection('schools').doc(spCurrentSchool.id).update({ price })
+    .then(() => { document.getElementById('sp-price').textContent = price; notify('Цена сохранена!'); });
+}
+
+function addInstructor() {
+  if (!spCurrentSchool) return;
+  const name = document.getElementById('sp-instructor-input').value.trim();
+  if (!name) return;
+  const list = [...(spCurrentSchool.instructors || []), name];
+  db.collection('schools').doc(spCurrentSchool.id).update({ instructors: list })
+    .then(() => {
+      spCurrentSchool.instructors = list;
+      renderSpInstructors(list);
+      renderEditInstructors(list);
+      document.getElementById('sp-instructor-input').value = '';
+    });
+}
+
+function removeInstructor(idx) {
+  if (!spCurrentSchool) return;
+  const list = [...(spCurrentSchool.instructors || [])];
+  list.splice(idx, 1);
+  db.collection('schools').doc(spCurrentSchool.id).update({ instructors: list })
+    .then(() => {
+      spCurrentSchool.instructors = list;
+      renderSpInstructors(list);
+      renderEditInstructors(list);
+    });
+}
+
+function enrollFromProfile() {
+  if (!spCurrentSchool) return;
+  closeSchoolProfile();
+  openEnrollModal(spCurrentSchool.id, spCurrentSchool.name, spCurrentSchool.email);
+}
+
 // ── ENROLL MODAL ──
 let enrollTargetSchool = null; // { id, name, email }
 
@@ -2545,9 +2767,15 @@ function submitEnrollment() {
     createdAt:    firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  // 1. Сохраняем в Firestore
+  // 1. Сохраняем в Firestore + увеличиваем счётчик студентов
   db.collection('enrollments').add(enrollData)
     .then(function() {
+      if (schoolId) {
+        db.collection('schools').doc(schoolId).update({
+          students: firebase.firestore.FieldValue.increment(1)
+        });
+      }
+    }).then(function() {
       // 2. Отправляем email через EmailJS
       if (schoolEmail) {
         return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
@@ -2715,8 +2943,9 @@ function renderSchools(filter) {
     const initials = s.name.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const addrLine = s.address ? `<div style="font-size:0.72rem;color:#6c757d;margin-top:2px">${s.address}</div>` : '';
     const phoneLine = s.phone ? `<div style="font-size:0.75rem;color:#1a73e8;margin-top:4px">${s.phone}</div>` : '';
+    const stars = s.rating ? '★'.repeat(Math.round(s.rating)) + '☆'.repeat(5-Math.round(s.rating)) : '☆☆☆☆☆';
     return `
-      <div class="school-card">
+      <div class="school-card" onclick="openSchoolProfile('${s.id}')" style="cursor:pointer">
         <div class="sc-head">
           <div class="sc-avatar ${avatarCls[i % avatarCls.length]}">${initials}</div>
           <div style="flex:1;min-width:0">
@@ -2726,14 +2955,14 @@ function renderSchools(filter) {
             ${phoneLine}
           </div>
         </div>
+        <div style="color:#f59e0b;font-size:0.9rem;margin-bottom:6px">${stars} <span style="color:#6c757d;font-size:0.75rem">${s.rating ? '('+s.rating+')' : ''}</span></div>
         <div class="sc-stats">
-          <div class="sc-stat"><div class="sc-stat-val">${s.rating || '—'}</div><div class="sc-stat-lbl">${ratingLbl}</div></div>
           <div class="sc-stat"><div class="sc-stat-val">${s.pass_rate ? s.pass_rate+'%' : '—'}</div><div class="sc-stat-lbl">${passLbl}</div></div>
           <div class="sc-stat"><div class="sc-stat-val">${s.students || 0}</div><div class="sc-stat-lbl">${studLbl}</div></div>
+          <div class="sc-stat"><div class="sc-stat-val">${s.price || '—'}</div><div class="sc-stat-lbl">${lessonLbl}</div></div>
         </div>
         <div class="sc-footer">
-          <div class="sc-price">${s.price || '—'}<small>${lessonLbl}</small></div>
-          <button class="sc-enroll" onclick="openEnrollModal('${s.id}','${s.name.replace(/'/g,"\\'")}','${(s.email||'').replace(/'/g,"\\'")}')">${enrollLbl}</button>
+          <button class="sc-enroll" onclick="event.stopPropagation();openEnrollModal('${s.id}','${s.name.replace(/'/g,"\\'")}','${(s.email||'').replace(/'/g,"\\'")}')">${enrollLbl}</button>
         </div>
       </div>`;
   }).join('');
@@ -3451,6 +3680,63 @@ function initScrollAnimations() {
   });
 }
 </script>
+<!-- SCHOOL PROFILE MODAL -->
+<div class="school-profile-overlay" id="sp-overlay" style="display:none" onclick="handleSpOverlay(event)">
+  <div class="school-profile-modal" id="sp-modal">
+    <button class="sp-close" onclick="closeSchoolProfile()">✕</button>
+    <div class="sp-header">
+      <div class="sp-avatar" id="sp-avatar"></div>
+      <div class="sp-name" id="sp-name"></div>
+      <div class="sp-city" id="sp-city"></div>
+      <div class="sp-address" id="sp-address"></div>
+      <div class="sp-phone" id="sp-phone"></div>
+    </div>
+    <div class="sp-body">
+      <div class="sp-stats-row">
+        <div class="sp-stat"><div class="sp-stat-val" id="sp-students">0</div><div class="sp-stat-lbl">Студенты</div></div>
+        <div class="sp-stat"><div class="sp-stat-val" id="sp-price">—</div><div class="sp-stat-lbl">₪/урок</div></div>
+        <div class="sp-stat"><div class="sp-stat-val" id="sp-pass">—</div><div class="sp-stat-lbl">Сдаваемость</div></div>
+      </div>
+
+      <!-- Рейтинг -->
+      <div class="sp-rating-section">
+        <div class="sp-section-title">Рейтинг школы</div>
+        <div class="stars-display">
+          <button class="star-btn" onclick="rateSchool(1)">★</button>
+          <button class="star-btn" onclick="rateSchool(2)">★</button>
+          <button class="star-btn" onclick="rateSchool(3)">★</button>
+          <button class="star-btn" onclick="rateSchool(4)">★</button>
+          <button class="star-btn" onclick="rateSchool(5)">★</button>
+          <span class="rating-count" id="sp-rating-count"></span>
+        </div>
+        <div class="rating-user-note" id="sp-rating-note">Вы уже оценили эту школу ✓</div>
+      </div>
+
+      <!-- Инструкторы -->
+      <div class="sp-instructors">
+        <div class="sp-section-title">Инструкторы</div>
+        <div class="instructor-list" id="sp-instructor-list"></div>
+      </div>
+
+      <!-- Панель редактирования (только для владельца) -->
+      <div class="sp-edit-section" id="sp-edit-section" style="display:none">
+        <div class="sp-edit-title">⚙️ Панель управления школой</div>
+        <div class="sp-edit-row">
+          <input class="sp-edit-input" type="text" id="sp-price-input" placeholder="Цена урока, напр. ₪280"/>
+          <button class="sp-edit-btn" onclick="saveSchoolPrice()">Сохранить</button>
+        </div>
+        <div class="sp-edit-row">
+          <input class="sp-edit-input" type="text" id="sp-instructor-input" placeholder="Имя инструктора"/>
+          <button class="sp-edit-btn" onclick="addInstructor()">+ Добавить</button>
+        </div>
+        <div id="sp-edit-instructors" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;"></div>
+      </div>
+
+      <button class="sp-enroll-btn" id="sp-enroll-btn" onclick="enrollFromProfile()">Записаться в эту школу</button>
+    </div>
+  </div>
+</div>
+
 <!-- ENROLL MODAL -->
 <div class="enroll-overlay" id="enroll-overlay" style="display:none" onclick="handleEnrollOverlay(event)">
   <div class="enroll-modal" id="enroll-modal">
