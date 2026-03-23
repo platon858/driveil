@@ -2963,8 +2963,17 @@ function initSchoolsMap() {
   renderMapMarkers(schools);
 }
 
+let firestoreUnsubscribe = null;
+
 function loadFirestoreSchools() {
-  db.collection('schools').get().then(function(snapshot) {
+  const list = document.getElementById('school-list');
+  if (list) list.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#6c757d">⏳ Загружаем школы...</div>';
+
+  // Отписываемся от предыдущего слушателя если есть
+  if (firestoreUnsubscribe) firestoreUnsubscribe();
+
+  // onSnapshot — обновляет автоматически когда добавляется новая школа
+  firestoreUnsubscribe = db.collection('schools').onSnapshot(function(snapshot) {
     schools = [];
     snapshot.forEach(function(doc) {
       const d = doc.data();
@@ -2988,12 +2997,18 @@ function loadFirestoreSchools() {
         });
       }
     });
-    // Обновляем карточки если страница школ открыта
     renderSchools(currentSchoolFilter);
-    // Обновляем карту если она уже инициализирована
     if (schoolsMap) renderMapMarkers(schools);
-  }).catch(function(err) {
-    console.warn('Firestore load error:', err);
+  }, function(err) {
+    console.error('Firestore error:', err);
+    const list2 = document.getElementById('school-list');
+    if (list2) list2.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:40px 20px">
+        <div style="font-size:2rem;margin-bottom:12px">⚠️</div>
+        <div style="font-weight:700;color:#c0392b;margin-bottom:8px">Firestore не подключён</div>
+        <div style="color:#6c757d;font-size:0.85rem;margin-bottom:16px">Нужно включить Firestore в Firebase Console.<br>Перейди: Firebase Console → Firestore Database → Create database</div>
+        <button onclick="loadFirestoreSchools()" style="padding:10px 24px;background:#1a73e8;color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.9rem">Попробовать снова</button>
+      </div>`;
   });
 }
 
