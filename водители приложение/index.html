@@ -1961,14 +1961,16 @@ const i18n = {
   }
 };
 
-const schools = [
-  { id:1, name:'נהיגה ישראלית', city:'תל אביב', cityEn:'Tel Aviv', cityRu:'Тель-Авив', region:'center', rating:4.8, students:320, price:'₪280', badge:'top', founded:2008, pass_rate:71, lat:32.0853, lng:34.7818 },
-  { id:2, name:'בית ספר רגב', city:'חיפה', cityEn:'Haifa', cityRu:'Хайфа', region:'north', rating:4.6, students:210, price:'₪260', badge:'popular', founded:2012, pass_rate:68, lat:32.7940, lng:34.9896 },
-  { id:3, name:'מרכז הנהיגה', city:'ירושלים', cityEn:'Jerusalem', cityRu:'Иерусалим', region:'center', rating:4.9, students:450, price:'₪290', badge:'top', founded:2001, pass_rate:74, lat:31.7683, lng:35.2137 },
-  { id:4, name:'נהיגה בטוחה', city:'באר שבע', cityEn:'Beer Sheva', cityRu:'Беэр-Шева', region:'south', rating:4.5, students:180, price:'₪250', badge:'', founded:2015, pass_rate:65, lat:31.2518, lng:34.7913 },
-  { id:5, name:'אקדמיית הנהיגה', city:'נצרת', cityEn:'Nazareth', cityRu:'Назарет', region:'north', rating:4.7, students:290, price:'₪265', badge:'popular', founded:2010, pass_rate:69, lat:32.6996, lng:35.3035 },
-  { id:6, name:'כביש פתוח', city:'ראשון לציון', cityEn:'Rishon LeZion', cityRu:'Ришон-ле-Цион', region:'center', rating:4.6, students:195, price:'₪275', badge:'', founded:2014, pass_rate:67, lat:31.9730, lng:34.7925 },
-];
+// Школы загружаются из Firestore — статичных данных нет
+let schools = [];
+
+const cityRegionMap = {
+  'חיפה':'north','נצרת':'north','טבריה':'north',
+  'תל אביב':'center','ירושלים':'center','ראשון לציון':'center',
+  'פתח תקווה':'center','הרצליה':'center','חולון':'center',
+  'בת ים':'center','רחובות':'center','כפר סבא':'center','מודיעין':'center','בני ברק':'center',
+  'באר שבע':'south','אשדוד':'south','אשקלון':'south','אילת':'south'
+};
 
 // ── SVG ROAD SIGN GENERATORS ──
 const S = {
@@ -2175,7 +2177,7 @@ function setLang(lang) {
   document.getElementById('app').style.display = 'block';
   applyTranslations();
   setTimeout(() => updateNavSpotlight('home'), 50);
-  renderSchools('all');
+  loadFirestoreSchools(); // загружаем школы из Firestore (обновит карточки и карту)
   renderSchedule();
   renderTestimonials();
   renderFAQ();
@@ -2491,44 +2493,61 @@ function animateStats() {
 }
 
 // ── SCHOOLS ──
+let currentSchoolFilter = 'all';
+
 function renderSchools(filter) {
+  currentSchoolFilter = filter || currentSchoolFilter;
   const list = document.getElementById('school-list');
-  const filtered = filter === 'all' ? schools : schools.filter(s => s.region === filter);
-  const city = s => currentLang === 'ru' ? s.cityRu : currentLang === 'en' ? s.cityEn : s.city;
-  const ratingLbl  = currentLang === 'ru' ? 'Рейтинг'     : currentLang === 'en' ? 'Rating'    : 'דירוג';
-  const passLbl    = currentLang === 'ru' ? 'Сдаваемость' : currentLang === 'en' ? 'Pass Rate' : 'מעבר';
-  const studLbl    = currentLang === 'ru' ? 'Студенты'    : currentLang === 'en' ? 'Students'  : 'תלמידים';
-  const enrollLbl  = currentLang === 'ru' ? 'Записаться'  : currentLang === 'en' ? 'Enroll'    : 'הרשמה';
-  const lessonLbl  = currentLang === 'ru' ? '/урок'       : currentLang === 'en' ? '/lesson'   : '/שיעור';
-  const estLbl     = currentLang === 'ru' ? 'с.'          : currentLang === 'en' ? 'est.'      : 'נוסד';
-  const avatarCls  = ['', 'av-gold', 'av-green', 'av-purple', 'av-teal', 'av-green'];
+  if (!list) return;
+  const filtered = currentSchoolFilter === 'all' ? schools : schools.filter(s => s.region === currentSchoolFilter);
+
+  if (schools.length === 0) {
+    const emptyMsg = currentLang === 'ru'
+      ? 'Школы пока не зарегистрированы.<br>Будьте первыми — зарегистрируйте автошколу!'
+      : currentLang === 'en'
+      ? 'No schools registered yet.<br>Be the first — register your driving school!'
+      : 'אין בתי ספר רשומים עדיין.<br>היו הראשונים — רשמו את בית הספר שלכם!';
+    list.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#6c757d;font-size:1rem;line-height:1.7">${emptyMsg}</div>`;
+    return;
+  }
+
+  if (filtered.length === 0) {
+    const noMatch = currentLang === 'ru' ? 'В этом регионе школ пока нет' : currentLang === 'en' ? 'No schools in this region yet' : 'אין בתי ספר באזור זה עדיין';
+    list.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#6c757d">${noMatch}</div>`;
+    return;
+  }
+
+  const city     = s => currentLang === 'ru' ? (s.cityRu||s.city) : currentLang === 'en' ? (s.cityEn||s.city) : s.city;
+  const ratingLbl = currentLang === 'ru' ? 'Рейтинг'     : currentLang === 'en' ? 'Rating'    : 'דירוג';
+  const passLbl   = currentLang === 'ru' ? 'Сдаваемость' : currentLang === 'en' ? 'Pass Rate' : 'מעבר';
+  const studLbl   = currentLang === 'ru' ? 'Студенты'    : currentLang === 'en' ? 'Students'  : 'תלמידים';
+  const enrollLbl = currentLang === 'ru' ? 'Записаться'  : currentLang === 'en' ? 'Enroll'    : 'הרשמה';
+  const lessonLbl = currentLang === 'ru' ? '/урок'       : currentLang === 'en' ? '/lesson'   : '/שיעור';
+  const avatarCls = ['', 'av-gold', 'av-green', 'av-purple', 'av-teal', 'av-green'];
 
   list.innerHTML = filtered.map((s, i) => {
     const initials = s.name.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    const pillHtml = s.badge === 'top'
-      ? `<span class="sc-pill gold">Top Rated</span>`
-      : s.badge === 'popular'
-      ? `<span class="sc-pill green">Popular</span>`
-      : '';
+    const addrLine = s.address ? `<div style="font-size:0.72rem;color:#6c757d;margin-top:2px">${s.address}</div>` : '';
+    const phoneLine = s.phone ? `<div style="font-size:0.75rem;color:#1a73e8;margin-top:4px">${s.phone}</div>` : '';
     return `
-      <div class="school-card" onclick="notify('${t.notify_school}')">
+      <div class="school-card">
         <div class="sc-head">
           <div class="sc-avatar ${avatarCls[i % avatarCls.length]}">${initials}</div>
           <div style="flex:1;min-width:0">
             <div class="sc-name">${s.name}</div>
-            <div class="sc-location">${city(s)} &middot; ${estLbl} ${s.founded}</div>
+            <div class="sc-location">${city(s)}</div>
+            ${addrLine}
+            ${phoneLine}
           </div>
-          ${pillHtml}
         </div>
         <div class="sc-stats">
-          <div class="sc-stat"><div class="sc-stat-val">${s.rating}</div><div class="sc-stat-lbl">${ratingLbl}</div></div>
-          <div class="sc-stat"><div class="sc-stat-val">${s.pass_rate}%</div><div class="sc-stat-lbl">${passLbl}</div></div>
-          <div class="sc-stat"><div class="sc-stat-val">${s.students}</div><div class="sc-stat-lbl">${studLbl}</div></div>
+          <div class="sc-stat"><div class="sc-stat-val">${s.rating || '—'}</div><div class="sc-stat-lbl">${ratingLbl}</div></div>
+          <div class="sc-stat"><div class="sc-stat-val">${s.pass_rate ? s.pass_rate+'%' : '—'}</div><div class="sc-stat-lbl">${passLbl}</div></div>
+          <div class="sc-stat"><div class="sc-stat-val">${s.students || 0}</div><div class="sc-stat-lbl">${studLbl}</div></div>
         </div>
-        <div class="sc-pass-bar"><div class="sc-pass-fill" style="width:${s.pass_rate}%"></div></div>
         <div class="sc-footer">
-          <div class="sc-price">${s.price}<small>${lessonLbl}</small></div>
-          <button class="sc-enroll" onclick="event.stopPropagation();showPage('register')">${enrollLbl}</button>
+          <div class="sc-price">${s.price || '—'}<small>${lessonLbl}</small></div>
+          <button class="sc-enroll" onclick="showPage('register')">${enrollLbl}</button>
         </div>
       </div>`;
   }).join('');
@@ -2939,42 +2958,40 @@ function initSchoolsMap() {
   }).addTo(schoolsMap);
 
   L.control.zoom({ position: 'bottomright' }).addTo(schoolsMap);
-  // Сначала показываем статичные школы, потом добавляем из Firestore
-  renderMapMarkers(schools);
   updateLocateLabel();
-  loadFirestoreSchools();
+  // Рисуем маркеры только из Firestore (schools уже загружены)
+  renderMapMarkers(schools);
 }
 
 function loadFirestoreSchools() {
   db.collection('schools').get().then(function(snapshot) {
-    const firestoreSchools = [];
+    schools = [];
     snapshot.forEach(function(doc) {
       const d = doc.data();
-      if (d.lat && d.lng && d.name) {
-        firestoreSchools.push({
+      if (d.name) {
+        schools.push({
           id: doc.id,
           name: d.name,
           city: d.city || '',
           cityEn: d.cityEn || '',
           cityRu: d.cityRu || '',
-          region: d.region || '',
+          region: cityRegionMap[d.city] || 'center',
           rating: d.rating || 0,
           students: d.students || 0,
           price: d.price || '—',
-          badge: d.badge || '',
+          badge: '',
           pass_rate: d.pass_rate || 0,
-          lat: d.lat,
-          lng: d.lng,
+          lat: d.lat || null,
+          lng: d.lng || null,
           phone: d.phone || '',
-          address: d.address || '',
-          fromFirestore: true
+          address: d.address || ''
         });
       }
     });
-    if (firestoreSchools.length > 0 && schoolsMap) {
-      const combined = schools.concat(firestoreSchools);
-      renderMapMarkers(combined);
-    }
+    // Обновляем карточки если страница школ открыта
+    renderSchools(currentSchoolFilter);
+    // Обновляем карту если она уже инициализирована
+    if (schoolsMap) renderMapMarkers(schools);
   }).catch(function(err) {
     console.warn('Firestore load error:', err);
   });
@@ -3014,24 +3031,21 @@ function renderMapMarkers(list) {
     iconSize: [36, 48], iconAnchor: [18, 48], popupAnchor: [0, -52]
   });
 
-  list.forEach((s, i) => {
-    const pill = s.badge === 'top'
-      ? `<span class="map-popup-pill gold">Top Rated</span>`
-      : s.badge === 'popular'
-      ? `<span class="map-popup-pill green">Popular</span>`
-      : '';
+  // Только школы с координатами показываем на карте
+  list.filter(s => s.lat && s.lng).forEach((s, i) => {
     const initials = s.name.trim().split(/\s+/).map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const addrLine = s.address ? `<div style="font-size:0.72rem;color:#888;margin-top:2px">${s.address}</div>` : '';
+    const phoneLine = s.phone ? `<div style="font-size:0.75rem;color:#1a73e8;margin-top:4px">${s.phone}</div>` : '';
     const popup = `
       <div class="map-popup" dir="ltr">
-        ${pill ? `<div style="margin-bottom:8px">${pill}</div>` : ''}
         <div class="map-popup-top">
           <div class="map-popup-avatar" style="background:${avGrads[i % avGrads.length]}">${initials}</div>
-          <div><div class="map-popup-name">${s.name}</div><div class="map-popup-city">${city(s)}</div></div>
-        </div>
-        <div class="map-popup-stats">
-          <div class="map-popup-stat"><div class="map-popup-stat-val">${s.rating}</div><div class="map-popup-stat-lbl">${ratingLbl}</div></div>
-          <div class="map-popup-stat"><div class="map-popup-stat-val">${s.pass_rate}%</div><div class="map-popup-stat-lbl">${passLbl}</div></div>
-          <div class="map-popup-stat"><div class="map-popup-stat-val">${s.price}</div><div class="map-popup-stat-lbl">${lessonLbl}</div></div>
+          <div>
+            <div class="map-popup-name">${s.name}</div>
+            <div class="map-popup-city">${city(s)}</div>
+            ${addrLine}
+            ${phoneLine}
+          </div>
         </div>
         <button class="map-popup-btn" onclick="showPage('register')">${enrollLbl}</button>
       </div>`;
