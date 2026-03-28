@@ -66,6 +66,7 @@
       z-index: 200; overflow: hidden;
       transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
       box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+      direction: ltr; /* keep sidebar LTR regardless of page RTL */
     }
     #sidebar:hover { width: 240px; }
     #app-content { margin-left: 64px; min-height: 100vh; transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1); }
@@ -102,7 +103,7 @@
     html.dark #tt-icon-moon { opacity: 0; transform: scale(0.5) rotate(90deg); }
     html.dark #tt-icon-sun  { opacity: 1; transform: scale(1) rotate(0deg); }
     #tt-label { transition: opacity 0.2s; }
-    .sb-label { opacity: 0; transition: opacity 0.2s 0.05s; white-space: nowrap; }
+    .sb-label { opacity: 0; transition: opacity 0.2s 0.05s; white-space: nowrap; unicode-bidi: plaintext; }
     #sidebar:hover .sb-label { opacity: 1; }
 
     .sb-user {
