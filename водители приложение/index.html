@@ -4450,5 +4450,12 @@ function rejectEnrollment(id) {
     </div>
   </div>
 </div>
+<script>
+document.addEventListener('click', function(e) {
+  var el = document.elementFromPoint(e.clientX, e.clientY);
+  if (!el) return;
+  alert('TAG: ' + el.tagName + '\nID: ' + el.id + '\nCLASS: ' + el.className + '\nParent: ' + el.parentElement.className);
+}, {once: true});
+</script>
 </body>
 </html>
