@@ -792,7 +792,7 @@
       transform: translateX(150%); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
       max-width: 300px; border-left: 4px solid var(--accent);
     }
-    [dir="rtl"] .notification { transform: translateX(150%); }
+    [dir="rtl"] .notification { transform: translateX(-150%); }
     [dir="rtl"] .notification.show { transform: translateX(0); }
     [dir="ltr"] .notification { transform: translateX(150%); }
     [dir="ltr"] .notification.show { transform: translateX(0); }
@@ -1245,7 +1245,6 @@
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 768px) {
-      .hero-badge { display: none; }
       /* Header */
       .header-nav { display: none !important; }
       .hamburger { display: flex; }
@@ -1795,7 +1794,7 @@
     <!-- HERO -->
     <div class="hero">
       <div class="hero-content">
-        <div class="hero-badge" style="display:none">🚗 <span data-i18n="hero_badge">#1 פלטפורמת נהיגה בישראל</span></div>
+        <div class="hero-badge">🚗 <span data-i18n="hero_badge">#1 פלטפורמת נהיגה בישראל</span></div>
         <h1 data-i18n="hero_title">ברוכים הבאים ל-<span>DriveIL</span></h1>
         <p data-i18n="hero_sub">הפלטפורמה המובילה לבתי ספר לנהיגה ונהגים בישראל. מצא בית ספר, תרגל תיאוריה וקבל את הרישיון שלך.</p>
         <div class="hero-btns">
