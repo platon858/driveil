@@ -2129,6 +2129,7 @@ const i18n = {
     dir:'rtl', lang:'he',
     nav_home_t:'בית', nav_schools_t:'בתי ספר', nav_test_t:'תיאוריה', nav_schedule_t:'שיעורים', nav_register_t:'הרשמה',
     nav_lang:'שפה', nav_logout:'יציאה', nav_login:'כניסה', nav_dashboard:'לוח בקרה',
+    theme_dark:'מצב לילה', theme_light:'מצב יום',
     hero_badge:'#1 פלטפורמת נהיגה בישראל',
     hero_title:'ברוכים הבאים אל DriveIL',
     hero_sub:'המערכת המובילה לניהול לימוד הנהיגה בישראל. אתר בית ספר מתאים, תרגל שאלות תיאוריה וקבל את רישיון הנהיגה שלך.',
@@ -2195,6 +2196,7 @@ const i18n = {
     dir:'ltr', lang:'ru',
     nav_home_t:'Главная', nav_schools_t:'Школы', nav_test_t:'Теория', nav_schedule_t:'Уроки', nav_register_t:'Запись',
     nav_lang:'Язык', nav_logout:'Выйти', nav_login:'Войти', nav_dashboard:'Кабинет',
+    theme_dark:'Тёмная тема', theme_light:'Светлая тема',
     hero_badge:'#1 платформа вождения в Израиле',
     hero_title:'Добро пожаловать в DriveIL',
     hero_sub:'Ведущая система управления обучением вождению в Израиле. Выберите автошколу, пройдите теоретическую подготовку и получите водительское удостоверение.',
@@ -2261,6 +2263,7 @@ const i18n = {
     dir:'ltr', lang:'en',
     nav_home_t:'Home', nav_schools_t:'Schools', nav_test_t:'Theory', nav_schedule_t:'Lessons', nav_register_t:'Register',
     nav_lang:'Language', nav_logout:'Log out', nav_login:'Log in', nav_dashboard:'Dashboard',
+    theme_dark:'Dark mode', theme_light:'Light mode',
     hero_badge:'#1 Driving Platform in Israel',
     hero_title:'Welcome to DriveIL',
     hero_sub:'Israel\'s leading driver education management system. Locate an accredited driving school, prepare for your theory examination, and obtain your driving licence.',
@@ -2560,6 +2563,13 @@ function applyTranslations() {
     const key = el.getAttribute('data-i18n');
     if (t[key] !== undefined) el.textContent = t[key];
   });
+  // Update theme button label and tooltip
+  const isDark = document.documentElement.classList.contains('dark');
+  const lbl = document.getElementById('tt-label');
+  const btn = document.getElementById('theme-toggle');
+  const labelText = isDark ? (t.theme_light || 'Светлая тема') : (t.theme_dark || 'Тёмная тема');
+  if (lbl) lbl.textContent = labelText;
+  if (btn) btn.title = labelText;
 }
 
 // ── FIREBASE ──
@@ -3109,13 +3119,16 @@ function applyTheme(dark) {
     document.documentElement.classList.remove('dark');
   }
   const lbl = document.getElementById('tt-label');
+  const btn = document.getElementById('theme-toggle');
+  const labelText = dark ? (t && t.theme_light || 'Светлая тема') : (t && t.theme_dark || 'Тёмная тема');
   if (lbl) {
     lbl.style.opacity = '0';
     setTimeout(function() {
-      lbl.textContent = dark ? 'Светлая тема' : 'Тёмная тема';
+      lbl.textContent = labelText;
       lbl.style.opacity = '';
     }, 180);
   }
+  if (btn) btn.title = labelText;
 }
 function toggleTheme() {
   const isDark = !document.documentElement.classList.contains('dark');
