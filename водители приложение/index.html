@@ -145,6 +145,31 @@
     }
     .sb-auth-btn:hover { background: rgba(26,115,232,0.35); }
 
+    /* ─── MOBILE BOTTOM NAV ─── */
+    #mobile-nav {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background: #0a1628;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      z-index: 9999;
+      padding-bottom: env(safe-area-inset-bottom);
+      direction: ltr;
+    }
+    .mbn-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      border: none; background: transparent;
+      color: rgba(255,255,255,0.38);
+      cursor: pointer; font-family: inherit;
+      font-size: 0.6rem; font-weight: 600;
+      padding: 6px 4px; transition: color 0.2s;
+      white-space: nowrap;
+    }
+    .mbn-btn svg { width: 22px; height: 22px; }
+    .mbn-btn.active { color: #4d9fff; }
+    .mbn-btn.active svg { stroke: #4d9fff; }
+
     /* hide old header */
     header { display: none !important; }
 
@@ -1252,6 +1277,11 @@
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 768px) {
+      /* Sidebar → скрываем, используем нижний нав */
+      #sidebar { display: none; }
+      body { padding-left: 0; padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+      #mobile-nav { display: flex; }
+
       /* Header */
       .header-nav { display: none !important; }
       .hamburger { display: flex; }
@@ -1783,6 +1813,30 @@
       </button>
     </div>
   </div>
+</nav>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav id="mobile-nav">
+  <button class="mbn-btn active" id="mnav-home" onclick="showPage('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span data-i18n="nav_home_t">בית</span>
+  </button>
+  <button class="mbn-btn" id="mnav-schools" onclick="showPage('schools')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><rect x="9" y="14" width="6" height="8"/><path d="M9 3H5v4l7-4 7 4V3h-4"/></svg>
+    <span data-i18n="nav_schools_t">בתי ספר</span>
+  </button>
+  <button class="mbn-btn" id="mnav-test" onclick="showPage('test')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <span data-i18n="nav_test_t">תיאוריה</span>
+  </button>
+  <button class="mbn-btn" id="mnav-schedule" onclick="showPage('schedule')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span data-i18n="nav_schedule_t">שיעורים</span>
+  </button>
+  <button class="mbn-btn" id="mnav-auth" onclick="openAuthModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span data-i18n="nav_login">כניסה</span>
+  </button>
 </nav>
 
 <!-- MAIN APP -->
@@ -3259,6 +3313,10 @@ function showPage(name) {
   document.querySelectorAll('.sb-btn').forEach(b => b.classList.remove('active'));
   const sb = document.getElementById('snav-' + name);
   if (sb) sb.classList.add('active');
+  // mobile bottom nav active
+  document.querySelectorAll('.mbn-btn').forEach(b => b.classList.remove('active'));
+  const mb = document.getElementById('mnav-' + name);
+  if (mb) mb.classList.add('active');
   // old nav-btn compat
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const nb = document.getElementById('nav-' + name);
