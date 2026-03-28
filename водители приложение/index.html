@@ -80,7 +80,14 @@
       white-space: nowrap; flex-shrink: 0;
       padding-left: 18px;
     }
-    .sb-logo span { color: #ff6b35; }
+    .sb-logo-d { color: white; }
+    .sb-logo-rest {
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: opacity 0.25s 0.08s, transform 0.25s 0.08s;
+    }
+    .sb-logo-rest span { color: #ff6b35; }
+    #sidebar:hover .sb-logo-rest { opacity: 1; transform: translateX(0); }
 
     .sb-nav { flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 8px; overflow: hidden; }
     .sb-bottom { padding: 8px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 6px; }
@@ -1730,7 +1737,7 @@
 
 <!-- SIDEBAR (outside #app to stay in root stacking context) -->
 <nav id="sidebar">
-  <div class="sb-logo">Drive<span>IL</span></div>
+  <div class="sb-logo"><span class="sb-logo-d">D</span><span class="sb-logo-rest">rive<span>IL</span></span></div>
   <div class="sb-nav">
     <button class="sb-btn active" id="snav-home" onclick="showPage('home')">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
