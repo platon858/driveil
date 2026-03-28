@@ -95,9 +95,14 @@
     .sb-btn:hover { background: rgba(255,255,255,0.08); color: white; }
     .sb-btn.active { background: rgba(26,115,232,0.25); color: white; }
     .sb-btn.active .sb-icon { color: #4d9fff; }
-    .sb-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; }
+    .sb-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .sb-icon svg { width: 20px; height: 20px; }
-    #tt-icon-moon, #tt-icon-sun { position: absolute; transition: opacity 0.35s, transform 0.35s; }
+    #tt-icon-wrap { position: relative; width: 20px; height: 20px; flex-shrink: 0; }
+    #tt-icon-moon, #tt-icon-sun {
+      position: absolute; top: 0; left: 0;
+      width: 20px; height: 20px;
+      transition: opacity 0.35s, transform 0.35s;
+    }
     #tt-icon-moon { opacity: 1; transform: scale(1) rotate(0deg); }
     #tt-icon-sun  { opacity: 0; transform: scale(0.5) rotate(-90deg); }
     html.dark #tt-icon-moon { opacity: 0; transform: scale(0.5) rotate(90deg); }
