@@ -2015,11 +2015,6 @@ function renderCalendarView(bookings, isSchool, schoolData) {
             ${sd.price ? `<span>₪${sd.price} / שיעור</span>` : ''}
           </div>
           ${sd.description ? `<div class="sp-desc">${escapeHtml(sd.description)}</div>` : ''}
-          <div class="sp-stats">
-            <div class="sp-stat"><span class="sp-stat-val">${withStatus.length}</span><span class="sp-stat-lbl">${L2.lessons}</span></div>
-            <div class="sp-stat"><span class="sp-stat-val">${upcoming}</span><span class="sp-stat-lbl">${currentLang==='ru'?'Предстоит':currentLang==='en'?'Upcoming':'קרובים'}</span></div>
-            <div class="sp-stat"><span class="sp-stat-val">${instrCount}</span><span class="sp-stat-lbl">${L2.instrs}</span></div>
-          </div>
           <button class="sp-edit-btn" onclick="openSchoolProfile()">✏️ ${L2.edit}</button>
         </div>
         <div class="sp-section-title">${plusSvg} <span>${L2.myless}</span>
