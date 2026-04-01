@@ -1931,6 +1931,7 @@ function loadScheduleData() {
   db.collection('schools').doc(user.uid).get().then(function(schoolDoc) {
     const isSchool = schoolDoc.exists;
     _userIsSchool = isSchool;
+    if (isSchool) updateSidebarForSchool();
     const schoolData = isSchool ? schoolDoc.data() : null;
     const query = isSchool
       ? db.collection('bookings').where('schoolId', '==', user.uid)
