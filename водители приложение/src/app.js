@@ -1745,8 +1745,9 @@ function loadMySchoolPage() {
           ${statsSection}
         </div>
       </div>`;
-  }).catch(function() {
-    page.innerHTML = '<div class="db-empty">Ошибка загрузки</div>';
+  }).catch(function(err) {
+    console.error('loadMySchoolPage error:', err);
+    page.innerHTML = `<div class="db-empty">Ошибка загрузки: ${err.message}</div>`;
   });
 }
 
