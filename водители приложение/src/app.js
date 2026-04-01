@@ -1641,6 +1641,8 @@ window.selectBookingSlot = selectBookingSlot;
 window.selectBookingType = selectBookingType;
 window.confirmBooking = confirmBooking;
 window.cancelBooking = cancelBooking;
+window.schedCalNav = schedCalNav;
+window.schedCalSelect = schedCalSelect;
 
 
 // ══════════════════════════════════════════════════════
@@ -1756,133 +1758,209 @@ function loadScheduleData() {
 
   container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">⏳ Загружаем уроки…</div>';
 
-  db.collection('bookings').where('studentId', '==', user.uid).orderBy('date').get()
-    .then(function(snap) {
+  db.collection('schools').doc(user.uid).get().then(function(schoolDoc) {
+    const isSchool = schoolDoc.exists;
+    const query = isSchool
+      ? db.collection('bookings').where('schoolId', '==', user.uid)
+      : db.collection('bookings').where('studentId', '==', user.uid);
+    query.get().then(function(snap) {
       const bookings = [];
       snap.forEach(d => bookings.push({ id: d.id, ...d.data() }));
-      renderScheduleFromBookings(bookings);
-    })
-    .catch(function() {
-      // orderBy needs index — fallback without ordering
-      db.collection('bookings').where('studentId', '==', user.uid).get()
-        .then(function(snap) {
-          const bookings = [];
-          snap.forEach(d => bookings.push({ id: d.id, ...d.data() }));
-          bookings.sort((a,b) => a.date < b.date ? -1 : 1);
-          renderScheduleFromBookings(bookings);
-        })
-        .catch(function() { renderScheduleFromBookings([]); });
-    });
+      bookings.sort((a,b) => a.date < b.date ? -1 : 1);
+      renderCalendarView(bookings, isSchool);
+    }).catch(function() { renderCalendarView([], isSchool); });
+  }).catch(function() {
+    db.collection('bookings').where('studentId', '==', user.uid).get()
+      .then(function(snap) {
+        const bookings = [];
+        snap.forEach(d => bookings.push({ id: d.id, ...d.data() }));
+        bookings.sort((a,b) => a.date < b.date ? -1 : 1);
+        renderCalendarView(bookings, false);
+      }).catch(function() { renderCalendarView([], false); });
+  });
 }
 
-function renderScheduleFromBookings(bookings) {
+// _calState: { year, month, bookings, selectedDate, isSchool }
+const _cal = { year: new Date().getFullYear(), month: new Date().getMonth(), bookings: [], selectedDate: null, isSchool: false };
+
+function renderCalendarView(bookings, isSchool) {
+  _cal.bookings = bookings;
+  _cal.isSchool = isSchool;
+  _cal.selectedDate = null;
   const container = document.getElementById('schedule-body');
   if (!container) return;
 
   const today = new Date();
-  today.setHours(0,0,0,0);
-
-  // Determine status
   const withStatus = bookings.map(b => {
-    if (b.status === 'cancelled') return { ...b, _st: 'cancelled' };
+    if (b.status === 'cancelled') return null;
     const [d,m,y] = b.date.split('.');
     const bDate = new Date(+y, +m-1, +d);
-    return { ...b, _st: bDate < today ? 'status_done' : 'status_confirmed' };
-  }).filter(b => b._st !== 'cancelled');
+    bDate.setHours(0,0,0,0);
+    const st = bDate < new Date(today.getFullYear(), today.getMonth(), today.getDate()) ? 'done' : 'upcoming';
+    return { ...b, _st: st, _dateObj: bDate };
+  }).filter(Boolean);
 
-  const upcoming = withStatus.filter(b => b._st !== 'status_done');
-  const done     = withStatus.filter(b => b._st === 'status_done');
+  _cal.withStatus = withStatus;
+
+  const upcoming = withStatus.filter(b => b._st === 'upcoming').length;
+  const done     = withStatus.filter(b => b._st === 'done').length;
 
   const L = {
     total:    currentLang==='ru'?'Всего':currentLang==='en'?'Total':'סה"כ',
     upcoming: currentLang==='ru'?'Предстоит':currentLang==='en'?'Upcoming':'קרובים',
     done:     currentLang==='ru'?'Завершено':currentLang==='en'?'Done':'הושלמו',
-    feat:     currentLang==='ru'?'Ближайшие':currentLang==='en'?'Next':'הבא',
     book:     currentLang==='ru'?'Записаться на урок':currentLang==='en'?'Book a lesson':'הזמן שיעור',
-    instr:    currentLang==='ru'?'Инструктор':currentLang==='en'?'Instructor':'מדריך',
-    cancel:   currentLang==='ru'?'Отменить':currentLang==='en'?'Cancel':'בטל',
     noLess:   currentLang==='ru'?'Уроков пока нет':currentLang==='en'?'No lessons yet':'אין שיעורים עדיין',
-    noSub:    currentLang==='ru'?'Запишитесь чтобы начать':currentLang==='en'?'Book a lesson to get started':'הזמן שיעור כדי להתחיל',
+    noSub:    currentLang==='ru'?'Нажмите «+» чтобы записаться':currentLang==='en'?'Tap «+» to book a lesson':'לחץ «+» להזמנת שיעור',
+    clickDay: currentLang==='ru'?'Нажмите на дату чтобы увидеть уроки':currentLang==='en'?'Click a date to see lessons':'לחץ על תאריך לצפייה בשיעורים',
   };
 
-  const typeColors = { lesson_practical:'#1a73e8', lesson_theory:'#8e44ad', lesson_highway:'#27ae60' };
-  const statusCls  = { status_confirmed:'ls-confirmed', status_pending:'ls-pending', status_done:'ls-done' };
-  const personSvg  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
-
   const statsHtml = `
-    <div class="intro-cards-row" style="margin-bottom:32px">
-      <div class="intro-card-wrap" style="transform:rotate(-1.5deg)">
-        <div class="intro-card">
-          <div class="intro-card-icon-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-          <div class="intro-card-val">${withStatus.length}</div>
-          <div class="intro-card-lbl">${L.total}</div>
-        </div>
-      </div>
-      <div class="intro-card-wrap" style="transform:rotate(1deg)">
-        <div class="intro-popular-pill">${L.feat}</div>
-        <div class="intro-card featured">
-          <div class="intro-card-icon-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <div class="intro-card-val">${upcoming.length}</div>
-          <div class="intro-card-lbl">${L.upcoming}</div>
-        </div>
-      </div>
-      <div class="intro-card-wrap" style="transform:rotate(-2deg)">
-        <div class="intro-card">
-          <div class="intro-card-icon-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="intro-card-val">${done.length}</div>
-          <div class="intro-card-lbl">${L.done}</div>
-        </div>
-      </div>
+    <div class="cal-stats-row">
+      <div class="cal-stat"><span class="cal-stat-val">${withStatus.length}</span><span class="cal-stat-lbl">${L.total}</span></div>
+      <div class="cal-stat accent"><span class="cal-stat-val">${upcoming}</span><span class="cal-stat-lbl">${L.upcoming}</span></div>
+      <div class="cal-stat"><span class="cal-stat-val">${done}</span><span class="cal-stat-lbl">${L.done}</span></div>
     </div>`;
 
-  let cardsHtml = `<button class="schedule-add-btn" onclick="openBookingModal()">
+  const bookBtn = isSchool ? '' : `<button class="schedule-add-btn" onclick="openBookingModal()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     ${L.book}
   </button>`;
 
-  if (withStatus.length === 0) {
-    cardsHtml += `<div class="schedule-empty">
-      <div class="schedule-empty-icon">📅</div>
-      <h3>${L.noLess}</h3>
-      <p>${L.noSub}</p>
+  container.innerHTML = statsHtml + bookBtn + `
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <button class="cal-nav-btn" onclick="schedCalNav(-1)">‹</button>
+        <span class="cal-month-label" id="cal-month-label"></span>
+        <button class="cal-nav-btn" onclick="schedCalNav(1)">›</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div class="cal-day-lessons" id="cal-day-lessons"><p class="cal-hint">${L.clickDay}</p></div>`;
+
+  renderCalendarGrid();
+}
+
+function renderCalendarGrid() {
+  const grid = document.getElementById('cal-grid');
+  const label = document.getElementById('cal-month-label');
+  if (!grid) return;
+
+  const { year, month, withStatus } = _cal;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const monthNames = {
+    ru: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+    he: ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'],
+    en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+  };
+  const dayNames = {
+    ru: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+    he: ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'],
+    en: ['Su','Mo','Tu','We','Th','Fr','Sa'],
+  };
+
+  label.textContent = (monthNames[currentLang] || monthNames.ru)[month] + ' ' + year;
+
+  // Build a set of dates that have bookings this month
+  const bookedDates = {};
+  (withStatus || []).forEach(b => {
+    const [d,m,y] = b.date.split('.');
+    if (+y === year && +m - 1 === month) {
+      const key = b.date;
+      if (!bookedDates[key]) bookedDates[key] = [];
+      bookedDates[key].push(b);
+    }
+  });
+
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const days = dayNames[currentLang] || dayNames.ru;
+  let html = days.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+
+  // Empty cells before first day
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell empty"></div>';
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${String(d).padStart(2,'0')}.${String(month+1).padStart(2,'0')}.${year}`;
+    const cellDate = new Date(year, month, d);
+    cellDate.setHours(0,0,0,0);
+    const isToday = cellDate.getTime() === today.getTime();
+    const isSelected = _cal.selectedDate === dateStr;
+    const lessons = bookedDates[dateStr] || [];
+    const hasDot = lessons.length > 0;
+    const isPast = cellDate < today;
+
+    const typeColors = { lesson_practical:'#1a73e8', lesson_theory:'#8e44ad', lesson_highway:'#27ae60' };
+    const dots = lessons.slice(0,3).map(b => `<span class="cal-dot" style="background:${typeColors[b.type]||'#1a73e8'}"></span>`).join('');
+
+    html += `<div class="cal-cell ${isToday?'today':''} ${isSelected?'selected':''} ${isPast?'past':''} ${hasDot?'has-lesson':''}" onclick="schedCalSelect('${dateStr}')">
+      <span class="cal-cell-num">${d}</span>
+      ${hasDot ? `<div class="cal-dots">${dots}</div>` : ''}
     </div>`;
-  } else {
-    cardsHtml += '<div class="lessons-grid">';
-    withStatus.forEach(b => {
-      const color  = typeColors[b.type]  || '#1a73e8';
-      const stCls  = statusCls[b._st]   || 'ls-pending';
-      const stTxt  = t[b._st] || b._st;
-      const typeTxt = t[b.type] || b.type;
-      const canCancel = b._st !== 'status_done';
-      cardsHtml += `
-        <div class="lesson-card">
-          <div class="lesson-accent" style="background:${color}"></div>
-          <div class="lesson-body">
-            <div class="lesson-top">
-              <div>
-                <div class="lesson-time-val">${b.time}</div>
-                <div class="lesson-date-val">${b.date}</div>
-              </div>
-              <span class="lesson-status ${stCls}">${stTxt}</span>
-            </div>
-            <div class="lesson-divider"></div>
-            <div class="lesson-type-row">
-              <div class="lesson-type-dot" style="background:${color}"></div>
-              <div class="lesson-type-name">${typeTxt}</div>
-            </div>
-            <div class="lesson-instr-row">
-              <div class="lesson-instr-avatar">${personSvg}</div>
-              <div class="lesson-instr-name">${escapeHtml(b.instructorName||'')}</div>
-            </div>
-            ${b.schoolName ? `<div class="lesson-instr-row"><div class="lesson-instr-avatar">🏫</div><div class="lesson-instr-name" style="color:var(--muted)">${escapeHtml(b.schoolName)}</div></div>` : ''}
-            ${canCancel ? `<button class="lesson-cancel-btn" onclick="cancelBooking('${b.id}')">${L.cancel}</button>` : ''}
-          </div>
-        </div>`;
-    });
-    cardsHtml += '</div>';
   }
 
-  container.innerHTML = statsHtml + cardsHtml;
+  grid.innerHTML = html;
+}
+
+function schedCalNav(dir) {
+  _cal.month += dir;
+  if (_cal.month > 11) { _cal.month = 0; _cal.year++; }
+  if (_cal.month < 0)  { _cal.month = 11; _cal.year--; }
+  _cal.selectedDate = null;
+  renderCalendarGrid();
+  const panel = document.getElementById('cal-day-lessons');
+  if (panel) {
+    const hint = currentLang==='ru'?'Нажмите на дату чтобы увидеть уроки':currentLang==='en'?'Click a date to see lessons':'לחץ על תאריך לצפייה בשיעורים';
+    panel.innerHTML = `<p class="cal-hint">${hint}</p>`;
+  }
+}
+
+function schedCalSelect(dateStr) {
+  _cal.selectedDate = dateStr;
+  renderCalendarGrid();
+
+  const lessons = (_cal.withStatus || []).filter(b => b.date === dateStr);
+  const panel = document.getElementById('cal-day-lessons');
+  if (!panel) return;
+
+  const typeColors = { lesson_practical:'#1a73e8', lesson_theory:'#8e44ad', lesson_highway:'#27ae60' };
+  const statusCls  = { upcoming:'ls-confirmed', done:'ls-done' };
+  const personSvg  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
+  const cancelLbl  = currentLang==='ru'?'Отменить':currentLang==='en'?'Cancel':'בטל';
+
+  if (lessons.length === 0) {
+    const empty = currentLang==='ru'?'Нет уроков в этот день':currentLang==='en'?'No lessons this day':'אין שיעורים ביום זה';
+    panel.innerHTML = `<p class="cal-hint">${empty}</p>`;
+    return;
+  }
+
+  panel.innerHTML = lessons.map(b => {
+    const color   = typeColors[b.type] || '#1a73e8';
+    const stCls   = statusCls[b._st] || 'ls-pending';
+    const stTxt   = t[b._st === 'upcoming' ? 'status_confirmed' : 'status_done'] || b._st;
+    const typeTxt = t[b.type] || b.type;
+    const canCancel = b._st === 'upcoming';
+    const nameRow = _cal.isSchool
+      ? `<div class="lesson-instr-row">${personSvg}<span class="lesson-instr-name">${escapeHtml(b.studentName||'')}</span></div>`
+      : `<div class="lesson-instr-row">${personSvg}<span class="lesson-instr-name">${escapeHtml(b.instructorName||'')}</span></div>`;
+    return `<div class="lesson-card" style="margin-bottom:10px">
+      <div class="lesson-accent" style="background:${color}"></div>
+      <div class="lesson-body">
+        <div class="lesson-top">
+          <div><div class="lesson-time-val">${b.time}</div><div class="lesson-date-val">${b.date}</div></div>
+          <span class="lesson-status ${stCls}">${stTxt}</span>
+        </div>
+        <div class="lesson-divider"></div>
+        <div class="lesson-type-row"><div class="lesson-type-dot" style="background:${color}"></div><div class="lesson-type-name">${typeTxt}</div></div>
+        ${nameRow}
+        ${b.schoolName && !_cal.isSchool ? `<div class="lesson-instr-row">🏫 <span class="lesson-instr-name" style="color:var(--muted)">${escapeHtml(b.schoolName)}</span></div>` : ''}
+        ${canCancel && !_cal.isSchool ? `<button class="lesson-cancel-btn" onclick="cancelBooking('${b.id}')">${cancelLbl}</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function cancelBooking(bookingId) {

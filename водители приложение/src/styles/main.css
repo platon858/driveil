@@ -1809,3 +1809,85 @@
       .avail-cell { border-radius: 5px; }
       .booking-modal { border-radius: 20px 20px 0 0; max-height: 95vh; }
     }
+
+    /* ══ CALENDAR VIEW ══ */
+    .cal-stats-row {
+      display: flex; gap: 12px; margin-bottom: 20px;
+    }
+    .cal-stat {
+      flex: 1; background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px 12px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .cal-stat.accent { background: #1a73e8; border-color: #1a73e8; }
+    .cal-stat.accent .cal-stat-val,
+    .cal-stat.accent .cal-stat-lbl { color: #fff; }
+    .cal-stat-val { font-size: 1.5rem; font-weight: 800; color: var(--text); }
+    .cal-stat-lbl { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+
+    .cal-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; padding: 20px; margin-bottom: 20px;
+    }
+    .cal-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+    }
+    .cal-month-label { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .cal-nav-btn {
+      width: 34px; height: 34px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text); cursor: pointer; font-size: 1.15rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, transform .1s;
+    }
+    .cal-nav-btn:hover { background: var(--accent-light); transform: scale(1.08); }
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+    }
+    .cal-day-name {
+      text-align: center; font-size: 0.68rem; font-weight: 700;
+      color: var(--muted); padding: 4px 0; text-transform: uppercase; letter-spacing: .03em;
+    }
+    .cal-cell {
+      aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start; padding: 5px 2px 3px;
+      cursor: pointer; transition: background .15s, transform .1s, box-shadow .15s;
+      min-height: 40px;
+    }
+    .cal-cell.empty { cursor: default; }
+    .cal-cell:not(.empty):hover { background: var(--accent-light); transform: scale(1.06); }
+    .cal-cell.past:not(.has-lesson) { opacity: 0.45; }
+    .cal-cell.today .cal-cell-num {
+      background: #1a73e8; color: #fff; border-radius: 50%;
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    }
+    .cal-cell.selected { background: rgba(26,115,232,0.12); box-shadow: 0 0 0 2px #1a73e8; }
+    .cal-cell-num {
+      font-size: 0.8rem; font-weight: 600; color: var(--text);
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    }
+    .cal-dots { display: flex; gap: 2px; justify-content: center; margin-top: 2px; }
+    .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .cal-day-lessons {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; padding: 20px; min-height: 80px;
+    }
+    .cal-hint { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 16px 0; margin: 0; }
+
+    html.dark .cal-wrap,
+    html.dark .cal-day-lessons { background: #0d0d0d; border-color: #222; }
+    html.dark .cal-stat { background: #111; border-color: #222; }
+    html.dark .cal-nav-btn { background: #111; border-color: #333; color: #e6edf3; }
+    html.dark .cal-nav-btn:hover { background: #1a2233; }
+    html.dark .cal-cell:not(.empty):hover { background: #1a2233; }
+    html.dark .cal-cell.selected { background: rgba(26,115,232,0.2); }
+
+    @media (max-width: 600px) {
+      .cal-stats-row { gap: 8px; }
+      .cal-stat { padding: 10px 6px; border-radius: 10px; }
+      .cal-stat-val { font-size: 1.2rem; }
+      .cal-grid { gap: 2px; }
+      .cal-cell { border-radius: 7px; min-height: 34px; }
+      .cal-cell-num { font-size: 0.72rem; width: 18px; height: 18px; }
+      .cal-dot { width: 5px; height: 5px; }
+    }
