@@ -1608,8 +1608,10 @@ function loadMySchoolPage() {
 
   Promise.all([
     db.collection('schools').doc(user.uid).get(),
-    db.collection('enrollments').where('schoolId','==',user.uid).where('status','==','confirmed').get()
-  ]).then(function([schoolDoc, enrollSnap]) {
+    db.collection('enrollments').where('schoolId','==',user.uid).where('status','==','confirmed').get(),
+    db.collection('bookings').where('schoolId','==',user.uid).where('status','==','confirmed').get(),
+    db.collection('bookings').where('schoolId','==',user.uid).where('status','==','cancelled').get(),
+  ]).then(function([schoolDoc, enrollSnap, confirmedSnap, cancelledSnap]) {
     if (!schoolDoc.exists) {
       page.innerHTML = '<div class="db-empty">Профиль не найден</div>'; return;
     }
@@ -1617,6 +1619,44 @@ function loadMySchoolPage() {
     const enrollments = [];
     enrollSnap.forEach(d => enrollments.push({ id: d.id, ...d.data() }));
 
+    // ── bookings stats ──────────────────────────────────────────────
+    const confirmed = [];
+    confirmedSnap.forEach(d => confirmed.push(d.data()));
+    const cancelledCount = cancelledSnap.size;
+
+    // 1. lessons this week (Mon–Sun)
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun
+    const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+    const weekStart = new Date(now); weekStart.setDate(now.getDate() + diffToMon); weekStart.setHours(0,0,0,0);
+    const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 7);
+    const lessonsThisWeek = confirmed.filter(b => {
+      const [d,m,y] = (b.date||'').split('.');
+      if (!y) return false;
+      const bd = new Date(+y, +m-1, +d);
+      return bd >= weekStart && bd < weekEnd;
+    }).length;
+
+    // 2. cancellation rate
+    const totalBookings = confirmed.length + cancelledCount;
+    const cancelRate = totalBookings > 0 ? Math.round(cancelledCount / totalBookings * 100) : 0;
+
+    // 3. lesson type breakdown
+    const typeCount = { lesson_practical: 0, lesson_theory: 0, lesson_highway: 0 };
+    confirmed.forEach(b => { if (typeCount[b.type] !== undefined) typeCount[b.type]++; });
+
+    // 4. top instructor
+    const instrMap = {};
+    confirmed.forEach(b => { if (b.instructorName) instrMap[b.instructorName] = (instrMap[b.instructorName]||0)+1; });
+    const topInstr = Object.entries(instrMap).sort((a,b)=>b[1]-a[1])[0];
+
+    // 5. avg lessons per student
+    const studentMap = {};
+    confirmed.forEach(b => { if (b.studentName) studentMap[b.studentName] = (studentMap[b.studentName]||0)+1; });
+    const uniqueStudents = Object.keys(studentMap).length;
+    const avgLessons = uniqueStudents > 0 ? (confirmed.length / uniqueStudents).toFixed(1) : '—';
+
+    // ── labels ──────────────────────────────────────────────────────
     const initial    = (school.name || '?').charAt(0).toUpperCase();
     const instrCount = (school.instructors || []).length;
     const L = {
@@ -1626,8 +1666,17 @@ function loadMySchoolPage() {
       students:   currentLang==='ru'?'Мои ученики':currentLang==='en'?'My students':'התלמידים שלי',
       edit:       currentLang==='ru'?'Редактировать профиль':currentLang==='en'?'Edit profile':'ערוך פרופיל',
       noStudents: currentLang==='ru'?'Пока нет подтверждённых учеников':currentLang==='en'?'No confirmed students yet':'אין תלמידים רשומים עדיין',
+      statsTitle: currentLang==='ru'?'Статистика уроков':currentLang==='en'?'Lesson Stats':'סטטיסטיקת שיעורים',
+      weekLabel:  currentLang==='ru'?'На этой неделе':currentLang==='en'?'This week':'השבוע',
+      cancelLbl:  currentLang==='ru'?'Отмены':currentLang==='en'?'Cancellations':'ביטולים',
+      topInstrLbl:currentLang==='ru'?'Топ инструктор':currentLang==='en'?'Top instructor':'מדריך מוביל',
+      avgLbl:     currentLang==='ru'?'Ср. уроков / студент':currentLang==='en'?'Avg / student':'ממוצע לתלמיד',
+      practical:  currentLang==='ru'?'Практика':currentLang==='en'?'Practical':'נהיגה',
+      theory:     currentLang==='ru'?'Теория':currentLang==='en'?'Theory':'תיאוריה',
+      highway:    currentLang==='ru'?'Шоссе':currentLang==='en'?'Highway':'כביש מהיר',
     };
-    const personSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
+    const personSvg  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
+    const chartSvg   = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>`;
 
     const studentCards = enrollments.length === 0
       ? `<p class="cal-hint" style="padding:20px 0">${L.noStudents}</p>`
@@ -1639,6 +1688,37 @@ function loadMySchoolPage() {
               <div class="sp-student-meta">${escapeHtml(e.studentPhone||e.studentEmail||'')}</div>
             </div>
           </div>`).join('');
+
+    const statsSection = confirmed.length === 0 ? '' : `
+      <div class="sp-section-title">${chartSvg}<span>${L.statsTitle}</span></div>
+      <div style="padding:0 20px 20px">
+        <div class="sp-lesson-stats">
+          <div class="sp-ls-card">
+            <div class="sp-ls-val">${lessonsThisWeek}</div>
+            <div class="sp-ls-lbl">${L.weekLabel}</div>
+          </div>
+          <div class="sp-ls-card sp-ls-card--${cancelRate > 15 ? 'warn' : 'ok'}">
+            <div class="sp-ls-val">${cancelRate}%</div>
+            <div class="sp-ls-lbl">${L.cancelLbl}</div>
+          </div>
+          <div class="sp-ls-card">
+            <div class="sp-ls-val">${avgLessons}</div>
+            <div class="sp-ls-lbl">${L.avgLbl}</div>
+          </div>
+          <div class="sp-ls-card sp-ls-card--wide">
+            <div class="sp-ls-type-row">
+              <span class="sp-ls-type-dot sp-ls-type-dot--practical"></span>${L.practical} <b>${typeCount.lesson_practical}</b>
+              <span class="sp-ls-type-dot sp-ls-type-dot--theory"></span>${L.theory} <b>${typeCount.lesson_theory}</b>
+              <span class="sp-ls-type-dot sp-ls-type-dot--highway"></span>${L.highway} <b>${typeCount.lesson_highway}</b>
+            </div>
+            <div class="sp-ls-lbl" style="margin-top:4px">Типы уроков</div>
+          </div>
+          ${topInstr ? `<div class="sp-ls-card sp-ls-card--wide">
+            <div class="sp-ls-val sp-ls-val--sm">${escapeHtml(topInstr[0])}</div>
+            <div class="sp-ls-lbl">${L.topInstrLbl} · ${topInstr[1]} уроков</div>
+          </div>` : ''}
+        </div>
+      </div>`;
 
     page.innerHTML = `
       <div style="max-width:620px;margin:0 auto;padding:20px">
@@ -1662,6 +1742,7 @@ function loadMySchoolPage() {
           </div>
           <div class="sp-section-title">${personSvg}<span>${L.students}</span></div>
           <div style="padding:0 20px 20px">${studentCards}</div>
+          ${statsSection}
         </div>
       </div>`;
   }).catch(function() {
