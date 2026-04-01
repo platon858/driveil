@@ -1692,7 +1692,7 @@ function loadMySchoolPage() {
             </div>
           </div>`).join('');
 
-    const statsSection = confirmed.length === 0 ? '' : `
+    const statsSection = `
       <div class="sp-section-title">${chartSvg}<span>${L.statsTitle}</span></div>
       <div style="padding:0 20px 20px">
         <div class="sp-lesson-stats">
