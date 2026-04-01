@@ -706,6 +706,48 @@
   </div>
 </div>
 <!-- BOOKING MODAL -->
+<!-- ═══ SCHOOL ADD LESSON MODAL ═══ -->
+<div class="booking-overlay" id="sl-overlay" onclick="handleSlOverlay(event)" style="display:none">
+  <div class="booking-modal" id="sl-modal">
+    <div class="booking-modal-header">
+      <div class="booking-modal-title" id="sl-title">Добавить урок</div>
+      <button class="booking-modal-close" onclick="closeSchoolLessonModal()">✕</button>
+    </div>
+    <div class="booking-modal-body">
+      <div class="booking-field">
+        <label id="sl-lbl-date">Дата</label>
+        <input type="date" id="sl-date" class="booking-select" />
+      </div>
+      <div class="booking-field">
+        <label id="sl-lbl-time">Время</label>
+        <select id="sl-time" class="booking-select">
+          <option value="07:00">07:00</option><option value="08:00">08:00</option>
+          <option value="09:00">09:00</option><option value="10:00">10:00</option>
+          <option value="11:00">11:00</option><option value="12:00">12:00</option>
+          <option value="13:00">13:00</option><option value="14:00">14:00</option>
+          <option value="15:00">15:00</option><option value="16:00">16:00</option>
+          <option value="17:00">17:00</option><option value="18:00">18:00</option>
+          <option value="19:00">19:00</option><option value="20:00">20:00</option>
+        </select>
+      </div>
+      <div class="booking-field">
+        <label id="sl-lbl-instr">Инструктор</label>
+        <select id="sl-instr" class="booking-select"></select>
+      </div>
+      <div class="booking-field">
+        <label id="sl-lbl-student">Ученик</label>
+        <select id="sl-student" class="booking-select"></select>
+      </div>
+      <div class="booking-type-row" id="sl-type-row">
+        <button class="booking-type-btn active" data-type="lesson_practical" onclick="selectSlType(this)">🚗 Вождение</button>
+        <button class="booking-type-btn" data-type="lesson_theory" onclick="selectSlType(this)">📖 Теория</button>
+        <button class="booking-type-btn" data-type="lesson_highway" onclick="selectSlType(this)">🛣️ Шоссе</button>
+      </div>
+      <button class="booking-confirm-btn" onclick="confirmSchoolLesson()" id="sl-confirm-btn">Добавить урок</button>
+    </div>
+  </div>
+</div>
+
 <div class="booking-overlay" id="booking-overlay" onclick="handleBookingOverlay(event)">
   <div class="booking-modal" id="booking-modal">
     <div class="booking-modal-header">

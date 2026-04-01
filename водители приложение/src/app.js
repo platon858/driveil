@@ -1643,6 +1643,11 @@ window.confirmBooking = confirmBooking;
 window.cancelBooking = cancelBooking;
 window.schedCalNav = schedCalNav;
 window.schedCalSelect = schedCalSelect;
+window.openSchoolLessonModal = openSchoolLessonModal;
+window.closeSchoolLessonModal = closeSchoolLessonModal;
+window.handleSlOverlay = handleSlOverlay;
+window.selectSlType = selectSlType;
+window.confirmSchoolLesson = confirmSchoolLesson;
 
 
 // ══════════════════════════════════════════════════════
@@ -1760,6 +1765,7 @@ function loadScheduleData() {
 
   db.collection('schools').doc(user.uid).get().then(function(schoolDoc) {
     const isSchool = schoolDoc.exists;
+    _userIsSchool = isSchool;
     const query = isSchool
       ? db.collection('bookings').where('schoolId', '==', user.uid)
       : db.collection('bookings').where('studentId', '==', user.uid);
@@ -1782,6 +1788,7 @@ function loadScheduleData() {
 
 // _calState: { year, month, bookings, selectedDate, isSchool }
 const _cal = { year: new Date().getFullYear(), month: new Date().getMonth(), bookings: [], selectedDate: null, isSchool: false };
+let _userIsSchool = false;
 
 function renderCalendarView(bookings, isSchool) {
   _cal.bookings = bookings;
@@ -1822,10 +1829,21 @@ function renderCalendarView(bookings, isSchool) {
       <div class="cal-stat"><span class="cal-stat-val">${done}</span><span class="cal-stat-lbl">${L.done}</span></div>
     </div>`;
 
-  const bookBtn = isSchool ? '' : `<button class="schedule-add-btn" onclick="openBookingModal()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    ${L.book}
-  </button>`;
+  // Update page title based on role
+  const titleEl = document.querySelector('#page-schedule h1');
+  if (titleEl) titleEl.textContent = isSchool
+    ? (currentLang==='ru'?'Мои уроки':currentLang==='en'?'My Lessons':'השיעורים שלי')
+    : (t.schedule_title || 'לוח שיעורים');
+
+  const bookBtn = isSchool
+    ? `<button class="schedule-add-btn" onclick="openSchoolLessonModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        ${currentLang==='ru'?'Добавить урок':currentLang==='en'?'Add lesson':'הוסף שיעור'}
+      </button>`
+    : `<button class="schedule-add-btn" onclick="openBookingModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        ${L.book}
+      </button>`;
 
   container.innerHTML = statsHtml + bookBtn + `
     <div class="cal-wrap">
@@ -1988,6 +2006,10 @@ const _bk = {
 function openBookingModal() {
   const user = auth.currentUser;
   if (!user) { openAuthModal(); return; }
+  if (_userIsSchool) {
+    notify(currentLang==='ru'?'Школы не могут записываться на уроки':currentLang==='en'?'Schools cannot book lessons':'בתי ספר אינם יכולים להזמין שיעורים');
+    return;
+  }
 
   const overlay = document.getElementById('booking-overlay');
   overlay.style.display = 'flex';
@@ -2220,6 +2242,9 @@ function confirmBooking() {
 
   db.collection('bookings').add(booking).then(function() {
     closeBookingModal();
+    // Navigate calendar to the booked month
+    const [bd,bm,by] = _bk.selectedDate.split('.');
+    _cal.year = +by; _cal.month = +bm - 1; _cal.selectedDate = _bk.selectedDate;
     loadScheduleData();
     const msg = currentLang==='ru' ? `Урок записан: ${_bk.selectedDate} в ${_bk.selectedTime} ✓`
               : currentLang==='en' ? `Lesson booked: ${_bk.selectedDate} at ${_bk.selectedTime} ✓`
@@ -2229,5 +2254,132 @@ function confirmBooking() {
     notify('Ошибка при записи. Попробуйте снова.');
     btn.disabled = false;
     updateBookingConfirmBtn();
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// SCHOOL ADD LESSON MODAL
+// ══════════════════════════════════════════════════════
+
+function openSchoolLessonModal() {
+  const user = auth.currentUser;
+  if (!user || !_userIsSchool) return;
+
+  const overlay = document.getElementById('sl-overlay');
+  overlay.style.display = 'flex';
+
+  // Labels
+  const L = {
+    title:   currentLang==='ru'?'Добавить урок':currentLang==='en'?'Add lesson':'הוסף שיעור',
+    date:    currentLang==='ru'?'Дата':currentLang==='en'?'Date':'תאריך',
+    time:    currentLang==='ru'?'Время':currentLang==='en'?'Time':'שעה',
+    instr:   currentLang==='ru'?'Инструктор':currentLang==='en'?'Instructor':'מדריך',
+    student: currentLang==='ru'?'Ученик':currentLang==='en'?'Student':'תלמיד',
+    confirm: currentLang==='ru'?'Добавить урок':currentLang==='en'?'Add lesson':'הוסף שיעור',
+  };
+  document.getElementById('sl-title').textContent = L.title;
+  document.getElementById('sl-lbl-date').textContent = L.date;
+  document.getElementById('sl-lbl-time').textContent = L.time;
+  document.getElementById('sl-lbl-instr').textContent = L.instr;
+  document.getElementById('sl-lbl-student').textContent = L.student;
+  document.getElementById('sl-confirm-btn').textContent = L.confirm;
+
+  // Default date = today
+  const today = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('sl-date').value = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+  // Default time = nearest future hour
+  const nextHour = Math.min(today.getHours() + 1, 20);
+  document.getElementById('sl-time').value = `${pad(Math.max(nextHour,7))}:00`;
+
+  // Reset type
+  document.querySelectorAll('#sl-type-row .booking-type-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+
+  // Load instructors
+  db.collection('schools').doc(user.uid).get().then(function(doc) {
+    const instructors = doc.exists ? (doc.data().instructors || []) : [];
+    const isel = document.getElementById('sl-instr');
+    const none = currentLang==='ru'?'— не указан —':currentLang==='en'?'— none —':'— לא צוין —';
+    isel.innerHTML = `<option value="">${none}</option>` +
+      instructors.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+  });
+
+  // Load confirmed students
+  db.collection('enrollments').where('schoolId','==',user.uid).where('status','==','confirmed').get()
+    .then(function(snap) {
+      const ssel = document.getElementById('sl-student');
+      const none = currentLang==='ru'?'— не указан —':currentLang==='en'?'— none —':'— לא צוין —';
+      const opts = [];
+      snap.forEach(d => {
+        const e = d.data();
+        opts.push({ id: e.userId||d.id, name: e.studentName||e.studentEmail||'?' });
+      });
+      ssel.innerHTML = `<option value="">${none}</option>` +
+        opts.map(s => `<option value="${s.id}" data-name="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('');
+    });
+}
+
+function closeSchoolLessonModal() {
+  document.getElementById('sl-overlay').style.display = 'none';
+}
+
+function handleSlOverlay(e) {
+  if (e.target === document.getElementById('sl-overlay')) closeSchoolLessonModal();
+}
+
+function selectSlType(btn) {
+  document.querySelectorAll('#sl-type-row .booking-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function confirmSchoolLesson() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const dateVal = document.getElementById('sl-date').value; // YYYY-MM-DD
+  if (!dateVal) { notify(currentLang==='ru'?'Выберите дату':'בחר תאריך'); return; }
+
+  const [y,m,d] = dateVal.split('-');
+  const dateStr = `${d}.${m}.${y}`;
+  const time = document.getElementById('sl-time').value;
+  const instrSel = document.getElementById('sl-instr');
+  const studSel  = document.getElementById('sl-student');
+  const typeBtn  = document.querySelector('#sl-type-row .booking-type-btn.active');
+  const studOpt  = studSel.options[studSel.selectedIndex];
+
+  const btn = document.getElementById('sl-confirm-btn');
+  btn.disabled = true; btn.textContent = '…';
+
+  db.collection('schools').doc(user.uid).get().then(function(doc) {
+    const school = doc.exists ? doc.data() : {};
+    const booking = {
+      schoolId:      user.uid,
+      schoolName:    school.name || '',
+      instructorName: instrSel.value || '',
+      studentId:     studSel.value || user.uid,
+      studentName:   (studSel.value && studOpt) ? (studOpt.dataset.name || studOpt.textContent) : '—',
+      date:          dateStr,
+      time:          time,
+      duration:      90,
+      type:          typeBtn ? typeBtn.dataset.type : 'lesson_practical',
+      status:        'confirmed',
+      createdBy:     'school',
+      createdAt:     firebase.firestore.FieldValue.serverTimestamp(),
+    };
+
+    db.collection('bookings').add(booking).then(function() {
+      closeSchoolLessonModal();
+      _cal.year = +y; _cal.month = +m - 1; _cal.selectedDate = dateStr;
+      loadScheduleData();
+      const msg = currentLang==='ru' ? `Урок добавлен: ${dateStr} в ${time} ✓`
+                : currentLang==='en' ? `Lesson added: ${dateStr} at ${time} ✓`
+                : `שיעור נוסף: ${dateStr} ב-${time} ✓`;
+      notify(msg);
+    }).catch(function() {
+      notify(currentLang==='ru'?'Ошибка добавления':'שגיאה');
+      btn.disabled = false;
+      btn.textContent = currentLang==='ru'?'Добавить урок':'הוסף שיעור';
+    });
   });
 }
