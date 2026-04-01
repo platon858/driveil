@@ -1766,6 +1766,7 @@ function loadScheduleData() {
   db.collection('schools').doc(user.uid).get().then(function(schoolDoc) {
     const isSchool = schoolDoc.exists;
     _userIsSchool = isSchool;
+    const schoolData = isSchool ? schoolDoc.data() : null;
     const query = isSchool
       ? db.collection('bookings').where('schoolId', '==', user.uid)
       : db.collection('bookings').where('studentId', '==', user.uid);
@@ -1773,8 +1774,8 @@ function loadScheduleData() {
       const bookings = [];
       snap.forEach(d => bookings.push({ id: d.id, ...d.data() }));
       bookings.sort((a,b) => a.date < b.date ? -1 : 1);
-      renderCalendarView(bookings, isSchool);
-    }).catch(function() { renderCalendarView([], isSchool); });
+      renderCalendarView(bookings, isSchool, schoolData);
+    }).catch(function() { renderCalendarView([], isSchool, schoolData); });
   }).catch(function() {
     db.collection('bookings').where('studentId', '==', user.uid).get()
       .then(function(snap) {
@@ -1790,7 +1791,7 @@ function loadScheduleData() {
 const _cal = { year: new Date().getFullYear(), month: new Date().getMonth(), bookings: [], selectedDate: null, isSchool: false };
 let _userIsSchool = false;
 
-function renderCalendarView(bookings, isSchool) {
+function renderCalendarView(bookings, isSchool, schoolData) {
   _cal.bookings = bookings;
   _cal.isSchool = isSchool;
   _cal.selectedDate = null;
@@ -1812,40 +1813,58 @@ function renderCalendarView(bookings, isSchool) {
   const upcoming = withStatus.filter(b => b._st === 'upcoming').length;
   const done     = withStatus.filter(b => b._st === 'done').length;
 
-  const L = {
-    total:    currentLang==='ru'?'Всего':currentLang==='en'?'Total':'סה"כ',
-    upcoming: currentLang==='ru'?'Предстоит':currentLang==='en'?'Upcoming':'קרובים',
-    done:     currentLang==='ru'?'Завершено':currentLang==='en'?'Done':'הושלמו',
-    book:     currentLang==='ru'?'Записаться на урок':currentLang==='en'?'Book a lesson':'הזמן שיעור',
-    noLess:   currentLang==='ru'?'Уроков пока нет':currentLang==='en'?'No lessons yet':'אין שיעורים עדיין',
-    noSub:    currentLang==='ru'?'Нажмите «+» чтобы записаться':currentLang==='en'?'Tap «+» to book a lesson':'לחץ «+» להזמנת שיעור',
-    clickDay: currentLang==='ru'?'Нажмите на дату чтобы увидеть уроки':currentLang==='en'?'Click a date to see lessons':'לחץ על תאריך לצפייה בשיעורים',
-  };
+  const clickDay = currentLang==='ru'?'Нажмите на дату чтобы увидеть уроки':currentLang==='en'?'Click a date to see lessons':'לחץ על תאריך לצפייה בשיעורים';
+  const bookLbl  = currentLang==='ru'?'Записаться на урок':currentLang==='en'?'Book a lesson':'הזמן שיעור';
+  const addLbl   = currentLang==='ru'?'Добавить урок':currentLang==='en'?'Add lesson':'הוסף שיעור';
+  const plusSvg  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
 
-  const statsHtml = `
-    <div class="cal-stats-row">
-      <div class="cal-stat"><span class="cal-stat-val">${withStatus.length}</span><span class="cal-stat-lbl">${L.total}</span></div>
-      <div class="cal-stat accent"><span class="cal-stat-val">${upcoming}</span><span class="cal-stat-lbl">${L.upcoming}</span></div>
-      <div class="cal-stat"><span class="cal-stat-val">${done}</span><span class="cal-stat-lbl">${L.done}</span></div>
-    </div>`;
-
-  // Update page title based on role
+  // Update page title
   const titleEl = document.querySelector('#page-schedule h1');
   if (titleEl) titleEl.textContent = isSchool
     ? (currentLang==='ru'?'Мои уроки':currentLang==='en'?'My Lessons':'השיעורים שלי')
     : (t.schedule_title || 'לוח שיעורים');
 
-  const bookBtn = isSchool
-    ? `<button class="schedule-add-btn" onclick="openSchoolLessonModal()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        ${currentLang==='ru'?'Добавить урок':currentLang==='en'?'Add lesson':'הוסף שיעור'}
-      </button>`
-    : `<button class="schedule-add-btn" onclick="openBookingModal()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        ${L.book}
-      </button>`;
+  // School profile card (Facebook style)
+  let profileHtml = '';
+  if (isSchool && schoolData) {
+    const sd = schoolData;
+    const initial = (sd.name || '?').charAt(0).toUpperCase();
+    const instrCount = (sd.instructors || []).length;
+    const L2 = {
+      lessons:  currentLang==='ru'?'Уроков':currentLang==='en'?'Lessons':'שיעורים',
+      instrs:   currentLang==='ru'?'Инструкторов':currentLang==='en'?'Instructors':'מדריכים',
+      students: currentLang==='ru'?'Учеников':currentLang==='en'?'Students':'תלמידים',
+      edit:     currentLang==='ru'?'Редактировать профиль':currentLang==='en'?'Edit profile':'ערוך פרופיל',
+      myless:   currentLang==='ru'?'Мои уроки':currentLang==='en'?'My lessons':'השיעורים שלי',
+    };
+    profileHtml = `
+      <div class="sp-profile">
+        <div class="sp-cover"></div>
+        <div class="sp-avatar">${initial}</div>
+        <div class="sp-body">
+          <div class="sp-name">${escapeHtml(sd.name || '')}</div>
+          <div class="sp-meta">
+            ${sd.city ? `<span>📍 ${escapeHtml(sd.city)}</span>` : ''}
+            ${sd.rating ? `<span>⭐ ${sd.rating.toFixed(1)}</span>` : ''}
+            ${sd.price ? `<span>₪${sd.price} / שיעור</span>` : ''}
+          </div>
+          ${sd.description ? `<div class="sp-desc">${escapeHtml(sd.description)}</div>` : ''}
+          <div class="sp-stats">
+            <div class="sp-stat"><span class="sp-stat-val">${withStatus.length}</span><span class="sp-stat-lbl">${L2.lessons}</span></div>
+            <div class="sp-stat"><span class="sp-stat-val">${upcoming}</span><span class="sp-stat-lbl">${currentLang==='ru'?'Предстоит':currentLang==='en'?'Upcoming':'קרובים'}</span></div>
+            <div class="sp-stat"><span class="sp-stat-val">${instrCount}</span><span class="sp-stat-lbl">${L2.instrs}</span></div>
+          </div>
+          <button class="sp-edit-btn" onclick="openSchoolProfile()">✏️ ${L2.edit}</button>
+        </div>
+        <div class="sp-section-title">${plusSvg} <span>${L2.myless}</span>
+          <button class="schedule-add-btn sp-add-btn" onclick="openSchoolLessonModal()">${plusSvg} ${addLbl}</button>
+        </div>
+      </div>`;
+  }
 
-  container.innerHTML = statsHtml + bookBtn + `
+  const bookBtn = isSchool ? '' : `<button class="schedule-add-btn" onclick="openBookingModal()">${plusSvg} ${bookLbl}</button>`;
+
+  container.innerHTML = profileHtml + bookBtn + `
     <div class="cal-wrap">
       <div class="cal-header">
         <button class="cal-nav-btn" onclick="schedCalNav(-1)">‹</button>
@@ -1854,7 +1873,7 @@ function renderCalendarView(bookings, isSchool) {
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
-    <div class="cal-day-lessons" id="cal-day-lessons"><p class="cal-hint">${L.clickDay}</p></div>`;
+    <div class="cal-day-lessons" id="cal-day-lessons"><p class="cal-hint">${clickDay}</p></div>`;
 
   renderCalendarGrid();
 }

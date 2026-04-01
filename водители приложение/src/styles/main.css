@@ -1891,3 +1891,73 @@
       .cal-cell-num { font-size: 0.72rem; width: 18px; height: 18px; }
       .cal-dot { width: 5px; height: 5px; }
     }
+
+    /* ══ SCHOOL PROFILE (Facebook style) ══ */
+    .sp-profile {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; overflow: hidden; margin-bottom: 20px;
+    }
+    .sp-cover {
+      height: 110px;
+      background: linear-gradient(135deg, #0a1628 0%, #1a2e5a 55%, #1a73e8 100%);
+    }
+    .sp-body { padding: 0 20px 20px; position: relative; }
+    .sp-avatar {
+      width: 76px; height: 76px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a73e8, #0a1628);
+      border: 4px solid var(--card);
+      position: absolute; top: -38px; inset-inline-start: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 800; color: #fff;
+      box-shadow: 0 4px 16px rgba(26,115,232,0.35);
+    }
+    .sp-name {
+      font-size: 1.25rem; font-weight: 800; color: var(--text);
+      padding-top: 48px;
+    }
+    .sp-meta {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      font-size: 0.8rem; color: var(--muted); margin-top: 5px;
+    }
+    .sp-desc {
+      font-size: 0.88rem; color: var(--text); margin-top: 10px;
+      line-height: 1.55; opacity: 0.85;
+    }
+    .sp-stats {
+      display: flex; gap: 24px; margin-top: 16px;
+      padding-top: 14px; border-top: 1px solid var(--border);
+    }
+    .sp-stat { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+    .sp-stat-val { font-size: 1.3rem; font-weight: 800; color: var(--text); }
+    .sp-stat-lbl { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .sp-edit-btn {
+      margin-top: 14px; padding: 8px 18px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text); font-size: 0.83rem; font-weight: 600;
+      cursor: pointer; transition: background .15s;
+    }
+    .sp-edit-btn:hover { background: var(--accent-light); }
+    .sp-section-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.95rem; font-weight: 700; color: var(--text);
+      padding: 16px 20px 14px; border-top: 1px solid var(--border);
+      margin-top: 16px;
+    }
+    .sp-section-title span { flex: 1; }
+    .sp-add-btn {
+      margin: 0; padding: 7px 14px; font-size: 0.8rem;
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    html.dark .sp-profile { background: #0d0d0d; border-color: #222; }
+    html.dark .sp-avatar { border-color: #0d0d0d; }
+    html.dark .sp-edit-btn { background: #111; border-color: #333; }
+    html.dark .sp-edit-btn:hover { background: #1a2233; }
+
+    @media (max-width: 600px) {
+      .sp-cover { height: 80px; }
+      .sp-avatar { width: 60px; height: 60px; font-size: 1.5rem; top: -30px; }
+      .sp-name { font-size: 1.1rem; padding-top: 38px; }
+      .sp-stats { gap: 16px; }
+      .sp-stat-val { font-size: 1.1rem; }
+    }
