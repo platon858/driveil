@@ -709,6 +709,7 @@ function showPage(name) {
   if (name === 'test') startTest();
   if (name === 'dashboard') loadDashboard();
   if (name === 'schedule') loadScheduleData();
+  if (name === 'schools' && _userIsSchool) loadMySchoolPage();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1462,7 +1463,19 @@ function loadDashboard() {
   }).catch(function() { loadStudentDashboard(user); });
 }
 
+function updateSidebarForSchool() {
+  const schedLbl = document.querySelector('#snav-schedule .sb-label');
+  if (schedLbl) schedLbl.textContent = currentLang==='ru'?'Мои уроки':currentLang==='en'?'My Lessons':'השיעורים שלי';
+  const schoolLbl = document.querySelector('#snav-schools .sb-label');
+  if (schoolLbl) schoolLbl.textContent = currentLang==='ru'?'Моя школа':currentLang==='en'?'My School':'בית ספרי';
+  const mSchedLbl = document.querySelector('#mnav-schedule span');
+  if (mSchedLbl) mSchedLbl.textContent = currentLang==='ru'?'Мои уроки':currentLang==='en'?'My Lessons':'השיעורים שלי';
+  const mSchoolLbl = document.querySelector('#mnav-schools span');
+  if (mSchoolLbl) mSchoolLbl.textContent = currentLang==='ru'?'Моя школа':currentLang==='en'?'My School':'ביה"ס שלי';
+}
+
 function loadSchoolDashboard(user, school) {
+  updateSidebarForSchool();
   const body = document.getElementById('db-body');
   db.collection('enrollments').where('schoolId', '==', user.uid).get().then(function(snap) {
     const all = [];
@@ -1586,6 +1599,76 @@ function rejectEnrollment(id) {
 // ── Expose functions to window (called from HTML onclick handlers) ──
 window.setLang = setLang;
 window.backToLang = backToLang;
+function loadMySchoolPage() {
+  const user = auth.currentUser;
+  const page = document.querySelector('.schools-page');
+  if (!page || !user) return;
+
+  page.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)">⏳</div>';
+
+  Promise.all([
+    db.collection('schools').doc(user.uid).get(),
+    db.collection('enrollments').where('schoolId','==',user.uid).where('status','==','confirmed').get()
+  ]).then(function([schoolDoc, enrollSnap]) {
+    if (!schoolDoc.exists) {
+      page.innerHTML = '<div class="db-empty">Профиль не найден</div>'; return;
+    }
+    const school = schoolDoc.data();
+    const enrollments = [];
+    enrollSnap.forEach(d => enrollments.push({ id: d.id, ...d.data() }));
+
+    const initial    = (school.name || '?').charAt(0).toUpperCase();
+    const instrCount = (school.instructors || []).length;
+    const L = {
+      enrolled:   currentLang==='ru'?'Записаны':currentLang==='en'?'Enrolled':'רשומים',
+      instrs:     currentLang==='ru'?'Инструкторы':currentLang==='en'?'Instructors':'מדריכים',
+      rating:     currentLang==='ru'?'Рейтинг':currentLang==='en'?'Rating':'דירוג',
+      students:   currentLang==='ru'?'Мои ученики':currentLang==='en'?'My students':'התלמידים שלי',
+      edit:       currentLang==='ru'?'Редактировать профиль':currentLang==='en'?'Edit profile':'ערוך פרופיל',
+      noStudents: currentLang==='ru'?'Пока нет подтверждённых учеников':currentLang==='en'?'No confirmed students yet':'אין תלמידים רשומים עדיין',
+    };
+    const personSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
+
+    const studentCards = enrollments.length === 0
+      ? `<p class="cal-hint" style="padding:20px 0">${L.noStudents}</p>`
+      : enrollments.map(e => `
+          <div class="sp-student-item">
+            <div class="sp-student-avatar">${(e.studentName||'?').charAt(0).toUpperCase()}</div>
+            <div>
+              <div class="sp-student-name">${escapeHtml(e.studentName||'—')}</div>
+              <div class="sp-student-meta">${escapeHtml(e.studentPhone||e.studentEmail||'')}</div>
+            </div>
+          </div>`).join('');
+
+    page.innerHTML = `
+      <div style="max-width:620px;margin:0 auto;padding:20px">
+        <div class="sp-profile">
+          <div class="sp-cover"></div>
+          <div class="sp-avatar">${initial}</div>
+          <div class="sp-body">
+            <div class="sp-name">${escapeHtml(school.name||'')}</div>
+            <div class="sp-meta">
+              ${school.city ? `<span>📍 ${escapeHtml(school.city)}</span>` : ''}
+              ${school.rating ? `<span>⭐ ${school.rating.toFixed(1)}</span>` : ''}
+              ${school.price ? `<span>₪${school.price} / שיעור</span>` : ''}
+            </div>
+            ${school.description ? `<div class="sp-desc">${escapeHtml(school.description)}</div>` : ''}
+            <div class="sp-stats">
+              <div class="sp-stat"><span class="sp-stat-val">${enrollments.length}</span><span class="sp-stat-lbl">${L.enrolled}</span></div>
+              <div class="sp-stat"><span class="sp-stat-val">${instrCount}</span><span class="sp-stat-lbl">${L.instrs}</span></div>
+              ${school.rating ? `<div class="sp-stat"><span class="sp-stat-val">${school.rating.toFixed(1)}</span><span class="sp-stat-lbl">${L.rating}</span></div>` : ''}
+            </div>
+            <button class="sp-edit-btn" onclick="openSchoolProfile()">✏️ ${L.edit}</button>
+          </div>
+          <div class="sp-section-title">${personSvg}<span>${L.students}</span></div>
+          <div style="padding:0 20px 20px">${studentCards}</div>
+        </div>
+      </div>`;
+  }).catch(function() {
+    page.innerHTML = '<div class="db-empty">Ошибка загрузки</div>';
+  });
+}
+
 window.showPage = showPage;
 window.openAuthModal = openAuthModal;
 window.closeAuthModal = closeAuthModal;

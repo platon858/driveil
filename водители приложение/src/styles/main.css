@@ -1949,6 +1949,20 @@
       display: flex; align-items: center; gap: 5px;
     }
 
+    .sp-student-item {
+      display: flex; gap: 12px; align-items: center;
+      padding: 10px 20px; border-bottom: 1px solid var(--border);
+    }
+    .sp-student-item:last-child { border-bottom: none; }
+    .sp-student-avatar {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #1a73e8, #0a5bc4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; color: #fff;
+    }
+    .sp-student-name { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+    .sp-student-meta { font-size: 0.75rem; color: var(--muted); }
+
     html.dark .sp-profile { background: #0d0d0d; border-color: #222; }
     html.dark .sp-avatar { border-color: #0d0d0d; }
     html.dark .sp-edit-btn { background: #111; border-color: #333; }
