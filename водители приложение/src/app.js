@@ -1602,6 +1602,30 @@ function rejectEnrollment(id) {
 // ── Expose functions to window (called from HTML onclick handlers) ──
 window.setLang = setLang;
 window.backToLang = backToLang;
+function generateSparklineSvg(data) {
+  const W = 300, H = 56, pad = 4;
+  const max = Math.max(...data, 1);
+  const stepX = (W - pad * 2) / (data.length - 1);
+  const pts = data.map(function(v, i) {
+    const x = pad + i * stepX;
+    const y = H - pad - (v / max) * (H - pad * 2);
+    return [x, y];
+  });
+  const line = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+  const area = line + ' L' + pts[pts.length-1][0].toFixed(1) + ',' + (H-pad) + ' L' + pad + ',' + (H-pad) + ' Z';
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="msp-sg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a73e8" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#1a73e8" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="${area}" fill="url(#msp-sg)"/>
+    <path d="${line}" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${pts.map(function(p, i) { return data[i] > 0 ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="#1a73e8"/>` : ''; }).join('')}
+  </svg>`;
+}
+
 function loadMySchoolPage() {
   const user = auth.currentUser;
   const page = document.querySelector('.schools-page');
@@ -1661,7 +1685,6 @@ function loadMySchoolPage() {
 
     // ── labels ──────────────────────────────────────────────────────
     const initial    = (school.name || '?').charAt(0).toUpperCase();
-    const instrCount = (school.instructors || []).length;
     const L = {
       enrolled:   currentLang==='ru'?'Записаны':currentLang==='en'?'Enrolled':'רשומים',
       instrs:     currentLang==='ru'?'Инструкторы':currentLang==='en'?'Instructors':'מדריכים',
@@ -1678,100 +1701,128 @@ function loadMySchoolPage() {
       theory:     currentLang==='ru'?'Теория':currentLang==='en'?'Theory':'תיאוריה',
       highway:    currentLang==='ru'?'Шоссе':currentLang==='en'?'Highway':'כביש מהיר',
     };
-    const personSvg  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
-    const chartSvg   = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>`;
-
-    const studentCards = enrollments.length === 0
-      ? `<p class="cal-hint" style="padding:20px 0">${L.noStudents}</p>`
-      : enrollments.map(e => `
-          <div class="sp-student-item">
-            <div class="sp-student-avatar">${(e.studentName||'?').charAt(0).toUpperCase()}</div>
-            <div>
-              <div class="sp-student-name">${escapeHtml(e.studentName||'—')}</div>
-              <div class="sp-student-meta">${escapeHtml(e.studentPhone||e.studentEmail||'')}</div>
-            </div>
-          </div>`).join('');
-
     const totalType = typeCount.lesson_practical + typeCount.lesson_theory + typeCount.lesson_highway || 1;
     const pPct = Math.round(typeCount.lesson_practical / totalType * 100);
     const tPct = Math.round(typeCount.lesson_theory    / totalType * 100);
     const hPct = 100 - pPct - tPct;
-    const statsSection = `
-      <div class="sp-section-title">${chartSvg}<span>${L.statsTitle}</span></div>
-      <div style="padding:0 20px 20px">
-        <div class="sp-lesson-stats">
 
-          <div class="sp-ls-card sp-ls-card--blue">
-            <div class="sp-ls-icon">📅</div>
-            <div class="sp-ls-val">${lessonsThisWeek}</div>
-            <div class="sp-ls-lbl">${L.weekLabel}</div>
-          </div>
+    // Build sparkline data: group confirmed bookings by week (last 8 weeks)
+    const sparkData = (function() {
+      const weeks = Array(8).fill(0);
+      const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+      const baseTime = weekStart.getTime() - 7 * msPerWeek; // 8 weeks back from current week start
+      confirmed.forEach(function(b) {
+        const [d,m,y] = (b.date||'').split('.');
+        if (!y) return;
+        const bd = new Date(+y, +m-1, +d).getTime();
+        const idx = Math.floor((bd - baseTime) / msPerWeek);
+        if (idx >= 0 && idx < 8) weeks[idx]++;
+      });
+      return weeks;
+    }());
 
-          <div class="sp-ls-card sp-ls-card--${cancelRate > 15 ? 'warn' : 'green'}">
-            <div class="sp-ls-icon">${cancelRate > 15 ? '⚠️' : '✅'}</div>
-            <div class="sp-ls-val">${cancelRate}%</div>
-            <div class="sp-ls-lbl">${L.cancelLbl}</div>
-          </div>
-
-          <div class="sp-ls-card sp-ls-card--purple">
-            <div class="sp-ls-icon">📊</div>
-            <div class="sp-ls-val">${avgLessons}</div>
-            <div class="sp-ls-lbl">${L.avgLbl}</div>
-          </div>
-
-          <div class="sp-ls-card sp-ls-card--wide sp-ls-card--types">
-            <div class="sp-ls-types-header">
-              <span class="sp-ls-icon" style="font-size:1rem">🚗</span>
-              <span class="sp-ls-wide-title">${currentLang==='ru'?'Типы уроков':currentLang==='en'?'Lesson types':'סוגי שיעורים'}</span>
+    const studentRows = enrollments.length === 0
+      ? `<p class="msp-empty">${L.noStudents}</p>`
+      : enrollments.map(function(e) {
+          const sInit = (e.studentName||'?').charAt(0).toUpperCase();
+          const sName = escapeHtml(e.studentName||'—');
+          const sMeta = escapeHtml(e.studentPhone||e.studentEmail||'');
+          // count confirmed lessons for this student
+          const sLessons = confirmed.filter(function(b){ return b.studentName === e.studentName; }).length;
+          return `
+          <div class="msp-student-row">
+            <div class="msp-student-avatar">${sInit}</div>
+            <div class="msp-student-info">
+              <div class="msp-student-name">${sName}</div>
+              <div class="msp-student-meta">${sMeta}</div>
             </div>
-            <div class="sp-ls-bar">
-              <div class="sp-ls-bar-seg sp-ls-bar-seg--practical" style="width:${pPct}%"></div>
-              <div class="sp-ls-bar-seg sp-ls-bar-seg--theory"    style="width:${tPct}%"></div>
-              <div class="sp-ls-bar-seg sp-ls-bar-seg--highway"   style="width:${hPct}%"></div>
-            </div>
-            <div class="sp-ls-type-row">
-              <span class="sp-ls-type-dot sp-ls-type-dot--practical"></span>${L.practical} <b>${typeCount.lesson_practical}</b>
-              <span class="sp-ls-type-dot sp-ls-type-dot--theory"></span>${L.theory} <b>${typeCount.lesson_theory}</b>
-              <span class="sp-ls-type-dot sp-ls-type-dot--highway"></span>${L.highway} <b>${typeCount.lesson_highway}</b>
-            </div>
-          </div>
+            <div class="msp-student-stat">${sLessons > 0 ? sLessons + ' ' + (currentLang==='ru'?'ур.':currentLang==='en'?'ls.':'שיע.') : ''}</div>
+          </div>`;
+        }).join('');
 
-          ${topInstr ? `
-          <div class="sp-ls-card sp-ls-card--wide sp-ls-card--instr">
-            <div class="sp-ls-instr-avatar">${topInstr[0].charAt(0).toUpperCase()}</div>
-            <div>
-              <div class="sp-ls-val sp-ls-val--sm">${escapeHtml(topInstr[0])}</div>
-              <div class="sp-ls-lbl">${L.topInstrLbl} · <b>${topInstr[1]}</b> ${currentLang==='ru'?'уроков':currentLang==='en'?'lessons':'שיעורים'}</div>
-            </div>
-          </div>` : ''}
-
-        </div>
-      </div>`;
+    const domTypesTitle = currentLang==='ru'?'Типы уроков':currentLang==='en'?'Lesson types':'סוגי שיעורים';
 
     page.innerHTML = `
-      <div style="max-width:620px;margin:0 auto;padding:20px">
-        <div class="sp-profile">
-          <div class="sp-cover"></div>
-          <div class="sp-avatar">${initial}</div>
-          <div class="sp-body">
-            <div class="sp-name">${escapeHtml(school.name||'')}</div>
-            <div class="sp-meta">
+      <div class="msp-page">
+
+        <!-- Card 1: Main stats -->
+        <div class="msp-card">
+          <div class="msp-card-header">
+            <div class="msp-cover"></div>
+            <div class="msp-avatar">${initial}</div>
+          </div>
+          <div class="msp-card-body">
+            <div class="msp-school-name">${escapeHtml(school.name||'')}</div>
+            <div class="msp-school-meta">
               ${school.city ? `<span>📍 ${escapeHtml(school.city)}</span>` : ''}
               ${school.rating ? `<span>⭐ ${school.rating.toFixed(1)}</span>` : ''}
-              ${school.price ? `<span>₪${school.price} / שיעור</span>` : ''}
+              ${school.price ? `<span>₪${school.price}</span>` : ''}
             </div>
-            ${school.description ? `<div class="sp-desc">${escapeHtml(school.description)}</div>` : ''}
-            <div class="sp-stats">
-              <div class="sp-stat sp-stat--blue"><div class="sp-stat-inner"><div class="sp-stat-val">${enrollments.length}</div><div class="sp-stat-lbl">${L.enrolled}</div></div></div>
-              <div class="sp-stat sp-stat--green"><div class="sp-stat-inner"><div class="sp-stat-val">${instrCount}</div><div class="sp-stat-lbl">${L.instrs}</div></div></div>
-              ${school.rating ? `<div class="sp-stat sp-stat--gold"><div class="sp-stat-inner"><div class="sp-stat-val">${school.rating.toFixed(1)}</div><div class="sp-stat-lbl">${L.rating}</div></div></div>` : '<div class="sp-stat sp-stat--gold" style="visibility:hidden"><div class="sp-stat-inner"></div></div>'}
+            ${school.description ? `<div class="msp-school-desc">${escapeHtml(school.description)}</div>` : ''}
+
+            <!-- Hero metric -->
+            <div class="msp-hero-stat">
+              <div class="msp-hero-label">${currentLang==='ru'?'Всего уроков':currentLang==='en'?'Total lessons':'סה"כ שיעורים'}</div>
+              <div class="msp-hero-value">${confirmed.length}</div>
+              <div class="msp-hero-change ${cancelRate > 15 ? 'neg' : 'pos'}">${cancelRate}% ${currentLang==='ru'?'отмен':currentLang==='en'?'cancel rate':'ביטולים'}</div>
             </div>
-            <button class="sp-edit-btn" onclick="openSchoolProfile()">✏️ ${L.edit}</button>
+
+            <!-- Sparkline -->
+            <div class="msp-chart">${generateSparklineSvg(sparkData)}</div>
+
+            <!-- Stats grid -->
+            <div class="msp-stats-grid">
+              <div class="msp-stat-item">
+                <div class="msp-stat-val">${lessonsThisWeek}</div>
+                <div class="msp-stat-lbl">${L.weekLabel}</div>
+              </div>
+              <div class="msp-stat-item">
+                <div class="msp-stat-val">${enrollments.length}</div>
+                <div class="msp-stat-lbl">${L.enrolled}</div>
+              </div>
+              <div class="msp-stat-item">
+                <div class="msp-stat-val">${avgLessons}</div>
+                <div class="msp-stat-lbl">${currentLang==='ru'?'Ср. уроков':currentLang==='en'?'Avg / std':'ממוצע'}</div>
+              </div>
+            </div>
+
+            <!-- Dominance bar: lesson types -->
+            <div class="msp-dominance">
+              <div class="msp-dom-title">${domTypesTitle}</div>
+              <div class="msp-dom-labels">
+                <span>🚗 ${L.practical} <b>${typeCount.lesson_practical}</b></span>
+                <span>📚 ${L.theory} <b>${typeCount.lesson_theory}</b></span>
+                <span>🛣️ ${L.highway} <b>${typeCount.lesson_highway}</b></span>
+              </div>
+              <div class="msp-dom-bar">
+                <div class="msp-dom-seg seg-practical" style="width:${pPct}%"></div>
+                <div class="msp-dom-seg seg-theory"    style="width:${tPct}%"></div>
+                <div class="msp-dom-seg seg-highway"   style="width:${hPct}%"></div>
+              </div>
+            </div>
+
+            ${topInstr ? `
+            <div class="msp-top-instr">
+              <div class="msp-top-instr-avatar">${topInstr[0].charAt(0).toUpperCase()}</div>
+              <div class="msp-top-instr-info">
+                <div class="msp-top-instr-name">${escapeHtml(topInstr[0])}</div>
+                <div class="msp-top-instr-meta">${L.topInstrLbl} · <b>${topInstr[1]}</b> ${currentLang==='ru'?'уроков':currentLang==='en'?'lessons':'שיעורים'}</div>
+              </div>
+            </div>` : ''}
+
+            <button class="msp-edit-btn" onclick="openSchoolProfile()">✏️ ${L.edit}</button>
           </div>
-          <div class="sp-section-title">${personSvg}<span>${L.students}</span></div>
-          <div style="padding:0 20px 20px">${studentCards}</div>
-          ${statsSection}
         </div>
+
+        <!-- Card 2: Students list -->
+        <div class="msp-card">
+          <div class="msp-list-header">
+            <span>${L.students}</span>
+            <span class="msp-badge">${enrollments.length}</span>
+          </div>
+          ${studentRows}
+        </div>
+
       </div>`;
   }).catch(function(err) {
     console.error('loadMySchoolPage error:', err);

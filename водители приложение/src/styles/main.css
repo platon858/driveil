@@ -1890,243 +1890,215 @@
       .cal-dot { width: 5px; height: 5px; }
     }
 
-    /* ══ SCHOOL PROFILE (Facebook style) ══ */
-    .sp-profile {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 18px; overflow: hidden; margin-bottom: 20px;
-      position: relative;
+    /* ══ MY SCHOOL PAGE (MSP) — CryptoStatsCard style ══ */
+    .msp-page {
+      max-width: 640px; margin: 0 auto; padding: 20px;
+      display: flex; flex-direction: column; gap: 16px;
     }
-    .sp-cover {
-      height: 170px;
-      background: linear-gradient(135deg, #050e1f 0%, #0d2050 25%, #1a73e8 60%, #6c40ff 85%, #9c2fff 100%);
+
+    /* Card shell */
+    .msp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    /* Header: cover + floating avatar */
+    .msp-card-header { position: relative; }
+    .msp-cover {
+      height: 120px;
+      background: linear-gradient(135deg, #050e1f 0%, #0d2050 30%, #1a73e8 65%, #6c40ff 88%, #9c2fff 100%);
       position: relative; overflow: hidden;
     }
-    .sp-cover::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 70% 50%, rgba(108,64,255,0.35) 0%, transparent 70%),
-                  radial-gradient(ellipse at 20% 80%, rgba(26,115,232,0.25) 0%, transparent 60%);
+    .msp-cover::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 75% 50%, rgba(108,64,255,0.4) 0%, transparent 65%),
+                  radial-gradient(ellipse at 15% 90%, rgba(26,115,232,0.3) 0%, transparent 55%);
       pointer-events: none;
     }
-    .sp-body { padding: 0 20px 20px; position: relative; }
-    .sp-avatar {
-      width: 76px; height: 76px; border-radius: 50%;
-      background: linear-gradient(135deg, #1a73e8, #0a1628);
+    .msp-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a73e8 0%, #9c2fff 100%);
       border: 4px solid var(--card);
-      position: absolute; top: -38px; inset-inline-start: 20px;
+      position: absolute; bottom: -36px; inset-inline-start: 20px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 2rem; font-weight: 800; color: #fff;
-      box-shadow: 0 4px 16px rgba(26,115,232,0.35);
+      font-size: 1.9rem; font-weight: 800; color: #fff;
+      box-shadow: 0 6px 20px rgba(26,115,232,0.4);
+      z-index: 1;
     }
-    .sp-name {
-      font-size: 1.25rem; font-weight: 800; color: var(--text);
-      padding-top: 48px;
+
+    /* Card body */
+    .msp-card-body { padding: 0 20px 20px; }
+    .msp-school-name {
+      font-size: 1.3rem; font-weight: 800; color: var(--text);
+      padding-top: 46px; line-height: 1.2;
     }
-    .sp-meta {
+    .msp-school-meta {
       display: flex; flex-wrap: wrap; gap: 10px;
-      font-size: 0.8rem; color: var(--muted); margin-top: 5px;
+      font-size: 0.8rem; color: var(--muted); margin-top: 4px;
     }
-    .sp-desc {
-      font-size: 0.88rem; color: var(--text); margin-top: 10px;
-      line-height: 1.55; opacity: 0.85;
+    .msp-school-desc {
+      font-size: 0.85rem; color: var(--text); opacity: 0.8;
+      margin-top: 8px; line-height: 1.5;
     }
-    .sp-stats {
+
+    /* Hero metric */
+    .msp-hero-stat {
+      text-align: center; margin: 22px 0 8px;
+    }
+    .msp-hero-label {
+      font-size: 0.65rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .msp-hero-value {
+      font-size: 3.2rem; font-weight: 900; line-height: 1;
+      letter-spacing: -2px; color: var(--text); margin: 4px 0;
+    }
+    .msp-hero-change {
+      display: inline-block; font-size: 0.8rem; font-weight: 700;
+      padding: 2px 10px; border-radius: 99px;
+    }
+    .msp-hero-change.pos { color: #27ae60; background: rgba(39,174,96,0.12); }
+    .msp-hero-change.neg { color: #e74c3c; background: rgba(231,76,60,0.12); }
+
+    /* Sparkline chart */
+    .msp-chart {
+      padding: 4px 0 8px; overflow: hidden;
+    }
+    .msp-chart svg { width: 100%; height: 56px; display: block; }
+
+    /* Stats grid — 3 columns */
+    .msp-stats-grid {
       display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 10px; margin-top: 16px;
-      padding-top: 16px; border-top: 1px solid var(--border);
+      gap: 12px; padding: 16px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
     }
-    /* BorderBeam keyframe */
-    @keyframes sp-beam { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-    .sp-stat {
-      position: relative; border-radius: 16px; overflow: hidden;
-      padding: 2px; /* border thickness */
-      background: linear-gradient(135deg, #1a73e8, #4da6ff);
-      transition: transform 0.18s, box-shadow 0.18s;
+    .msp-stat-item { text-align: center; }
+    .msp-stat-val {
+      font-size: 1.5rem; font-weight: 800; color: var(--text);
+      line-height: 1; letter-spacing: -0.5px;
     }
-    .sp-stat--green { background: linear-gradient(135deg, #27ae60, #67d48a); }
-    .sp-stat--gold  { background: linear-gradient(135deg, #f5a623, #ffca6b); }
-
-    /* rotating beam overlay */
-    .sp-stat::before {
-      content: ''; position: absolute; inset: -80%;
-      background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(255,255,255,0.85) 25deg, transparent 55deg);
-      animation: sp-beam 2.8s linear infinite;
+    .msp-stat-lbl {
+      font-size: 0.62rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px;
     }
-    .sp-stat--green::before { animation-delay: -0.9s; }
-    .sp-stat--gold::before  { animation-delay: -1.8s; }
 
-    .sp-stat-inner {
-      position: relative; z-index: 1;
-      background: var(--card);
-      border-radius: 14px;
-      padding: 16px 10px;
-      text-align: center;
+    /* Dominance bar */
+    .msp-dominance { padding: 16px 0 8px; }
+    .msp-dom-title {
+      font-size: 0.72rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px;
     }
-    .sp-stat:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,115,232,0.35); }
-    .sp-stat--green:hover { box-shadow: 0 8px 24px rgba(39,174,96,0.35); }
-    .sp-stat--gold:hover  { box-shadow: 0 8px 24px rgba(245,166,35,0.35); }
+    .msp-dom-labels {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      font-size: 0.78rem; color: var(--text); margin-bottom: 8px;
+    }
+    .msp-dom-labels span { display: flex; align-items: center; gap: 4px; }
+    .msp-dom-bar {
+      display: flex; height: 8px; border-radius: 99px; overflow: hidden;
+      background: var(--border); gap: 2px;
+    }
+    .msp-dom-seg {
+      height: 100%; border-radius: 99px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: 0;
+    }
+    .seg-practical { background: linear-gradient(90deg, #1a73e8, #4da6ff); }
+    .seg-theory    { background: linear-gradient(90deg, #9c40ff, #b86fff); }
+    .seg-highway   { background: linear-gradient(90deg, #f5a623, #ffca6b); }
 
-    .sp-stat-val { font-size: 1.6rem; font-weight: 800; line-height: 1; color: #1a73e8; }
-    .sp-stat--green .sp-stat-val { color: #27ae60; }
-    .sp-stat--gold  .sp-stat-val { color: #f5a623; }
-    .sp-stat-lbl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 5px; font-weight: 600; }
-    .sp-edit-btn {
-      margin-top: 14px; padding: 8px 18px; border-radius: 10px;
+    /* Top instructor row */
+    .msp-top-instr {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 0 6px;
+      border-top: 1px solid var(--border); margin-top: 12px;
+    }
+    .msp-top-instr-avatar {
+      width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #1a73e8, #9c40ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 800; color: #fff;
+      box-shadow: 0 4px 14px rgba(26,115,232,0.3);
+    }
+    .msp-top-instr-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+    .msp-top-instr-meta { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
+
+    /* Edit button */
+    .msp-edit-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 16px; padding: 8px 20px; border-radius: 12px;
       border: 1px solid var(--border); background: var(--bg);
       color: var(--text); font-size: 0.83rem; font-weight: 600;
-      cursor: pointer; transition: background .15s;
+      cursor: pointer; transition: background 0.15s, box-shadow 0.15s;
     }
-    .sp-edit-btn:hover { background: var(--accent-light); }
-    .sp-section-title {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 0.95rem; font-weight: 700; color: var(--text);
-      padding: 16px 20px 14px; border-top: 1px solid var(--border);
-      margin-top: 16px;
-    }
-    .sp-section-title span { flex: 1; }
-    .sp-add-btn {
-      margin: 0; padding: 7px 14px; font-size: 0.8rem;
-      display: flex; align-items: center; gap: 5px;
+    .msp-edit-btn:hover {
+      background: var(--accent-light);
+      box-shadow: 0 2px 10px rgba(26,115,232,0.15);
     }
 
-    .sp-student-item {
-      display: flex; gap: 12px; align-items: center;
-      padding: 10px 20px; border-bottom: 1px solid var(--border);
+    /* Students list header */
+    .msp-list-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      font-size: 0.95rem; font-weight: 700; color: var(--text);
+      border-bottom: 1px solid var(--border);
     }
-    .sp-student-item:last-child { border-bottom: none; }
-    .sp-student-avatar {
-      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
-      background: linear-gradient(135deg, #1a73e8, #0a5bc4);
+    .msp-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 22px; height: 22px; border-radius: 99px; padding: 0 7px;
+      background: #1a73e8; color: #fff;
+      font-size: 0.72rem; font-weight: 800;
+    }
+
+    /* Student rows */
+    .msp-student-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 20px; border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+    .msp-student-row:last-child { border-bottom: none; }
+    .msp-student-row:hover { background: rgba(26,115,232,0.04); }
+    .msp-student-avatar {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #1a73e8, #6c40ff);
       display: flex; align-items: center; justify-content: center;
       font-size: 1rem; font-weight: 700; color: #fff;
     }
-    .sp-student-name { font-size: 0.88rem; font-weight: 600; color: var(--text); }
-    .sp-student-meta { font-size: 0.75rem; color: var(--muted); }
+    .msp-student-info { flex: 1; min-width: 0; }
+    .msp-student-name {
+      font-size: 0.88rem; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .msp-student-meta { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
+    .msp-student-stat {
+      font-size: 0.8rem; font-weight: 700; color: #27ae60;
+      white-space: nowrap; margin-inline-start: auto; flex-shrink: 0;
+    }
+    .msp-empty { padding: 24px 20px; color: var(--muted); font-size: 0.88rem; }
 
-    /* lesson stats grid */
-    .sp-lesson-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-    .sp-ls-card {
-      position: relative; overflow: hidden;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 18px 14px 16px;
-      text-align: center;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .sp-ls-card::after {
-      content: ''; position: absolute; inset: 0; border-radius: 18px;
-      opacity: 0; transition: opacity 0.2s; pointer-events: none;
-    }
-    .sp-ls-card:hover { transform: translateY(-3px); }
-    .sp-ls-card:hover::after { opacity: 1; }
-
-    /* color variants — gradient background tint */
-    .sp-ls-card--blue   {
-      background: linear-gradient(145deg, rgba(26,115,232,0.13) 0%, var(--card) 60%);
-      border-color: rgba(26,115,232,0.45);
-      border-width: 2px;
-    }
-    .sp-ls-card--blue::after   { box-shadow: 0 8px 28px rgba(26,115,232,0.22); }
-    .sp-ls-card--green  {
-      background: linear-gradient(145deg, rgba(39,174,96,0.13) 0%, var(--card) 60%);
-      border-color: rgba(39,174,96,0.45);
-      border-width: 2px;
-    }
-    .sp-ls-card--green::after  { box-shadow: 0 8px 28px rgba(39,174,96,0.22); }
-    .sp-ls-card--warn   {
-      background: linear-gradient(145deg, rgba(231,76,60,0.13) 0%, var(--card) 60%);
-      border-color: rgba(231,76,60,0.45);
-      border-width: 2px;
-    }
-    .sp-ls-card--warn::after   { box-shadow: 0 8px 28px rgba(231,76,60,0.22); }
-    .sp-ls-card--purple {
-      background: linear-gradient(145deg, rgba(156,64,255,0.13) 0%, var(--card) 60%);
-      border-color: rgba(156,64,255,0.45);
-      border-width: 2px;
-    }
-    .sp-ls-card--purple::after { box-shadow: 0 8px 28px rgba(156,64,255,0.22); }
-
-    /* icon badge */
-    .sp-ls-icon {
-      width: 42px; height: 42px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.15rem; margin: 0 auto 10px;
-      transition: transform 0.2s;
-    }
-    .sp-ls-card:hover .sp-ls-icon { transform: scale(1.1); }
-    .sp-ls-card--blue   .sp-ls-icon { background: rgba(26,115,232,0.12); }
-    .sp-ls-card--green  .sp-ls-icon { background: rgba(39,174,96,0.12); }
-    .sp-ls-card--warn   .sp-ls-icon { background: rgba(231,76,60,0.12); }
-    .sp-ls-card--purple .sp-ls-icon { background: rgba(156,64,255,0.12); }
-
-    .sp-ls-val {
-      font-size: 1.9rem; font-weight: 800;
-      line-height: 1; letter-spacing: -1px;
-    }
-    .sp-ls-val--sm { font-size: 1.05rem; font-weight: 700; }
-    .sp-ls-lbl { font-size: 0.64rem; color: var(--muted); margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-    .sp-ls-card--warn   .sp-ls-val { color: #e74c3c; }
-    .sp-ls-card--green  .sp-ls-val { color: #27ae60; }
-    .sp-ls-card--blue   .sp-ls-val { color: #1a73e8; }
-    .sp-ls-card--purple .sp-ls-val { color: #9c40ff; }
-
-    /* wide cards */
-    .sp-ls-card--wide { grid-column: span 3; text-align: start; padding: 16px 18px; }
-    .sp-ls-types-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-    .sp-ls-wide-title { font-size: 0.82rem; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.05em; }
-
-    /* stacked progress bar */
-    .sp-ls-bar {
-      display: flex; height: 8px; border-radius: 99px; overflow: hidden;
-      background: var(--border); margin-bottom: 12px; gap: 2px;
-    }
-    .sp-ls-bar-seg { height: 100%; border-radius: 99px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
-    .sp-ls-bar-seg--practical { background: linear-gradient(90deg, #1a73e8, #4da6ff); }
-    .sp-ls-bar-seg--theory    { background: linear-gradient(90deg, #9c40ff, #b86fff); }
-    .sp-ls-bar-seg--highway   { background: linear-gradient(90deg, #f5a623, #ffca6b); }
-
-    .sp-ls-type-row {
-      display: flex; align-items: center; gap: 12px;
-      font-size: 0.8rem; color: var(--text); flex-wrap: wrap;
-    }
-    .sp-ls-type-dot {
-      display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-    }
-    .sp-ls-type-dot--practical { background: #1a73e8; }
-    .sp-ls-type-dot--theory    { background: #9c40ff; }
-    .sp-ls-type-dot--highway   { background: #f5a623; }
-
-    /* top instructor card */
-    .sp-ls-card--instr { display: flex; align-items: center; gap: 14px; }
-    .sp-ls-instr-avatar {
-      width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
-      background: linear-gradient(135deg, #1a73e8, #9c40ff);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.15rem; font-weight: 800; color: #fff;
-      box-shadow: 0 4px 14px rgba(26,115,232,0.35);
-    }
-
-    html.dark .sp-ls-card { background: var(--card); border-color: var(--border); }
-    html.dark .sp-ls-card--blue   { background: linear-gradient(145deg, rgba(26,115,232,0.15) 0%, var(--card) 60%); border-color: rgba(26,115,232,0.45); }
-    html.dark .sp-ls-card--green  { background: linear-gradient(145deg, rgba(39,174,96,0.15) 0%, var(--card) 60%); border-color: rgba(39,174,96,0.45); }
-    html.dark .sp-ls-card--warn   { background: linear-gradient(145deg, rgba(231,76,60,0.15) 0%, var(--card) 60%); border-color: rgba(231,76,60,0.45); }
-    html.dark .sp-ls-card--purple { background: linear-gradient(145deg, rgba(156,64,255,0.15) 0%, var(--card) 60%); border-color: rgba(156,64,255,0.45); }
-    html.dark .sp-profile { background: #0d0d0d; border-color: #222; }
-    html.dark .sp-avatar { border-color: #0d0d0d; }
-    html.dark .sp-stat-inner { background: #111; }
-    html.dark .sp-edit-btn { background: #111; border-color: #333; }
-    html.dark .sp-edit-btn:hover { background: #1a2233; }
+    /* Dark mode */
+    html.dark .msp-card { background: #0f0f0f; border-color: #222; box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
+    html.dark .msp-avatar { border-color: #0f0f0f; }
+    html.dark .msp-stats-grid { border-color: #222; }
+    html.dark .msp-dom-bar { background: #222; }
+    html.dark .msp-top-instr { border-color: #222; }
+    html.dark .msp-list-header { border-color: #222; }
+    html.dark .msp-student-row { border-color: #222; }
+    html.dark .msp-student-row:hover { background: rgba(26,115,232,0.08); }
+    html.dark .msp-edit-btn { background: #1a1a1a; border-color: #333; }
+    html.dark .msp-edit-btn:hover { background: #1a2233; }
+    html.dark .msp-hero-change.pos { background: rgba(39,174,96,0.18); }
+    html.dark .msp-hero-change.neg { background: rgba(231,76,60,0.18); }
 
     @media (max-width: 600px) {
-      .sp-cover { height: 110px; }
-      .sp-avatar { width: 60px; height: 60px; font-size: 1.5rem; top: -30px; }
-      .sp-name { font-size: 1.1rem; padding-top: 38px; }
-      .sp-stats { gap: 16px; }
-      .sp-stat-val { font-size: 1.1rem; }
+      .msp-page { padding: 12px; }
+      .msp-cover { height: 90px; }
+      .msp-avatar { width: 60px; height: 60px; font-size: 1.5rem; bottom: -30px; }
+      .msp-school-name { font-size: 1.1rem; padding-top: 40px; }
+      .msp-hero-value { font-size: 2.4rem; }
+      .msp-stat-val { font-size: 1.2rem; }
+      .msp-dom-labels { gap: 8px; font-size: 0.73rem; }
     }
