@@ -1935,32 +1935,42 @@
       gap: 10px; margin-top: 16px;
       padding-top: 16px; border-top: 1px solid var(--border);
     }
+    /* BorderBeam keyframe */
+    @keyframes sp-beam { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
     .sp-stat {
-      border-radius: 16px; padding: 16px 10px;
-      text-align: center;
-      border: 3px solid transparent;
-      background: linear-gradient(var(--card), var(--card)) padding-box,
-                  linear-gradient(135deg, #1a73e8, #4da6ff) border-box;
-      box-shadow: 0 2px 12px rgba(26,115,232,0.10);
+      position: relative; border-radius: 16px; overflow: hidden;
+      padding: 2px; /* border thickness */
+      background: linear-gradient(135deg, #1a73e8, #4da6ff);
       transition: transform 0.18s, box-shadow 0.18s;
     }
-    .sp-stat:nth-child(2) {
-      background: linear-gradient(var(--card), var(--card)) padding-box,
-                  linear-gradient(135deg, #27ae60, #67d48a) border-box;
-      box-shadow: 0 2px 12px rgba(39,174,96,0.10);
+    .sp-stat--green { background: linear-gradient(135deg, #27ae60, #67d48a); }
+    .sp-stat--gold  { background: linear-gradient(135deg, #f5a623, #ffca6b); }
+
+    /* rotating beam overlay */
+    .sp-stat::before {
+      content: ''; position: absolute; inset: -80%;
+      background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(255,255,255,0.85) 25deg, transparent 55deg);
+      animation: sp-beam 2.8s linear infinite;
     }
-    .sp-stat:nth-child(3) {
-      background: linear-gradient(var(--card), var(--card)) padding-box,
-                  linear-gradient(135deg, #f5a623, #ffca6b) border-box;
-      box-shadow: 0 2px 12px rgba(245,166,35,0.10);
+    .sp-stat--green::before { animation-delay: -0.9s; }
+    .sp-stat--gold::before  { animation-delay: -1.8s; }
+
+    .sp-stat-inner {
+      position: relative; z-index: 1;
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px 10px;
+      text-align: center;
     }
-    .sp-stat:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,115,232,0.20); }
-    .sp-stat:nth-child(2):hover { box-shadow: 0 8px 24px rgba(39,174,96,0.20); }
-    .sp-stat:nth-child(3):hover { box-shadow: 0 8px 24px rgba(245,166,35,0.20); }
-    .sp-stat-val { font-size: 1.5rem; font-weight: 800; line-height: 1; color: #1a73e8; }
-    .sp-stat:nth-child(2) .sp-stat-val { color: #27ae60; }
-    .sp-stat:nth-child(3) .sp-stat-val { color: #f5a623; }
-    .sp-stat-lbl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 4px; font-weight: 600; }
+    .sp-stat:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,115,232,0.35); }
+    .sp-stat--green:hover { box-shadow: 0 8px 24px rgba(39,174,96,0.35); }
+    .sp-stat--gold:hover  { box-shadow: 0 8px 24px rgba(245,166,35,0.35); }
+
+    .sp-stat-val { font-size: 1.6rem; font-weight: 800; line-height: 1; color: #1a73e8; }
+    .sp-stat--green .sp-stat-val { color: #27ae60; }
+    .sp-stat--gold  .sp-stat-val { color: #f5a623; }
+    .sp-stat-lbl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 5px; font-weight: 600; }
     .sp-edit-btn {
       margin-top: 14px; padding: 8px 18px; border-radius: 10px;
       border: 1px solid var(--border); background: var(--bg);
@@ -2109,18 +2119,7 @@
     html.dark .sp-ls-card--purple { background: linear-gradient(145deg, rgba(156,64,255,0.15) 0%, var(--card) 60%); border-color: rgba(156,64,255,0.45); }
     html.dark .sp-profile { background: #0d0d0d; border-color: #222; }
     html.dark .sp-avatar { border-color: #0d0d0d; }
-    html.dark .sp-stat {
-      background: linear-gradient(var(--card), var(--card)) padding-box,
-                  linear-gradient(135deg, #1a73e8, #4da6ff) border-box;
-    }
-    html.dark .sp-stat:nth-child(2) {
-      background: linear-gradient(var(--card), var(--card)) padding-box,
-                  linear-gradient(135deg, #27ae60, #67d48a) border-box;
-    }
-    html.dark .sp-stat:nth-child(3) {
-      background: linear-gradient(var(--card), var(--card)) padding-box,
-                  linear-gradient(135deg, #f5a623, #ffca6b) border-box;
-    }
+    html.dark .sp-stat-inner { background: #111; }
     html.dark .sp-edit-btn { background: #111; border-color: #333; }
     html.dark .sp-edit-btn:hover { background: #1a2233; }
 
