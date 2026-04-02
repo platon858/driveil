@@ -1692,34 +1692,59 @@ function loadMySchoolPage() {
             </div>
           </div>`).join('');
 
+    const totalType = typeCount.lesson_practical + typeCount.lesson_theory + typeCount.lesson_highway || 1;
+    const pPct = Math.round(typeCount.lesson_practical / totalType * 100);
+    const tPct = Math.round(typeCount.lesson_theory    / totalType * 100);
+    const hPct = 100 - pPct - tPct;
     const statsSection = `
       <div class="sp-section-title">${chartSvg}<span>${L.statsTitle}</span></div>
       <div style="padding:0 20px 20px">
         <div class="sp-lesson-stats">
-          <div class="sp-ls-card">
+
+          <div class="sp-ls-card sp-ls-card--blue">
+            <div class="sp-ls-icon">📅</div>
             <div class="sp-ls-val">${lessonsThisWeek}</div>
             <div class="sp-ls-lbl">${L.weekLabel}</div>
           </div>
-          <div class="sp-ls-card sp-ls-card--${cancelRate > 15 ? 'warn' : 'ok'}">
+
+          <div class="sp-ls-card sp-ls-card--${cancelRate > 15 ? 'warn' : 'green'}">
+            <div class="sp-ls-icon">${cancelRate > 15 ? '⚠️' : '✅'}</div>
             <div class="sp-ls-val">${cancelRate}%</div>
             <div class="sp-ls-lbl">${L.cancelLbl}</div>
           </div>
-          <div class="sp-ls-card">
+
+          <div class="sp-ls-card sp-ls-card--purple">
+            <div class="sp-ls-icon">📊</div>
             <div class="sp-ls-val">${avgLessons}</div>
             <div class="sp-ls-lbl">${L.avgLbl}</div>
           </div>
-          <div class="sp-ls-card sp-ls-card--wide">
+
+          <div class="sp-ls-card sp-ls-card--wide sp-ls-card--types">
+            <div class="sp-ls-types-header">
+              <span class="sp-ls-icon" style="font-size:1rem">🚗</span>
+              <span class="sp-ls-wide-title">${currentLang==='ru'?'Типы уроков':currentLang==='en'?'Lesson types':'סוגי שיעורים'}</span>
+            </div>
+            <div class="sp-ls-bar">
+              <div class="sp-ls-bar-seg sp-ls-bar-seg--practical" style="width:${pPct}%"></div>
+              <div class="sp-ls-bar-seg sp-ls-bar-seg--theory"    style="width:${tPct}%"></div>
+              <div class="sp-ls-bar-seg sp-ls-bar-seg--highway"   style="width:${hPct}%"></div>
+            </div>
             <div class="sp-ls-type-row">
               <span class="sp-ls-type-dot sp-ls-type-dot--practical"></span>${L.practical} <b>${typeCount.lesson_practical}</b>
               <span class="sp-ls-type-dot sp-ls-type-dot--theory"></span>${L.theory} <b>${typeCount.lesson_theory}</b>
               <span class="sp-ls-type-dot sp-ls-type-dot--highway"></span>${L.highway} <b>${typeCount.lesson_highway}</b>
             </div>
-            <div class="sp-ls-lbl" style="margin-top:4px">Типы уроков</div>
           </div>
-          ${topInstr ? `<div class="sp-ls-card sp-ls-card--wide">
-            <div class="sp-ls-val sp-ls-val--sm">${escapeHtml(topInstr[0])}</div>
-            <div class="sp-ls-lbl">${L.topInstrLbl} · ${topInstr[1]} уроков</div>
+
+          ${topInstr ? `
+          <div class="sp-ls-card sp-ls-card--wide sp-ls-card--instr">
+            <div class="sp-ls-instr-avatar">${topInstr[0].charAt(0).toUpperCase()}</div>
+            <div>
+              <div class="sp-ls-val sp-ls-val--sm">${escapeHtml(topInstr[0])}</div>
+              <div class="sp-ls-lbl">${L.topInstrLbl} · <b>${topInstr[1]}</b> ${currentLang==='ru'?'уроков':currentLang==='en'?'lessons':'שיעורים'}</div>
+            </div>
           </div>` : ''}
+
         </div>
       </div>`;
 
