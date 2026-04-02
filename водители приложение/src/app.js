@@ -1762,9 +1762,9 @@ function loadMySchoolPage() {
             </div>
             ${school.description ? `<div class="sp-desc">${escapeHtml(school.description)}</div>` : ''}
             <div class="sp-stats">
-              <div class="sp-stat"><span class="sp-stat-val">${enrollments.length}</span><span class="sp-stat-lbl">${L.enrolled}</span></div>
-              <div class="sp-stat"><span class="sp-stat-val">${instrCount}</span><span class="sp-stat-lbl">${L.instrs}</span></div>
-              ${school.rating ? `<div class="sp-stat"><span class="sp-stat-val">${school.rating.toFixed(1)}</span><span class="sp-stat-lbl">${L.rating}</span></div>` : ''}
+              <div class="sp-stat"><div class="sp-stat-val">${enrollments.length}</div><div class="sp-stat-lbl">${L.enrolled}</div></div>
+              <div class="sp-stat"><div class="sp-stat-val">${instrCount}</div><div class="sp-stat-lbl">${L.instrs}</div></div>
+              ${school.rating ? `<div class="sp-stat"><div class="sp-stat-val">${school.rating.toFixed(1)}</div><div class="sp-stat-lbl">${L.rating}</div></div>` : '<div class="sp-stat" style="visibility:hidden"></div>'}
             </div>
             <button class="sp-edit-btn" onclick="openSchoolProfile()">✏️ ${L.edit}</button>
           </div>
