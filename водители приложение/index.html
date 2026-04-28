@@ -10,14 +10,167 @@
 </head>
 <body>
 
-<!-- LANGUAGE SELECTION -->
-<div id="lang-screen">
-  <div class="logo">Drive<span>IL</span></div>
-  <p id="lang-title">Choose your language / בחר שפה / Выберите язык</p>
-  <div class="lang-buttons">
-    <button class="lang-btn" onclick="setLang('he')"><span class="flag">🇮🇱</span> עברית</button>
-    <button class="lang-btn" onclick="setLang('ru')"><span class="flag">🇷🇺</span> Русский</button>
-    <button class="lang-btn" onclick="setLang('en')"><span class="flag">🇬🇧</span> English</button>
+<!-- SPLASH (shown while Firebase checks auth) -->
+<div id="splash-screen" style="position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
+  <div style="font-size:2.4rem;font-weight:900;color:white;letter-spacing:-1px;">Drive<span style="color:#ff6b35;">IL</span></div>
+  <div style="margin-top:24px;width:36px;height:36px;border:3px solid rgba(255,255,255,0.2);border-top-color:#ff6b35;border-radius:50%;animation:spin .8s linear infinite;"></div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</div>
+
+<!-- AUTH SCREEN (hidden until Firebase confirms no session) -->
+<div id="auth-screen" style="display:none">
+  <div class="logo" style="margin-bottom:4px;color:white;text-shadow:0 2px 8px rgba(0,0,0,0.3);">Drive<span style="color:#ff6b35;">IL</span></div>
+  <p id="as-subtitle" style="color:rgba(255,255,255,0.7);margin-bottom:20px;text-align:center;font-size:1rem;">כדי להמשיך, יש להתחבר</p>
+  <div style="background:#fff;border-radius:20px;padding:24px 20px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.3);box-sizing:border-box;">
+    <!-- Language picker -->
+    <div dir="ltr" style="display:flex;gap:8px;justify-content:center;margin-bottom:22px;">
+      <button class="as-lang-btn active" id="as-lang-he" onclick="pickLang('he')">עב</button>
+      <button class="as-lang-btn" id="as-lang-ru" onclick="pickLang('ru')">РУ</button>
+      <button class="as-lang-btn" id="as-lang-en" onclick="pickLang('en')">EN</button>
+    </div>
+    <!-- Already logged in -->
+    <div id="as-logged-in" style="display:none;text-align:center;">
+      <button id="as-continue-btn" onclick="_launchApp()" style="width:100%;padding:14px;background:#000;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px;">המשך</button>
+      <button onclick="asLogout()" style="width:100%;padding:10px;background:transparent;color:#888;border:1.5px solid #e2e2e2;border-radius:12px;font-size:0.9rem;cursor:pointer;font-family:inherit;" id="as-logout-btn">יציאה</button>
+    </div>
+    <!-- STEP 1: choose role -->
+    <div id="as-step-1">
+      <div style="display:flex;gap:12px;margin-bottom:20px;">
+        <button onclick="asPickRole('school')" style="flex:1;padding:18px 8px;border:2px solid #e8e8e8;border-radius:16px;background:#fff;cursor:pointer;font-family:inherit;">
+          <div style="font-size:2rem;margin-bottom:6px;">🚗</div>
+          <div style="font-weight:700;font-size:0.9rem;color:#222;" id="as-role-school-lbl">Учитель вождения</div>
+          <div style="font-size:0.72rem;color:#888;margin-top:3px;" id="as-role-school-sub">Инструктор / школа</div>
+        </button>
+        <button onclick="asPickRole('student')" style="flex:1;padding:18px 8px;border:2px solid #e8e8e8;border-radius:16px;background:#fff;cursor:pointer;font-family:inherit;">
+          <div style="font-size:2rem;margin-bottom:6px;">🎓</div>
+          <div style="font-weight:700;font-size:0.9rem;color:#222;" id="as-role-student-lbl">Ученик</div>
+          <div style="font-size:0.72rem;color:#888;margin-top:3px;" id="as-role-student-sub">Студент</div>
+        </button>
+      </div>
+      <p style="text-align:center;font-size:0.82rem;color:#888;margin:0;">
+        <span id="as-have-account-lbl">Уже есть аккаунт?</span>
+        <span onclick="asShowLogin()" style="color:#000;font-weight:700;text-decoration:underline;cursor:pointer;margin-inline-start:4px;" id="as-switch-action">Войти</span>
+      </p>
+    </div>
+    <!-- STEP 2: register form -->
+    <div id="as-step-2" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <button onclick="asGoBack()" style="background:none;border:1.5px solid #ddd;border-radius:10px;padding:6px 12px;cursor:pointer;font-size:0.8rem;color:#555;font-family:inherit;" id="as-back-btn">← назад</button>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:#f3f4f6;border-radius:20px;">
+          <span id="as-role-badge-icon" style="font-size:1rem;">🎓</span>
+          <span id="as-role-badge-lbl" style="font-size:0.8rem;font-weight:700;color:#374151;"></span>
+        </div>
+      </div>
+      <div id="as-error" style="display:none;background:#fff0f0;color:#c0392b;border-radius:10px;padding:10px 14px;font-size:0.85rem;margin-bottom:14px;"></div>
+      <!-- School fields -->
+      <div id="as-school-fields" style="display:none;">
+        <input class="auth-input" id="as-school-name" placeholder="Название автошколы" style="margin-bottom:10px;width:100%;box-sizing:border-box;"/>
+        <select class="auth-input" id="as-school-city" style="margin-bottom:10px;width:100%;box-sizing:border-box;">
+          <option value="">— Выберите город —</option>
+          <option value="תל אביב" data-ru="Тель-Авив" data-en="Tel Aviv" data-lat="32.0853" data-lng="34.7818">תל אביב</option>
+          <option value="ירושלים" data-ru="Иерусалим" data-en="Jerusalem" data-lat="31.7683" data-lng="35.2137">ירושלים</option>
+          <option value="חיפה" data-ru="Хайфа" data-en="Haifa" data-lat="32.7940" data-lng="34.9896">חיפה</option>
+          <option value="ראשון לציון" data-ru="Ришон-ле-Цион" data-en="Rishon LeZion" data-lat="31.9730" data-lng="34.7925">ראשון לציון</option>
+          <option value="פתח תקווה" data-ru="Петах-Тиква" data-en="Petah Tikva" data-lat="32.0878" data-lng="34.8878">פתח תקווה</option>
+          <option value="אשדוד" data-ru="Ашдод" data-en="Ashdod" data-lat="31.8044" data-lng="34.6553">אשדוד</option>
+          <option value="נתניה" data-ru="Нетания" data-en="Netanya" data-lat="32.3226" data-lng="34.8534">נתניה</option>
+          <option value="באר שבע" data-ru="Беэр-Шева" data-en="Beer Sheva" data-lat="31.2518" data-lng="34.7913">באר שבע</option>
+          <option value="בני ברק" data-ru="Бней-Брак" data-en="Bnei Brak" data-lat="32.0841" data-lng="34.8338">בני ברק</option>
+          <option value="חולון" data-ru="Холон" data-en="Holon" data-lat="32.0158" data-lng="34.7797">חולון</option>
+          <option value="רמת גן" data-ru="Рамат-Ган" data-en="Ramat Gan" data-lat="32.0694" data-lng="34.8237">רמת גן</option>
+          <option value="אשקלון" data-ru="Ашкелон" data-en="Ashkelon" data-lat="31.6688" data-lng="34.5742">אשקלון</option>
+          <option value="רחובות" data-ru="Реховот" data-en="Rehovot" data-lat="31.8969" data-lng="34.8085">רחובות</option>
+          <option value="בת ים" data-ru="Бат-Ям" data-en="Bat Yam" data-lat="32.0234" data-lng="34.7511">בת ים</option>
+          <option value="הרצליה" data-ru="Герцлия" data-en="Herzliya" data-lat="32.1665" data-lng="34.8438">הרצליה</option>
+          <option value="כפר סבא" data-ru="Кфар-Саба" data-en="Kfar Sava" data-lat="32.1798" data-lng="34.9078">כפר סבא</option>
+          <option value="מודיעין" data-ru="Модиин" data-en="Modi'in" data-lat="31.8969" data-lng="35.0103">מודיעין</option>
+          <option value="לוד" data-ru="Лод" data-en="Lod" data-lat="31.9516" data-lng="34.8958">לוד</option>
+          <option value="רמלה" data-ru="Рамла" data-en="Ramla" data-lat="31.9296" data-lng="34.8713">רמלה</option>
+          <option value="נס ציונה" data-ru="Нес-Циона" data-en="Nes Ziona" data-lat="31.9308" data-lng="34.7980">נס ציונה</option>
+          <option value="אילת" data-ru="Эйлат" data-en="Eilat" data-lat="29.5577" data-lng="34.9519">אילת</option>
+          <option value="נצרת" data-ru="Назарет" data-en="Nazareth" data-lat="32.6996" data-lng="35.3035">נצרת</option>
+          <option value="כרמיאל" data-ru="Кармиэль" data-en="Karmiel" data-lat="32.9221" data-lng="35.3025">כרמיאל</option>
+          <option value="טבריה" data-ru="Тверия" data-en="Tiberias" data-lat="32.7940" data-lng="35.5316">טבריה</option>
+          <option value="אריאל" data-ru="Ариэль" data-en="Ariel" data-lat="32.1066" data-lng="35.1714">אריאל</option>
+        </select>
+        <input class="auth-input" id="as-school-phone" placeholder="+972..." type="tel" style="margin-bottom:10px;width:100%;box-sizing:border-box;"/>
+        <div style="position:relative;margin-bottom:10px;">
+          <input class="auth-input" id="as-school-address" placeholder="Улица, номер дома" type="text" style="width:100%;box-sizing:border-box;padding-inline-end:36px;"/>
+          <span id="as-addr-status" style="position:absolute;inset-inline-end:10px;top:50%;transform:translateY(-50%);font-size:0.85rem;"></span>
+        </div>
+      </div>
+      <!-- Student fields -->
+      <div id="as-student-fields" style="display:none;">
+        <select class="auth-input" id="as-city" style="margin-bottom:10px;width:100%;box-sizing:border-box;">
+          <option value="">— Выберите город —</option>
+          <option value="תל אביב">תל אביב</option>
+          <option value="ירושלים">ירושלים</option>
+          <option value="חיפה">חיפה</option>
+          <option value="ראשון לציון">ראשון לציון</option>
+          <option value="פתח תקווה">פתח תקווה</option>
+          <option value="אשדוד">אשדוד</option>
+          <option value="נתניה">נתניה</option>
+          <option value="באר שבע">באר שבע</option>
+          <option value="בני ברק">בני ברק</option>
+          <option value="חולון">חולון</option>
+          <option value="רמת גן">רמת גן</option>
+          <option value="אשקלון">אשקלון</option>
+          <option value="רחובות">רחובות</option>
+          <option value="בת ים">בת ים</option>
+          <option value="הרצליה">הרצליה</option>
+          <option value="כפר סבא">כפר סבא</option>
+          <option value="מודיעין">מודיעין</option>
+          <option value="לוד">לוד</option>
+          <option value="רמלה">רמלה</option>
+          <option value="נס ציונה">נס ציונה</option>
+          <option value="אילת">אילת</option>
+          <option value="נצרת">נצרת</option>
+          <option value="כרמיאל">כרמיאל</option>
+          <option value="טבריה">טבריה</option>
+          <option value="אריאל">אריאל</option>
+        </select>
+        <input class="auth-input" type="date" id="as-dob" style="margin-bottom:10px;width:100%;box-sizing:border-box;"/>
+        <input class="auth-input" type="text" id="as-id-number" placeholder="תז / ID" style="margin-bottom:10px;width:100%;box-sizing:border-box;" inputmode="numeric" maxlength="9"/>
+      </div>
+      <!-- Common fields -->
+      <input class="auth-input" type="text" id="as-name" placeholder="Ваше имя" style="margin-bottom:10px;width:100%;box-sizing:border-box;"/>
+      <input class="auth-input" type="email" id="as-email" placeholder="email@gmail.com" style="margin-bottom:10px;width:100%;box-sizing:border-box;"/>
+      <div style="position:relative;margin-bottom:8px;">
+        <input class="auth-input" type="password" id="as-password" placeholder="Aa1!хххх" style="width:100%;box-sizing:border-box;padding-inline-end:40px;" oninput="asUpdatePwStrength()"/>
+        <button type="button" onclick="asTogglePw('as-password',this)" tabindex="-1" style="position:absolute;inset-inline-end:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:#9ca3af;line-height:1;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <!-- Password strength bars -->
+      <div style="display:flex;gap:4px;margin-bottom:6px;">
+        <div id="as-pw-bar-1" style="flex:1;height:4px;border-radius:2px;background:#e5e7eb;transition:background .2s;"></div>
+        <div id="as-pw-bar-2" style="flex:1;height:4px;border-radius:2px;background:#e5e7eb;transition:background .2s;"></div>
+        <div id="as-pw-bar-3" style="flex:1;height:4px;border-radius:2px;background:#e5e7eb;transition:background .2s;"></div>
+        <div id="as-pw-bar-4" style="flex:1;height:4px;border-radius:2px;background:#e5e7eb;transition:background .2s;"></div>
+      </div>
+      <div style="font-size:0.72rem;margin-bottom:16px;" id="as-pw-lbl">Мин. 8 симв., A-Z, a-z, 0-9, спецсимвол</div>
+      <button id="as-submit-btn" onclick="asSubmit()" style="width:100%;padding:14px;background:#000;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;">הרשמה</button>
+    </div>
+    <!-- STEP 3: login form -->
+    <div id="as-step-login" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <button onclick="asGoBack()" style="background:none;border:1.5px solid #ddd;border-radius:10px;padding:6px 12px;cursor:pointer;font-size:0.8rem;color:#555;font-family:inherit;">← назад</button>
+        <span style="font-weight:700;font-size:0.95rem;color:#222;" id="as-login-title-lbl">Войти</span>
+      </div>
+      <div id="as-error-login" style="display:none;background:#fff0f0;color:#c0392b;border-radius:10px;padding:10px 14px;font-size:0.85rem;margin-bottom:14px;"></div>
+      <input class="auth-input" type="email" id="as-email-login" placeholder="email@gmail.com" style="margin-bottom:10px;width:100%;box-sizing:border-box;"/>
+      <div style="position:relative;margin-bottom:20px;">
+        <input class="auth-input" type="password" id="as-password-login" placeholder="Пароль" style="width:100%;box-sizing:border-box;padding-inline-end:40px;"/>
+        <button type="button" onclick="asTogglePw('as-password-login',this)" tabindex="-1" style="position:absolute;inset-inline-end:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:#9ca3af;line-height:1;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <button onclick="asLoginSubmit()" style="width:100%;padding:14px;background:#000;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;" id="as-login-btn">התחבר</button>
+      <p style="text-align:center;margin-top:14px;font-size:0.82rem;color:#888;">
+        <span id="as-no-account-lbl">Нет аккаунта?</span>
+        <span onclick="asGoBack()" style="color:#000;font-weight:700;text-decoration:underline;cursor:pointer;margin-inline-start:4px;" id="as-register-link">Регистрация</span>
+      </p>
+    </div>
   </div>
 </div>
 
@@ -43,26 +196,28 @@
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
       <span class="sb-label" data-i18n="nav_schedule_t">שיעורים</span>
     </button>
+
     <button class="sb-btn" id="snav-register" onclick="showPage('register')" style="display:none">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></span>
       <span class="sb-label" data-i18n="nav_register_t">הרשמה</span>
     </button>
     <button class="sb-btn" id="snav-dashboard" onclick="showPage('dashboard')" style="display:none">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
-      <span class="sb-label">Кабинет</span>
+      <span class="sb-label" data-i18n="nav_dashboard">לוח בקרה</span>
     </button>
   </div>
   <div class="sb-bottom">
+    <div class="sb-lang-row" dir="ltr">
+      <button class="sb-lang-btn" id="snav-lang-he" onclick="pickLang('he')">עב</button>
+      <button class="sb-lang-btn" id="snav-lang-ru" onclick="pickLang('ru')">РУ</button>
+      <button class="sb-lang-btn" id="snav-lang-en" onclick="pickLang('en')">EN</button>
+    </div>
     <button class="sb-btn" id="sb-theme-btn" onclick="toggleTheme()" title="Toggle theme">
       <span class="sb-icon" id="tt-icon-wrap">
         <svg id="tt-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg id="tt-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </span>
       <span class="sb-label" id="tt-label">Тёмная тема</span>
-    </button>
-    <button class="sb-btn" onclick="backToLang()" style="font-size:0.8rem">
-      <span class="sb-icon">🇮🇱</span>
-      <span class="sb-label" data-i18n="nav_lang">Язык</span>
     </button>
     <div id="sb-auth-area">
       <button class="sb-auth-btn" onclick="openAuthModal()">
@@ -76,26 +231,65 @@
 <!-- MOBILE BOTTOM NAV -->
 <nav id="mobile-nav">
   <button class="mbn-btn active" id="mnav-home" onclick="showPage('home')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
     <span data-i18n="nav_home_t">בית</span>
   </button>
   <button class="mbn-btn" id="mnav-schools" onclick="showPage('schools')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><rect x="9" y="14" width="6" height="8"/><path d="M9 3H5v4l7-4 7 4V3h-4"/></svg>
+    <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><rect x="9" y="14" width="6" height="8"/><path d="M9 3H5v4l7-4 7 4V3h-4"/></svg></span>
     <span data-i18n="nav_schools_t">בתי ספר</span>
   </button>
   <button class="mbn-btn" id="mnav-test" onclick="showPage('test')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
     <span data-i18n="nav_test_t">תיאוריה</span>
   </button>
   <button class="mbn-btn" id="mnav-schedule" onclick="showPage('schedule')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
     <span data-i18n="nav_schedule_t">שיעורים</span>
   </button>
-  <button class="mbn-btn" id="mnav-auth" onclick="openAuthModal()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    <span data-i18n="nav_login">כניסה</span>
+
+  <button class="mbn-btn" id="mnav-dashboard" onclick="showPage('dashboard')" style="display:none">
+    <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+    <span data-i18n="nav_dashboard">לוח בקרה</span>
+  </button>
+  <button class="mbn-btn" id="mnav-settings" onclick="openMobileSettings()">
+    <span class="mbn-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </span>
+    <span id="mnav-settings-lbl">Настройки</span>
   </button>
 </nav>
+
+<!-- MOBILE SETTINGS PANEL -->
+<div id="mobile-settings-overlay" onclick="closeMobileSettings()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9000;"></div>
+<div id="mobile-settings-panel" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card-bg,#1e2a3a);border-radius:20px 20px 0 0;padding:20px 24px 40px;z-index:9001;transition:transform .3s;">
+  <div style="width:40px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 20px;"></div>
+  <div style="font-size:1.1rem;font-weight:700;color:white;margin-bottom:20px;" id="ms-title">Настройки</div>
+
+  <!-- Language -->
+  <div style="margin-bottom:20px;">
+    <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;" id="ms-lang-lbl">Язык</div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="pickLangAndClose('he')" id="ms-lang-he" style="flex:1;padding:10px;border:2px solid rgba(255,255,255,0.15);border-radius:12px;background:transparent;color:white;font-size:0.9rem;cursor:pointer;font-weight:600;">עב</button>
+      <button onclick="pickLangAndClose('ru')" id="ms-lang-ru" style="flex:1;padding:10px;border:2px solid rgba(255,255,255,0.15);border-radius:12px;background:transparent;color:white;font-size:0.9rem;cursor:pointer;font-weight:600;">РУ</button>
+      <button onclick="pickLangAndClose('en')" id="ms-lang-en" style="flex:1;padding:10px;border:2px solid rgba(255,255,255,0.15);border-radius:12px;background:transparent;color:white;font-size:0.9rem;cursor:pointer;font-weight:600;">EN</button>
+    </div>
+  </div>
+
+  <!-- Theme -->
+  <div>
+    <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;" id="ms-theme-lbl">Тема</div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="setThemeAndClose('light')" id="ms-theme-light" style="flex:1;padding:10px;border:2px solid rgba(255,255,255,0.15);border-radius:12px;background:transparent;color:white;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+        <span id="ms-light-lbl">Светлая</span>
+      </button>
+      <button onclick="setThemeAndClose('dark')" id="ms-theme-dark" style="flex:1;padding:10px;border:2px solid rgba(255,255,255,0.15);border-radius:12px;background:transparent;color:white;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span id="ms-dark-lbl">Тёмная</span>
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- MAIN APP -->
 <div id="app">
@@ -110,62 +304,193 @@
   <!-- ═══ HOME PAGE ═══ -->
   <div class="page active" id="page-home">
 
-    <!-- HERO -->
-    <div class="hero">
-      <div class="hero-bg-shapes">
-        <div class="hero-circle"></div>
-        <div class="hero-circle"></div>
-        <div class="hero-circle"></div>
-      </div>
-      <div class="hero-content">
-        <div class="hero-badge">🚗 <span data-i18n="hero_badge">#1 פלטפורמת נהיגה בישראל</span></div>
-        <h1 data-i18n="hero_title">ברוכים הבאים ל-<span>DriveIL</span></h1>
-        <p data-i18n="hero_sub">הפלטפורמה המובילה לבתי ספר לנהיגה ונהגים בישראל. מצא בית ספר, תרגל תיאוריה וקבל את הרישיון שלך.</p>
-        <div class="hero-btns">
-          <button class="btn-primary" onclick="showPage('test')" data-i18n="hero_btn1">התחל בחינה תיאורטית</button>
-          <button class="btn-secondary" onclick="showPage('schools')" data-i18n="hero_btn2">מצא בית ספר</button>
+    <!-- HERO (Uber style) -->
+    <div class="uber-hero">
+      <div class="uber-hero-inner">
+        <div class="uber-hero-left">
+          <h1 class="uber-hero-title" data-i18n="hero_title">הגיע הזמן<br>לרישיון שלך</h1>
+          <div class="uber-hero-btns">
+            <button class="uber-btn-ride" onclick="showPage('schools')" data-i18n="hero_btn2">מצא בית ספר</button>
+            <button class="uber-btn-drive" onclick="showPage('test')" data-i18n="hero_btn1">תרגל תיאוריה</button>
+          </div>
+        </div>
+        <div class="uber-hero-right">
+          <div class="uber-hero-img">
+            <div class="uber-hero-card" id="uber-hero-card">
+              <div class="uhc-geo-bar" id="uhc-geo-bar" style="display:none">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+                <span id="uhc-geo-text">Определяем местоположение...</span>
+              </div>
+              <div class="uhc-label">בתי ספר קרובים אליך</div>
+              <div class="uhc-item">
+                <div class="uhc-avatar">A</div>
+                <div class="uhc-info">
+                  <div class="uhc-name">אלפא נהיגה</div>
+                  <div class="uhc-meta">תל אביב &middot; 4.9 ★</div>
+                </div>
+                <div class="uhc-dist">1.2 ק"מ</div>
+              </div>
+              <div class="uhc-item">
+                <div class="uhc-avatar">M</div>
+                <div class="uhc-info">
+                  <div class="uhc-name">מהיר</div>
+                  <div class="uhc-meta">ירושלים &middot; 4.8 ★</div>
+                </div>
+                <div class="uhc-dist">2.4 ק"מ</div>
+              </div>
+              <div class="uhc-item">
+                <div class="uhc-avatar">S</div>
+                <div class="uhc-info">
+                  <div class="uhc-name">שלמה נהיגה</div>
+                  <div class="uhc-meta">חיפה &middot; 4.7 ★</div>
+                </div>
+                <div class="uhc-dist">3.1 ק"מ</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- STATS -->
-    <div class="stats-section">
+
+    <!-- PROGRESS WIDGET -->
+    <div class="progress-section">
+      <div class="progress-inner">
+        <div class="progress-ring-wrap">
+          <svg class="progress-ring" viewBox="0 0 200 200">
+            <circle class="pr-track" cx="100" cy="100" r="84" />
+            <circle class="pr-fill" id="pr-fill-circle" cx="100" cy="100" r="84" />
+          </svg>
+          <div class="pr-center">
+            <div class="pr-pct" id="pr-pct">0%</div>
+            <div class="pr-label" id="pr-label">готовности</div>
+          </div>
+        </div>
+        <div class="progress-stats">
+          <div class="prs-title" id="prs-title">Ваш прогресс к правам</div>
+          <div class="prs-items" id="prs-items">
+            <div class="prs-item" id="prs-school">
+              <div class="prs-icon prs-icon--warn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+              </div>
+              <div class="prs-info">
+                <div class="prs-name" id="prs-school-name">Школа не выбрана</div>
+                <div class="prs-hint" id="prs-school-hint">Выбери автошколу чтобы начать</div>
+              </div>
+              <button class="prs-action" onclick="showPage('schools')" id="prs-school-btn">Выбрать</button>
+            </div>
+            <div class="prs-item prs-item--input" style="cursor:pointer" onclick="openLessonsInput()">
+              <div class="prs-icon prs-icon--info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="prs-info">
+                <div class="prs-name" id="prs-lessons-label">Уроков пройдено</div>
+                <div class="prs-hint" id="prs-lessons-count">0 из ~28</div>
+              </div>
+              <button class="prs-action" onclick="event.stopPropagation();openLessonsInput()" id="prs-lessons-btn">Добавить</button>
+            </div>
+            <!-- Inline lessons input -->
+            <div class="prs-lessons-form" id="prs-lessons-form" style="display:none">
+              <div class="plf-row">
+                <div class="plf-field">
+                  <label class="plf-label" id="plf-label-count">Кол-во уроков</label>
+                  <input class="plf-input" type="number" id="plf-count" min="0" max="100" placeholder="0">
+                </div>
+                <div class="plf-field">
+                  <label class="plf-label" id="plf-label-mins">Минут за урок</label>
+                  <input class="plf-input" type="number" id="plf-mins" min="0" max="180" placeholder="45">
+                </div>
+              </div>
+              <div class="plf-total" id="plf-total">0 ч 0 мин всего</div>
+              <div class="plf-btns">
+                <button class="plf-save" id="plf-save-btn" onclick="saveLessonsInput()">Сохранить</button>
+                <button class="plf-cancel" id="plf-cancel-btn" onclick="closeLessonsInput()">Отмена</button>
+              </div>
+            </div>
+            <div class="prs-item" id="prs-theory-item" style="cursor:pointer" onclick="showPage('test')">
+              <div class="prs-icon prs-icon--ok" id="prs-theory-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+              </div>
+              <div class="prs-info">
+                <div class="prs-name" id="prs-theory-label">Теория</div>
+                <div class="prs-hint" id="prs-theory-hint">Пройди пробный тест</div>
+              </div>
+              <button class="prs-action" id="prs-theory-btn" onclick="event.stopPropagation();showPage('test')">Начать</button>
+            </div>
+            <div class="prs-item">
+              <div class="prs-icon prs-icon--info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <div class="prs-info">
+                <div class="prs-name" id="prs-time-label">До получения прав</div>
+                <div class="prs-hint" id="prs-time-est">~6 месяцев</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="school-setup-banner" style="display:none"></div>
+
+    <!-- STATS (hidden for now) -->
+    <div class="stats-section" style="display:none">
       <div class="stats-grid" id="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">🏫</div>
-          <div class="stat-num" id="stat-schools-count" data-target="0" data-suffix="">0</div>
-          <div class="stat-label" data-i18n="stat1">בתי ספר רשומים</div>
-          <div class="stat-source" data-i18n="stat1_src">DriveIL</div>
+        <div class="stat-card"><div class="stat-icon"></div><div class="stat-num" id="stat-schools-count" data-target="0" data-suffix="">0</div><div class="stat-label" data-i18n="stat1">בתי ספר רשומים</div><div class="stat-source" data-i18n="stat1_src">DriveIL</div></div>
+        <div class="stat-card"><div class="stat-icon"></div><div class="stat-num" data-target="127000" data-suffix="">0</div><div class="stat-label" data-i18n="stat2">נהגים חדשים בשנה</div><div class="stat-source" data-i18n="stat2_src">מקור: הלמס 2023</div></div>
+        <div class="stat-card"><div class="stat-icon"></div><div class="stat-num" data-target="68" data-suffix="%">0</div><div class="stat-label" data-i18n="stat3">שיעור מעבר תיאוריה</div><div class="stat-source" data-i18n="stat3_src">ממוצע ארצי 2024</div></div>
+        <div class="stat-card"><div class="stat-icon"></div><div class="stat-num" data-target="54" data-suffix="%">0</div><div class="stat-label" data-i18n="stat4">שיעור מעבר פרקטי</div><div class="stat-source" data-i18n="stat4_src">נסיון ראשון, 2023</div></div>
+        <div class="stat-card"><div class="stat-icon"></div><div class="stat-num" data-target="28" data-suffix="">0</div><div class="stat-label" data-i18n="stat5">ממוצע שיעורי נהיגה</div><div class="stat-source" data-i18n="stat5_src">עד קבלת רישיון</div></div>
+        <div class="stat-card"><div class="stat-icon"></div><div class="stat-num" data-target="4" data-suffix=".7">0</div><div class="stat-label" data-i18n="stat6">דירוג ממוצע מורים</div><div class="stat-source" data-i18n="stat6_src">מתוך 5 כוכבים</div></div>
+      </div>
+    </div>
+
+    <!-- SCHOOL HOME DASHBOARD (hidden for students) -->
+    <div id="school-home-dash" style="display:none">
+      <div class="shd-wrap">
+        <div class="shd-stats">
+          <div class="shd-stat-card">
+            <div class="shd-stat-num" id="shd-today">—</div>
+            <div class="shd-stat-lbl" data-i18n="shd_lessons_today">שיעורים היום</div>
+          </div>
+          <div class="shd-stat-card">
+            <div class="shd-stat-num shd-accent" id="shd-pending">—</div>
+            <div class="shd-stat-lbl" data-i18n="shd_pending_confirm">ממתינים לאישור</div>
+          </div>
+          <div class="shd-stat-card">
+            <div class="shd-stat-num" id="shd-students">—</div>
+            <div class="shd-stat-lbl" data-i18n="shd_students">תלמידים</div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">🎓</div>
-          <div class="stat-num" data-target="127000" data-suffix="">0</div>
-          <div class="stat-label" data-i18n="stat2">נהגים חדשים בשנה</div>
-          <div class="stat-source" data-i18n="stat2_src">מקור: הלמס 2023</div>
+        <div class="shd-actions">
+          <button class="shd-btn-primary" onclick="showPage('dashboard')" data-i18n="shd_btn_cabinet">לוח בקרה</button>
+          <button class="shd-btn-secondary" onclick="showPage('schedule')" data-i18n="shd_btn_schedule">לוח זמנים</button>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">📝</div>
-          <div class="stat-num" data-target="68" data-suffix="%">0</div>
-          <div class="stat-label" data-i18n="stat3">שיעור מעבר תיאוריה</div>
-          <div class="stat-source" data-i18n="stat3_src">ממוצע ארצי 2024</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">🚗</div>
-          <div class="stat-num" data-target="54" data-suffix="%">0</div>
-          <div class="stat-label" data-i18n="stat4">שיעור מעבר פרקטי</div>
-          <div class="stat-source" data-i18n="stat4_src">נסיון ראשון, 2023</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">⏱️</div>
-          <div class="stat-num" data-target="28" data-suffix="">0</div>
-          <div class="stat-label" data-i18n="stat5">ממוצע שיעורי נהיגה</div>
-          <div class="stat-source" data-i18n="stat5_src">עד קבלת רישיון</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">⭐</div>
-          <div class="stat-num" data-target="4" data-suffix=".7">0</div>
-          <div class="stat-label" data-i18n="stat6">דירוג ממוצע מורים</div>
-          <div class="stat-source" data-i18n="stat6_src">מתוך 5 כוכבים</div>
+        <div class="shd-guide">
+          <div class="shd-guide-title" data-i18n="shd_guide_title">איך להשתמש באפליקציה</div>
+          <div class="shd-guide-steps">
+            <div class="shd-guide-step">
+              <div class="shd-guide-num">1</div>
+              <div>
+                <div class="shd-guide-step-title" data-i18n="shd_guide1_title">לוח בקרה</div>
+                <div class="shd-guide-step-desc" data-i18n="shd_guide1_desc">נהל את פרופיל בית הספר, הוסף מדריכים וקבל בקשות מתלמידים</div>
+              </div>
+            </div>
+            <div class="shd-guide-step">
+              <div class="shd-guide-num">2</div>
+              <div>
+                <div class="shd-guide-step-title" data-i18n="shd_guide2_title">לוח זמנים</div>
+                <div class="shd-guide-step-desc" data-i18n="shd_guide2_desc">פתח חלונות זמינות, הוסף שיעורים לתלמידים ועקוב אחר הלוח</div>
+              </div>
+            </div>
+            <div class="shd-guide-step">
+              <div class="shd-guide-num">3</div>
+              <div>
+                <div class="shd-guide-step-title" data-i18n="shd_guide3_title">בקשות</div>
+                <div class="shd-guide-step-desc" data-i18n="shd_guide3_desc">קבל או דחה בקשות להרשמה לבית הספר ישירות מלוח הבקרה</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -210,75 +535,77 @@
       </div>
       <div class="features-grid">
         <div class="feature-card" onclick="showPage('test')">
-          <div class="feature-icon">📝</div>
+          <div class="feature-icon"></div>
           <h3 data-i18n="f1_title">בחינת תיאוריה מלאה</h3>
           <p data-i18n="f1_desc">320+ שאלות תיאוריה אמיתיות בעברית, רוסית ואנגלית עם הסברים ומשוב מיידי</p>
-          <span class="feature-tag tag-hot" data-i18n="f1_tag">🔥 פופולרי</span>
+          <span class="feature-tag tag-hot" data-i18n="f1_tag">פופולרי</span>
         </div>
         <div class="feature-card" onclick="showPage('schools')">
-          <div class="feature-icon">🏫</div>
+          <div class="feature-icon"></div>
           <h3 data-i18n="f2_title">מאגר בתי ספר</h3>
           <p data-i18n="f2_desc">1,247 בתי ספר לנהיגה ברחבי ישראל עם ביקורות, מחירים ומיקומים</p>
-          <span class="feature-tag tag-new" data-i18n="f2_tag">✨ חדש</span>
+          <span class="feature-tag tag-new" data-i18n="f2_tag">חדש</span>
         </div>
         <div class="feature-card" onclick="showPage('schedule')">
-          <div class="feature-icon">📅</div>
+          <div class="feature-icon"></div>
           <h3 data-i18n="f3_title">ניהול שיעורים</h3>
           <p data-i18n="f3_desc">קבע, בטל ועקוב אחר כל שיעורי הנהיגה שלך עם תזכורות חכמות</p>
-          <span class="feature-tag tag-pro" data-i18n="f3_tag">⚡ Pro</span>
+          <span class="feature-tag tag-pro" data-i18n="f3_tag">Pro</span>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📍</div>
+          <div class="feature-icon"></div>
           <h3 data-i18n="f4_title">מפה אינטראקטיבית</h3>
           <p data-i18n="f4_desc">מצא בתי ספר קרובים אליך עם מפה חיה ופילטרים מתקדמים</p>
-          <span class="feature-tag tag-new" data-i18n="f4_tag">✨ בקרוב</span>
+          <span class="feature-tag tag-new" data-i18n="f4_tag">בקרוב</span>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🤖</div>
+          <div class="feature-icon"></div>
           <h3 data-i18n="f5_title">מדריך AI אישי</h3>
           <p data-i18n="f5_desc">עוזר חכם שמנתח את הביצועים שלך ומתאים תוכנית לימוד אישית</p>
-          <span class="feature-tag tag-hot" data-i18n="f5_tag">🔥 AI</span>
+          <span class="feature-tag tag-hot" data-i18n="f5_tag">AI</span>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🏆</div>
+          <div class="feature-icon"></div>
           <h3 data-i18n="f6_title">מערכת הישגים</h3>
           <p data-i18n="f6_desc">אסוף תגים, עקוב אחר התקדמות ותתחרה עם חברים בדרך לרישיון</p>
-          <span class="feature-tag tag-pro" data-i18n="f6_tag">⚡ גיימיפיקציה</span>
+          <span class="feature-tag tag-pro" data-i18n="f6_tag">גיימיפיקציה</span>
         </div>
       </div>
     </div>
 
-    <!-- TESTIMONIALS -->
-    <div class="section testimonials-section">
-      <div class="section-header">
-        <div class="section-tag" data-i18n="test_tag">המלצות</div>
-        <div class="section-title" data-i18n="test_title_sec">מה אומרים עלינו</div>
-        <div class="section-sub" data-i18n="test_sub_sec">אלפי תלמידים ובתי ספר כבר בחרו ב-DriveIL</div>
-      </div>
-      <div class="testimonials-wrapper">
-        <div id="testimonials-track" class="testimonials-track"></div>
-        <div class="testimonial-nav">
-          <button class="t-btn" onclick="prevTestimonial()">←</button>
-          <button class="t-btn" onclick="nextTestimonial()">→</button>
-          <div class="t-dots" id="t-dots"></div>
+    <!-- LIVE ACTIVITY FEED -->
+    <div class="live-section">
+      <div class="live-inner">
+        <div class="live-header">
+          <div class="live-dot"></div>
+          <span id="live-title">Сейчас на платформе</span>
+        </div>
+        <div class="live-ticker" id="live-ticker">
+          <!-- filled by JS -->
+        </div>
+        <div class="live-quotes">
+          <div class="lq-card">
+            <div class="lq-stars">★★★★★</div>
+            <div class="lq-text" id="lq1">"Сдал теорию с первого раза"</div>
+            <div class="lq-author" id="lqa1">Дмитрий, Тель-Авив</div>
+          </div>
+          <div class="lq-card">
+            <div class="lq-stars">★★★★★</div>
+            <div class="lq-text" id="lq2">"Нашёл школу за 5 минут"</div>
+            <div class="lq-author" id="lqa2">Михаил, Хайфа</div>
+          </div>
+          <div class="lq-card">
+            <div class="lq-stars">★★★★☆</div>
+            <div class="lq-text" id="lq3">"Лучший трекер уроков"</div>
+            <div class="lq-author" id="lqa3">Анна, Иерусалим</div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- FAQ -->
-    <div class="section faq-section">
-      <div class="section-header">
-        <div class="section-tag" data-i18n="faq_tag">שאלות נפוצות</div>
-        <div class="section-title" data-i18n="faq_title">יש לך שאלות?</div>
-        <div class="section-sub" data-i18n="faq_sub">כל התשובות שאתה צריך במקום אחד</div>
-      </div>
-      <div class="faq-list" id="faq-list"></div>
     </div>
 
     <!-- CTA -->
     <div class="cta-section">
       <h2 data-i18n="cta_title">מוכן להתחיל?</h2>
-      <p data-i18n="cta_sub">הצטרף ל-127,000 נהגים שקיבלו את הרישיון שלהם עם DriveIL</p>
       <div class="cta-btns">
         <button class="btn-primary" onclick="showPage('register')" data-i18n="cta_btn1">הירשם חינם</button>
         <button class="btn-secondary" onclick="showPage('test')" data-i18n="cta_btn2">נסה תיאוריה</button>
@@ -296,7 +623,7 @@
           <h4 data-i18n="footer_nav">ניווט</h4>
           <a onclick="showPage('home')" data-i18n="footer_home">בית</a>
           <a onclick="showPage('schools')" data-i18n="footer_schools">בתי ספר</a>
-          <a onclick="showPage('test')" data-i18n="footer_theory">תיאוריה</a>
+          <a onclick="showPage('test')" data-i18n="footer_theory" id="footer-theory-link">תיאוריה</a>
           <a onclick="showPage('schedule')" data-i18n="footer_schedule">שיעורים</a>
         </div>
         <div class="footer-col">
@@ -308,9 +635,9 @@
         </div>
         <div class="footer-col">
           <h4 data-i18n="footer_contact_h">יצירת קשר</h4>
-          <a>📧 info@driveil.co.il</a>
-          <a>📞 *3456</a>
-          <a>📍 תל אביב, ישראל</a>
+          <a>info@driveil.co.il</a>
+          <a>0587979098</a>
+          <a id="footer-city">Ашдод, Израиль</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -324,31 +651,29 @@
   <!-- ═══ SCHOOLS PAGE ═══ -->
   <div class="page" id="page-schools">
     <div class="schools-page">
-      <div class="schools-page-hero">
-        <h1 data-i18n="schools_title">בתי ספר לנהיגה</h1>
-        <p data-i18n="schools_sub">בחר את בית הספר המתאים לך</p>
-        <div class="schools-filter-bar">
-          <button class="sfilter active" onclick="filterSchools('all',this)" data-i18n="tab_all">הכל</button>
-          <button class="sfilter" onclick="filterSchools('north',this)" data-i18n="tab_north">צפון</button>
-          <button class="sfilter" onclick="filterSchools('center',this)" data-i18n="tab_center">מרכז</button>
-          <button class="sfilter" onclick="filterSchools('south',this)" data-i18n="tab_south">דרום</button>
-        </div>
-      </div>
-      <div class="map-section">
-        <div class="map-toolbar">
-          <div class="map-toolbar-left">
-            <div class="map-toolbar-dot"></div>
-            <div class="map-toolbar-title" id="map-toolbar-label">Schools Map</div>
-            <div class="map-toolbar-count" id="map-count"></div>
+      <div class="uber-panel">
+        <div class="uber-panel-header">
+          <h2 data-i18n="schools_title">בתי ספר לנהיגה</h2>
+          <div class="uber-panel-meta">
+            <span class="uber-count-badge" id="map-count"></span>
+            <button class="uber-locate-btn" onclick="locateUser()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="9"/></svg>
+              <span id="locate-label">My Location</span>
+            </button>
           </div>
-          <button class="locate-btn" onclick="locateUser()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="9"/></svg>
-            <span id="locate-label">My Location</span>
-          </button>
+          <div class="uber-filter-row">
+            <button class="sfilter active" onclick="filterSchools('all',this)" data-i18n="tab_all">הכל</button>
+            <button class="sfilter" onclick="filterSchools('north',this)" data-i18n="tab_north">צפון</button>
+            <button class="sfilter" onclick="filterSchools('center',this)" data-i18n="tab_center">מרכז</button>
+            <button class="sfilter" onclick="filterSchools('south',this)" data-i18n="tab_south">דרום</button>
+          </div>
         </div>
-        <div class="map-wrap"><div id="schools-map"></div></div>
+        <div class="schools-grid uber-school-list" id="school-list"></div>
       </div>
-      <div class="schools-grid" id="school-list"></div>
+      <div class="uber-map">
+        <div id="schools-map"></div>
+        <div style="display:none" id="map-toolbar-label"></div>
+      </div>
     </div>
   </div>
 
@@ -373,6 +698,7 @@
       <div class="schedule-container" id="schedule-body"></div>
     </div>
   </div>
+
 
   <!-- ═══ REGISTER PAGE (hidden) ═══ -->
   <div class="page" id="page-register" style="display:none!important">
@@ -457,7 +783,7 @@
 <!-- RESULT MODAL -->
 <div class="modal-overlay" id="result-modal" style="display:none;">
   <div class="modal">
-    <div class="m-icon" id="result-icon">🎉</div>
+    <div class="m-icon" id="result-icon"></div>
     <h2 id="result-title">כל הכבוד!</h2>
     <div class="result-score" id="result-score">85%</div>
     <p id="result-msg">עברת את הבחינה בהצלחה</p>
@@ -501,27 +827,33 @@
         <div class="rating-user-note" id="sp-rating-note">Вы уже оценили эту школу ✓</div>
       </div>
 
-      <!-- Инструкторы -->
+      <!-- Машины (только для владельца) -->
       <div class="sp-instructors">
-        <div class="sp-section-title">Инструкторы</div>
+        <div class="sp-section-title">Машины</div>
         <div class="instructor-list" id="sp-instructor-list"></div>
       </div>
 
       <!-- Панель редактирования (только для владельца) -->
       <div class="sp-edit-section" id="sp-edit-section" style="display:none">
-        <div class="sp-edit-title">⚙️ Панель управления школой</div>
+        <div class="sp-edit-title">Панель управления</div>
         <div class="sp-edit-row">
           <input class="sp-edit-input" type="text" id="sp-price-input" placeholder="Цена урока, напр. ₪280"/>
           <button class="sp-edit-btn" onclick="saveSchoolPrice()">Сохранить</button>
         </div>
         <div class="sp-edit-row">
-          <input class="sp-edit-input" type="text" id="sp-instructor-input" placeholder="Имя инструктора"/>
+          <input class="sp-edit-input" type="text" id="sp-instructor-input" placeholder="Название машины"/>
           <button class="sp-edit-btn" onclick="addInstructor()">+ Добавить</button>
         </div>
         <div id="sp-edit-instructors" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;"></div>
       </div>
 
-      <button class="sp-enroll-btn" id="sp-enroll-btn" onclick="enrollFromProfile()">Записаться в эту школу</button>
+      <!-- Availability preview for students -->
+      <div id="sp-availability" style="display:none"></div>
+
+      <!-- Enroll / status for students -->
+      <div id="sp-student-actions">
+        <button class="sp-enroll-btn" id="sp-enroll-btn" onclick="enrollFromProfile()">Записаться в эту школу</button>
+      </div>
     </div>
   </div>
 </div>
@@ -531,7 +863,7 @@
   <div class="enroll-modal" id="enroll-modal">
     <button class="enroll-close" onclick="closeEnrollModal()">✕</button>
     <div id="enroll-form-wrap">
-      <div class="enroll-school-badge">🏫 <span id="enroll-school-name-lbl"></span></div>
+      <div class="enroll-school-badge"><span id="enroll-school-name-lbl"></span></div>
       <div class="enroll-title" id="enroll-title-txt">Записаться в автошколу</div>
       <div class="enroll-sub" id="enroll-sub-txt">Заполни форму — школа получит уведомление на почту</div>
       <div class="enroll-grid">
@@ -564,6 +896,27 @@
             <option value="C">C — Грузовик</option>
           </select>
         </div>
+        <div class="enroll-field">
+          <label id="lbl-transmission">Коробка передач</label>
+          <select class="enroll-select" id="enroll-transmission">
+            <option value="">— Выбрать —</option>
+            <option value="auto" id="enroll-trans-auto">Автомат</option>
+            <option value="manual" id="enroll-trans-manual">Механика</option>
+          </select>
+        </div>
+        <div class="enroll-field">
+          <label id="lbl-car-color">Цвет машины</label>
+          <select class="enroll-select" id="enroll-color">
+            <option value="">— Выбрать —</option>
+            <option value="black" id="enroll-color-black">Чёрный</option>
+            <option value="white" id="enroll-color-white">Белый</option>
+            <option value="silver" id="enroll-color-silver">Серебро</option>
+            <option value="blue" id="enroll-color-blue">Синий</option>
+            <option value="red" id="enroll-color-red">Красный</option>
+            <option value="brown" id="enroll-color-brown">Коричневый</option>
+            <option value="green" id="enroll-color-green">Зелёный</option>
+          </select>
+        </div>
         <div class="enroll-field enroll-full">
           <label id="lbl-date">Желаемая дата начала</label>
           <input class="enroll-input" type="date" id="enroll-date"/>
@@ -579,7 +932,7 @@
     </div>
     <div id="enroll-success-wrap" style="display:none">
       <div class="enroll-success">
-        <div class="enroll-success-icon">🎉</div>
+        <div class="enroll-success-icon"></div>
         <div class="enroll-success-title" id="enroll-ok-title">Заявка отправлена!</div>
         <div class="enroll-success-sub" id="enroll-ok-sub">Автошкола получила ваши данные и скоро свяжется с вами.</div>
         <button onclick="closeEnrollModal()" style="margin-top:20px;padding:10px 28px;background:#1a73e8;color:white;border:2px solid #0a1628;border-radius:10px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:3px 3px 0 0 #0a1628" id="enroll-ok-btn">Закрыть</button>
@@ -600,9 +953,9 @@
           <div class="auth-brand-tagline" id="auth-brand-tagline">ברוך הבא — הכנס לחשבון שלך</div>
         </div>
         <div class="auth-brand-features">
-          <div class="auth-brand-feature"><div class="auth-brand-feature-icon">🏫</div><span id="auth-feat1">בתי ספר לנהיגה מאומתים</span></div>
-          <div class="auth-brand-feature"><div class="auth-brand-feature-icon">📅</div><span id="auth-feat2">הזמנת שיעורים בקלות</span></div>
-          <div class="auth-brand-feature"><div class="auth-brand-feature-icon">📝</div><span id="auth-feat3">הכנה לתיאוריה</span></div>
+          <div class="auth-brand-feature"><div class="auth-brand-feature-icon"></div><span id="auth-feat1">בתי ספר לנהיגה מאומתים</span></div>
+          <div class="auth-brand-feature"><div class="auth-brand-feature-icon"></div><span id="auth-feat2">הזמנת שיעורים בקלות</span></div>
+          <div class="auth-brand-feature"><div class="auth-brand-feature-icon"></div><span id="auth-feat3">הכנה לתיאוריה</span></div>
         </div>
       </div>
       <!-- Right form panel -->
@@ -612,8 +965,8 @@
           <div class="auth-form-sub" id="auth-subtitle">Войди в свой аккаунт DriveIL</div>
         </div>
         <div class="auth-tabs">
-          <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Войти</button>
-          <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Регистрация</button>
+          <button class="auth-tab" id="tab-login" onclick="switchAuthTab('login')" style="display:none">Войти</button>
+          <button class="auth-tab active" id="tab-register" onclick="switchAuthTab('register')">Регистрация</button>
         </div>
         <div class="auth-form">
           <!-- Блок выбора роли — только при регистрации -->
@@ -621,14 +974,13 @@
             <span class="auth-role-label">Я регистрируюсь как:</span>
             <div class="auth-role-wrap">
               <button class="auth-role-btn active" id="role-student" onclick="selectRole('student')">
-                <span class="role-icon">🎓</span>Ученик
+                <span class="role-icon"></span>Ученик
               </button>
               <button class="auth-role-btn" id="role-school" onclick="selectRole('school')">
-                <span class="role-icon">🏫</span>Автошкола
+                <span class="role-icon"></span>Автошкола
               </button>
             </div>
           </div>
-
           <!-- Общие поля -->
           <div class="auth-input-wrap" id="auth-name-wrap" style="display:none;">
             <label id="auth-name-label">Имя</label>
@@ -655,6 +1007,47 @@
                 <div class="auth-pw-bar" id="pw-bar-4"></div>
               </div>
               <div class="auth-pw-label" id="pw-label">Введи пароль</div>
+            </div>
+          </div>
+
+          <!-- Поля только для ученика -->
+          <div class="auth-school-fields" id="auth-student-fields">
+            <div class="auth-input-wrap">
+              <label>Выберите дату рождения</label>
+              <input class="auth-input" type="date" id="auth-dob"/>
+            </div>
+            <div class="auth-input-wrap">
+              <label>Номер удостоверения личности (תז)</label>
+              <input class="auth-input" type="text" id="auth-id-number" placeholder="9 цифр" inputmode="numeric" maxlength="9"/>
+            </div>
+            <div class="auth-input-wrap">
+              <label>Город проживания</label>
+              <select class="auth-select" id="auth-student-city">
+                <option value="">— Выбрать город —</option>
+                <option value="tel-aviv" data-he="תל אביב" data-en="Tel Aviv" data-ru="Тель-Авив">Тель-Авив</option>
+                <option value="jerusalem" data-he="ירושלים" data-en="Jerusalem" data-ru="Иерусалим">Иерусалим</option>
+                <option value="haifa" data-he="חיפה" data-en="Haifa" data-ru="Хайфа">Хайфа</option>
+                <option value="beer-sheva" data-he="באר שבע" data-en="Beer Sheva" data-ru="Беэр-Шева">Беэр-Шева</option>
+                <option value="rishon" data-he="ראשון לציון" data-en="Rishon LeZion" data-ru="Ришон-ле-Цион">Ришон-ле-Цион</option>
+                <option value="petah-tikva" data-he="פתח תקווה" data-en="Petah Tikva" data-ru="Петах-Тиква">Петах-Тиква</option>
+                <option value="ashdod" data-he="אשדוד" data-en="Ashdod" data-ru="Ашдод">Ашдод</option>
+                <option value="netanya" data-he="נתניה" data-en="Netanya" data-ru="Нетания">Нетания</option>
+                <option value="herzliya" data-he="הרצליה" data-en="Herzliya" data-ru="Герцлия">Герцлия</option>
+                <option value="holon" data-he="חולון" data-en="Holon" data-ru="Холон">Холон</option>
+                <option value="bat-yam" data-he="בת ים" data-en="Bat Yam" data-ru="Бат-Ям">Бат-Ям</option>
+                <option value="rehovot" data-he="רחובות" data-en="Rehovot" data-ru="Реховот">Реховот</option>
+                <option value="ashkelon" data-he="אשקלון" data-en="Ashkelon" data-ru="Ашкелон">Ашкелон</option>
+                <option value="kfar-saba" data-he="כפר סבא" data-en="Kfar Saba" data-ru="Кфар-Саба">Кфар-Саба</option>
+                <option value="nazareth" data-he="נצרת" data-en="Nazareth" data-ru="Назарет">Назарет</option>
+                <option value="modiin" data-he="מודיעין" data-en="Modiin" data-ru="Модиин">Модиин</option>
+                <option value="tiberias" data-he="טבריה" data-en="Tiberias" data-ru="Тверия">Тверия</option>
+                <option value="eilat" data-he="אילת" data-en="Eilat" data-ru="Эйлат">Эйлат</option>
+                <option value="bnei-brak" data-he="בני ברק" data-en="Bnei Brak" data-ru="Бней-Брак">Бней-Брак</option>
+              </select>
+            </div>
+            <div class="auth-input-wrap">
+              <label>Телефон</label>
+              <input class="auth-input" type="tel" id="auth-student-phone" placeholder="+972-50-000-0000"/>
             </div>
           </div>
 
@@ -720,15 +1113,28 @@
       </div>
       <div class="booking-field">
         <label id="sl-lbl-time">Время</label>
-        <select id="sl-time" class="booking-select">
-          <option value="07:00">07:00</option><option value="08:00">08:00</option>
-          <option value="09:00">09:00</option><option value="10:00">10:00</option>
-          <option value="11:00">11:00</option><option value="12:00">12:00</option>
-          <option value="13:00">13:00</option><option value="14:00">14:00</option>
-          <option value="15:00">15:00</option><option value="16:00">16:00</option>
-          <option value="17:00">17:00</option><option value="18:00">18:00</option>
-          <option value="19:00">19:00</option><option value="20:00">20:00</option>
-        </select>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="sl-lbl-from" style="font-size:0.82rem;color:var(--muted);font-weight:700;white-space:nowrap">С</span>
+          <select id="sl-time-from" class="booking-select" style="flex:1">
+            <option value="7">07:00</option><option value="8">08:00</option>
+            <option value="9" selected>09:00</option><option value="10">10:00</option>
+            <option value="11">11:00</option><option value="12">12:00</option>
+            <option value="13">13:00</option><option value="14">14:00</option>
+            <option value="15">15:00</option><option value="16">16:00</option>
+            <option value="17">17:00</option><option value="18">18:00</option>
+            <option value="19">19:00</option><option value="20">20:00</option>
+          </select>
+          <span id="sl-lbl-to" style="font-size:0.82rem;color:var(--muted);font-weight:700;white-space:nowrap">До</span>
+          <select id="sl-time-to" class="booking-select" style="flex:1">
+            <option value="8">08:00</option><option value="9">09:00</option>
+            <option value="10" selected>10:00</option><option value="11">11:00</option>
+            <option value="12">12:00</option><option value="13">13:00</option>
+            <option value="14">14:00</option><option value="15">15:00</option>
+            <option value="16">16:00</option><option value="17">17:00</option>
+            <option value="18">18:00</option><option value="19">19:00</option>
+            <option value="20">20:00</option><option value="21">21:00</option>
+          </select>
+        </div>
       </div>
       <div class="booking-field">
         <label id="sl-lbl-instr">Инструктор</label>
@@ -738,10 +1144,21 @@
         <label id="sl-lbl-student">Ученик</label>
         <select id="sl-student" class="booking-select"></select>
       </div>
+      <div class="booking-field" id="sl-route-field">
+        <label id="sl-lbl-route">Маршрут</label>
+        <select id="sl-route" class="booking-select"></select>
+      </div>
       <div class="booking-type-row" id="sl-type-row">
-        <button class="booking-type-btn active" data-type="lesson_practical" onclick="selectSlType(this)">🚗 Вождение</button>
-        <button class="booking-type-btn" data-type="lesson_theory" onclick="selectSlType(this)">📖 Теория</button>
-        <button class="booking-type-btn" data-type="lesson_highway" onclick="selectSlType(this)">🛣️ Шоссе</button>
+        <button class="booking-type-btn active" data-type="lesson_practical" onclick="selectSlType(this)">Вождение</button>
+        <button class="booking-type-btn" data-type="lesson_theory" onclick="selectSlType(this)">Теория</button>
+        <button class="booking-type-btn" data-type="lesson_highway" onclick="selectSlType(this)">Шоссе</button>
+      </div>
+      <div class="sl-repeat-row" id="sl-repeat-row">
+        <span id="sl-repeat-qty-lbl">Уроков:</span>
+        <button type="button" class="sl-cnt-btn" onclick="changeRepeatCount(-1)">−</button>
+        <span id="sl-repeat-n">1</span>
+        <button type="button" class="sl-cnt-btn" onclick="changeRepeatCount(+1)">+</button>
+        <span class="sl-repeat-hint" id="sl-repeat-hint"></span>
       </div>
       <button class="booking-confirm-btn" onclick="confirmSchoolLesson()" id="sl-confirm-btn">Добавить урок</button>
     </div>
@@ -758,15 +1175,15 @@
       <!-- Step 1: school + instructor -->
       <div id="booking-step1">
         <div class="booking-field">
-          <label id="booking-school-lbl">Выбрать школу</label>
+          <label id="booking-school-lbl" data-i18n="reg_school">בית ספר לנהיגה</label>
           <select class="booking-select" id="booking-school-sel" onchange="onBookingSchoolChange()">
-            <option value="">— выбрать —</option>
+            <option value="">— בחר —</option>
           </select>
         </div>
         <div class="booking-field" id="booking-instructor-field" style="display:none">
-          <label id="booking-instr-lbl">Инструктор</label>
+          <label id="booking-instr-lbl" data-i18n="sch_instructor">מדריך</label>
           <select class="booking-select" id="booking-instr-sel" onchange="onBookingInstructorChange()">
-            <option value="">— выбрать —</option>
+            <option value="">— בחר —</option>
           </select>
         </div>
       </div>
@@ -781,11 +1198,11 @@
         <div class="booking-selected-info" id="booking-selected-info"></div>
         <!-- Lesson type -->
         <div class="booking-type-row" id="booking-type-row">
-          <button class="booking-type-btn active" data-type="lesson_practical" onclick="selectBookingType(this)">🚗 Практика</button>
-          <button class="booking-type-btn" data-type="lesson_theory" onclick="selectBookingType(this)">📚 Теория</button>
-          <button class="booking-type-btn" data-type="lesson_highway" onclick="selectBookingType(this)">🛣️ Шоссе</button>
+          <button class="booking-type-btn active" data-type="lesson_practical" onclick="selectBookingType(this)" data-i18n-booking-type="practical">נהיגה</button>
+          <button class="booking-type-btn" data-type="lesson_theory" onclick="selectBookingType(this)" data-i18n-booking-type="theory">תיאוריה</button>
+          <button class="booking-type-btn" data-type="lesson_highway" onclick="selectBookingType(this)" data-i18n-booking-type="highway">כביש מהיר</button>
         </div>
-        <button class="booking-confirm-btn" id="booking-confirm-btn" onclick="confirmBooking()" disabled>Выбрать время</button>
+        <button class="booking-confirm-btn" id="booking-confirm-btn" onclick="confirmBooking()" disabled data-i18n="booking_select_time">בחר שעה</button>
       </div>
     </div>
   </div>

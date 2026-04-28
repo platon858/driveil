@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── USERS ──────────────────────────────────────────────────────────────
+    // Only the user themselves can read/write their own profile
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── SCHOOLS ────────────────────────────────────────────────────────────
+    // Any logged-in user can read school profiles (needed for map/search)
+    // Only the school owner can update their own document
+    // No one can delete a school document
+    match /schools/{schoolId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && request.auth.uid == schoolId;
+      allow delete: if false;
+    }
+
+    // ── AVAILABILITY ───────────────────────────────────────────────────────
+    // Only the school owner writes; any logged-in user reads
+    match /availability/{schoolId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == schoolId;
+    }
+
+    // ── BOOKINGS ───────────────────────────────────────────────────────────
+    // A booking can only be read by the school or the student it belongs to
+    // Create: any logged-in user (student books a slot)
+    // Update/delete: only school owner or the student of that booking
+    // Fields schoolId and studentId must not be changed after creation
+    match /bookings/{bookingId} {
+      // School owner sees all their bookings
+      // Student sees their own bookings and open slots
+      // Any logged-in user can read confirmed bookings (needed to display taken slots on calendar)
+      allow read: if request.auth != null &&
+        (resource.data.schoolId == request.auth.uid ||
+         resource.data.studentId == request.auth.uid ||
+         resource.data.studentId == 'open' ||
+         resource.data.status == 'confirmed');
+      allow create: if request.auth != null &&
+        request.resource.data.keys().hasAll(['schoolId','studentId','date','time']);
+      allow update: if request.auth != null && (
+        // Normal edit: school owner or assigned student (fields locked)
+        (
+          (resource.data.schoolId == request.auth.uid ||
+           resource.data.studentId == request.auth.uid) &&
+          request.resource.data.schoolId == resource.data.schoolId &&
+          request.resource.data.studentId == resource.data.studentId
+        )
+        ||
+        // Student claims an open slot (studentId == 'open' or null/empty)
+        (
+          (resource.data.studentId == 'open' ||
+           !('studentId' in resource.data) ||
+           resource.data.studentId == null ||
+           resource.data.studentId == '') &&
+          request.resource.data.studentId == request.auth.uid &&
+          request.resource.data.schoolId == resource.data.schoolId
+        )
+      );
+      allow delete: if request.auth != null &&
+        (resource.data.schoolId == request.auth.uid ||
+         (resource.data.studentId == request.auth.uid && resource.data.studentId != 'open'));
+    }
+
+    // ── ENROLLMENTS ────────────────────────────────────────────────────────
+    // Read: only the school or the student who submitted it
+    // Create: any logged-in user (student applies to a school)
+    //   - userId in the document must match the creator
+    // Update: only school (to confirm/reject) or the student (to cancel)
+    //   - schoolId and userId fields cannot be changed
+    // Delete: not allowed (keep audit trail)
+    match /enrollments/{enrollId} {
+      allow read: if request.auth != null &&
+        (resource.data.schoolId == request.auth.uid ||
+         resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['schoolId','userId','studentName','status']);
+      allow update: if request.auth != null &&
+        (resource.data.schoolId == request.auth.uid ||
+         resource.data.userId == request.auth.uid) &&
+        request.resource.data.schoolId == resource.data.schoolId &&
+        request.resource.data.userId == resource.data.userId;
+      allow delete: if false;
+    }
+
+    // ── ROUTES ─────────────────────────────────────────────────────────────
+    // Any logged-in user can read routes (students see their teacher's routes)
+    // Only the school owner can create/update/delete their own routes
+    match /routes/{routeId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.schoolId == request.auth.uid;
+      allow update, delete: if request.auth != null
+        && resource.data.schoolId == request.auth.uid;
+    }
+
+    // ── RATINGS ────────────────────────────────────────────────────────────
+    // Any logged-in user can read ratings
+    // A user can only create/update/delete their own rating
+    match /ratings/{ratingId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null &&
+        resource.data.userId == request.auth.uid;
+    }
+
+  }
+}

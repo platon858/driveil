@@ -12,14 +12,14 @@ export const S = {
 };
 
 export const catCfg = {
-  speed:      { icon:'⚡', bg:'#fdecea', color:'#c0392b', he:'מגבלות מהירות', ru:'Скорость', en:'Speed Limits' },
-  signs:      { icon:'🔵', bg:'#e8f0fe', color:'#1a73e8', he:'תמרורים',       ru:'Знаки',    en:'Road Signs' },
-  priority:   { icon:'⚠️', bg:'#fff8e1', color:'#e67e22', he:'זכות קדימה',   ru:'Приоритет',en:'Right of Way' },
-  safety:     { icon:'🛡️', bg:'#e8f5e9', color:'#27ae60', he:'בטיחות',        ru:'Безопасность', en:'Safety' },
-  parking:    { icon:'🅿️', bg:'#e3f2fd', color:'#1565c0', he:'חניה',          ru:'Парковка',  en:'Parking' },
-  lights:     { icon:'💡', bg:'#fff3e0', color:'#e65100', he:'תאורה',          ru:'Освещение', en:'Lights' },
-  overtaking: { icon:'↔️', bg:'#f3e5f5', color:'#7b1fa2', he:'עקיפה',         ru:'Обгон',     en:'Overtaking' },
-  pedestrian: { icon:'🚶', bg:'#e0f7fa', color:'#00838f', he:'הולכי רגל',     ru:'Пешеходы',  en:'Pedestrians' },
+  speed:      { icon:'🚗', bg:'#fdecea', color:'#c0392b', he:'מגבלות מהירות', ru:'Скорость',      en:'Speed Limits' },
+  signs:      { icon:'🔵', bg:'#e8f0fe', color:'#1a73e8', he:'תמרורים',       ru:'Знаки',         en:'Road Signs' },
+  priority:   { icon:'⚠️', bg:'#fff8e1', color:'#e67e22', he:'זכות קדימה',   ru:'Приоритет',     en:'Right of Way' },
+  safety:     { icon:'🛡️', bg:'#e8f5e9', color:'#27ae60', he:'בטיחות',        ru:'Безопасность',  en:'Safety' },
+  parking:    { icon:'🅿️', bg:'#e3f2fd', color:'#1565c0', he:'חניה',          ru:'Парковка',      en:'Parking' },
+  lights:     { icon:'💡', bg:'#fff3e0', color:'#e65100', he:'תאורה',          ru:'Освещение',     en:'Lights' },
+  overtaking: { icon:'↔️', bg:'#f3e5f5', color:'#7b1fa2', he:'עקיפה',         ru:'Обгон',         en:'Overtaking' },
+  pedestrian: { icon:'🚶', bg:'#e0f7fa', color:'#00838f', he:'הולכי רגל',     ru:'Пешеходы',      en:'Pedestrians' },
 };
 
 export const cityRegionMap = {
